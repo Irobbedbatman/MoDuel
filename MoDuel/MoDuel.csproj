@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>2583f503-61b9-47dc-b882-90cf82fd6e8c</ProjectGuid>
+    <ProjectGuid>{2583F503-61B9-47DC-B882-90CF82FD6E8C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MoDuel</RootNamespace>
@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.2</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,26 +31,62 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System"/>
-    
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    
-    
-    <Reference Include="Microsoft.CSharp"/>
-    
-    <Reference Include="System.Data"/>
-    
-    <Reference Include="System.Net.Http"/>
-    
-    <Reference Include="System.Xml"/>
+    <Reference Include="MoonSharp.Interpreter">
+      <HintPath>..\..\MabinogiDuelRemake\Assets\Libraries\MoonSharp.Interpreter.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\MabinogiDuelRemake\Assets\Libraries\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Animation\AnimationData.cs" />
+    <Compile Include="Animation\AnimationHandler.cs" />
+    <Compile Include="CanPlayResponse.cs" />
+    <Compile Include="Cards\CardInstanceActivator.cs" />
+    <Compile Include="Cards\Card.cs" />
+    <Compile Include="Cards\CardInstance.cs" />
+    <Compile Include="Cards\CreatureInstance.cs" />
+    <Compile Include="Data\ContentLoader.cs" />
+    <Compile Include="Data\LoadedContent.cs" />
+    <Compile Include="DuelFlow.cs" />
+    <Compile Include="DuelFlowCommands.cs" />
+    <Compile Include="DuelFlowLua.cs" />
+    <Compile Include="DuelSettings.cs" />
+    <Compile Include="DuelState.cs" />
+    <Compile Include="Field\Field.cs" />
+    <Compile Include="Field\FieldEnumerator.cs" />
+    <Compile Include="Field\FieldSlot.cs" />
+    <Compile Include="Field\FullField.cs" />
+    <Compile Include="Field\SubField.cs" />
+    <Compile Include="Heroes\Hero.cs" />
+    <Compile Include="Heroes\HeroInstance.cs" />
+    <Compile Include="Mana\Mana.cs" />
+    <Compile Include="Mana\ManaEnumerator.cs" />
+    <Compile Include="Mana\ManaPool.cs" />
+    <Compile Include="Mana\ManaType.cs" />
+    <Compile Include="OngoingEffect.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Target.cs" />
+    <Compile Include="Tools\Indexer.cs" />
+    <Compile Include="Tools\JArrayProxy.cs" />
+    <Compile Include="Tools\LuaExtensions\LuaUserDataAccessors.cs" />
+    <Compile Include="Tools\LuaExtensions\TableExtensions.cs" />
+    <Compile Include="Tools\LuaEnvironment.cs" />
+    <Compile Include="Tools\LuaOperations.cs" />
+    <Compile Include="TurnData.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
- </Project>
+</Project>
