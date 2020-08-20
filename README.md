@@ -2,8 +2,6 @@
 
 An somewhat complete modular libary for handling the game flow and input of simple card games; inspired by Nexon & devCAT's Mabinogi Duel / Duel of Summoners without using any copyright or trademarked materials. As a I am not a lawyer and have not seeked legal consoltation on the topic; I can't specify the legal situation.
 
-Furthur deliberation is required to determine the best way to handle animations on a typical client.
-
 ### Explanation
 The foremost important part is the `DuelFlow` class. As titled it controls the flow of the duel, it takes input into the `DuelFlow.CommandQueue` and performs the command and any reactions that occour. These commands are anything a player might do in a turn e.g. Play a Card.
 
@@ -19,6 +17,9 @@ Generally a lot of methods and fields have been made public, which I can't recom
 ### Ideas
 
 Perhaps a stricter engine would be better but I wanted it as generic as possible. The problem this makes is that all the lua becomes more complex. 
+
+Furthur deliberation is required to determine the best way to handle animations on a typical client.
+
 
 ### Prerequisites
 
