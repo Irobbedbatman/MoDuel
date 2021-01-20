@@ -1,30 +1,32 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace MoDuel.Tools {
+    
     /// <summary>
     /// A class for handling unqiue indexed values.
     /// </summary>
     public class Indexer {
 
         /// <summary>
-        /// The highest value recorded.
+        /// The highest index value that has been created.
         /// </summary>
-        private int _MaximumValue = 0;
+        private int _highestIndex = 0;
 
         /// <summary>
-        /// A stack to use any index that has been freed up first.
+        /// A stack that contains all the freed indicies for resuse.
         /// </summary>
-        private static Stack<int> _FreeValues = new Stack<int>();
+        private static Stack<int> _freeValues = new Stack<int>();
 
         /// <summary>
         /// Gets the next unused index.
+        /// <para>If there is a freed index we use that first.</para>
         /// </summary>
         /// <returns>A unqiue index.</returns>
         public int GetNext() {
-            if (_FreeValues.Count > 0)
-                return _FreeValues.Pop();
+            if (_freeValues.Count > 0)
+                return _freeValues.Pop();
             else
-                return _MaximumValue++;
+                return _highestIndex++;
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace MoDuel.Tools {
         /// </summary>
         /// <param name="value">The index to free.</param>
         public void Free(int value) {
-            _FreeValues.Push(value);
+            _freeValues.Push(value);
         }
     }
 }
