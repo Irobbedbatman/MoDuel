@@ -61,12 +61,7 @@ namespace MoDuel.Cards {
         /// <summary>
         /// Check to see if this creature is alive as it has a position. (is on the field.)
         /// </summary>
-        public new bool IsAlive {
-            get {
-                if (Position == null)
-                    return false;
-                return true;
-            }
-        }
+        public new bool IsAlive => Position != null;
+        
     }
 }
