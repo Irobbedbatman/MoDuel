@@ -30,7 +30,7 @@ namespace MoDuel.Field {
 
         /// <summary>
         /// Wraps a postion around a sub field after it has moved.
-        /// <para>Waps both negative movement and positive movement.</para>
+        /// <para>Wraps both negative movement and positive movement.</para>
         /// <para>Invalid origin or move will result in a non-wrapped number.</para>
         /// </summary>
         /// <param name="origin">The starting point.</param>
