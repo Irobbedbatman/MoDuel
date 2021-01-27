@@ -17,7 +17,7 @@ namespace MoDuel.Field {
     [MoonSharpUserData]
     public abstract class Field : Target, IEnumerable {
 
-        public static int ERR_SLOT = -1;
+        public const int ERR_SLOT = -1;
 
         /// <summary>
         /// Accessor for a given position on the field.
@@ -44,16 +44,14 @@ namespace MoDuel.Field {
         /// <summary>
         /// Gets any creatures contained within the field.
         /// </summary>
-        /// <param name="offset">Offset that is used to increase the index. Used by <see cref="FullField"/> to get slot indexs for <see cref="FullField.Far"/>.</param>
-        /// <returns>An array of <see cref="CreatureInstance"/> that on the field.</returns>
-        public abstract HashSet<CreatureInstance> GetCreatures(int offset = 0);
+        /// /// <returns>An array of <see cref="CreatureInstance"/> that on the field.</returns>
+        public abstract HashSet<CreatureInstance> GetCreatures();
 
         /// <summary>
         /// Gets any slots that dont have a occupant.
         /// </summary>
-        /// <param name="offset">Offset that is used to increase the index. Used by <see cref="FullField"/> to get slot indexs for <see cref="FullField.Far"/>.</param>
         /// <returns>An array of all the empty <see cref="FieldSlot"/> in this <see cref="Field"/></returns>
-        public abstract HashSet<FieldSlot> GetEmptySlots(int offset = 0);
+        public abstract HashSet<FieldSlot> GetEmptySlots();
 
         /// <summary>
         /// Gets the index the slot is at in the field.

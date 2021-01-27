@@ -58,9 +58,9 @@ namespace MoDuel.Field {
         /// <inheritdoc/>
         public override FieldSlot this[int index] => index >= 5 ? Far[index - 5] : Near[index];
         /// <inheritdoc/>
-        public override HashSet<CreatureInstance> GetCreatures(int offset = 0) => Near.GetCreatures().Concat(Far.GetCreatures(offset: 5)).ToHashSet();
+        public override HashSet<CreatureInstance> GetCreatures() => Near.GetCreatures().Concat(Far.GetCreatures()).ToHashSet();
         /// <inheritdoc/>
-        public override HashSet<FieldSlot> GetEmptySlots(int offset = 0) => Near.GetEmptySlots().Concat(Far.GetEmptySlots(offset: 5)).ToHashSet();
+        public override HashSet<FieldSlot> GetEmptySlots() => Near.GetEmptySlots().Concat(Far.GetEmptySlots()).ToHashSet();
         /// <inheritdoc/>
         public override FieldEnumerator GetEnumerator() => new FieldEnumerator(Near.Slots.Concat(Far.Slots).ToArray());
         /// <inheritdoc/>

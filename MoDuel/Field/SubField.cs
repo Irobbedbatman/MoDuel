@@ -41,7 +41,7 @@ namespace MoDuel.Field {
         public override FieldSlot this[int index] => Slots[index];
 
         /// <inheritdoc/>
-        public override HashSet<CreatureInstance> GetCreatures(int offset = 0) {
+        public override HashSet<CreatureInstance> GetCreatures() {
             var keys = new HashSet<CreatureInstance>();
             for (int i = 0; i < Slots.Length; ++i) {
                 if (Slots[i].Occupant != null)
@@ -51,7 +51,7 @@ namespace MoDuel.Field {
         }
 
         /// <inheritdoc/>
-        public override HashSet<FieldSlot> GetEmptySlots(int offset = 0) {
+        public override HashSet<FieldSlot> GetEmptySlots() {
             var keys = new HashSet<FieldSlot>();
             for (int i = 0; i < Slots.Length; ++i) {
                 if (Slots[i].Occupant == null)

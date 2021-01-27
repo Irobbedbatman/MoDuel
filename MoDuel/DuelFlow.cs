@@ -33,7 +33,6 @@ namespace MoDuel {
         [MoonSharpHidden]
         public EventHandler<AnimationData> OutBoundDelegate;
 
-
         public CardInstanceActivator CardInstanceActivator = new CardInstanceActivator();
 
         /// <summary>
