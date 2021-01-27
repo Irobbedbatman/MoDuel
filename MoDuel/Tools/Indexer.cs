@@ -15,7 +15,7 @@ namespace MoDuel.Tools {
         /// <summary>
         /// A stack that contains all the freed indicies for resuse.
         /// </summary>
-        private static Stack<int> _freeValues = new Stack<int>();
+        private readonly static Stack<int> _freeValues = new Stack<int>();
 
         /// <summary>
         /// Gets the next unused index.

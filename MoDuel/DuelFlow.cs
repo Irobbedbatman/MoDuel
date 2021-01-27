@@ -16,6 +16,11 @@ namespace MoDuel {
     public partial class DuelFlow {
 
         /// <summary>
+        /// The lua systems and loaded content provided to the <see cref="DuelFlow"/> on it's creation.
+        /// </summary>
+        private readonly EnvironmentContainer Environment;
+
+        /// <summary>
         /// The current state of the duel.
         /// <para>Holds most of the duel variables.</para>
         /// </summary>
@@ -26,20 +31,8 @@ namespace MoDuel {
         /// The animations that are sent out from the duel flow.
         /// </summary>
         [MoonSharpHidden]
-        private Action<AnimationData> OutBoundDelegate = delegate { };
+        public EventHandler<AnimationData> OutBoundDelegate;
 
-        /// <summary>
-        /// Start listening to receieve animations from the duel flow.
-        /// </summary>
-        [MoonSharpHidden]
-        public void StartListening (Action<AnimationData> action) => OutBoundDelegate += action;
-
-
-        /// <summary>
-        /// Stop listening to receieve animations from the duel flow.
-        /// </summary>
-        [MoonSharpHidden]
-        public void StopListening(Action<AnimationData> action) => OutBoundDelegate -= action;
 
         public CardInstanceActivator CardInstanceActivator = new CardInstanceActivator();
 
@@ -64,12 +57,11 @@ namespace MoDuel {
         private ManualResetEvent ContinueEvent = new ManualResetEvent(false);
 
         [MoonSharpHidden]
-        public DuelFlow(DuelSettings settings, Player player1, Player player2, Player goesFirst) {
-
+        public DuelFlow(EnvironmentContainer environment, DuelSettings settings, Player player1, Player player2, Player goesFirst) {
             State = new DuelState(player1, player2, settings) {
                 CurrentTurn = new TurnData(goesFirst)
             };
-
+            Environment = environment;
             SetupLua();
         }
 
@@ -90,7 +82,8 @@ namespace MoDuel {
         /// <para>Calls <see cref="DuelSettings.TimeOutAction"/> on the current turn owner.</para>
         /// </summary>
         private void TimeOutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-            LuaEnvironment.Call(State.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
+            //TODO: Thread safety
+            Environment.Lua.AsScript.Call(State.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
         }
 
         [MoonSharpHidden]

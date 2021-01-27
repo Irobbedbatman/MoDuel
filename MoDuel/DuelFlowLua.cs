@@ -6,32 +6,21 @@ using MoDuel.Heroes;
 using MoonSharp.Interpreter;
 using System;
 using System.Linq;
+using MoonSharp.Environment;
+
 
 namespace MoDuel {
 
     public partial class DuelFlow {
 
-        /// <summary>
-        /// Accessor for the singleton <see cref="Tools.LuaEnvironment"/>.
-        /// </summary>
-        [MoonSharpHidden]
-        private Script LuaEnvironment => Tools.LuaEnvironment.Instance;
-
-        /// <summary>
-        /// Accessor for the singleton <see cref="Tools.LuaEnvironment"/>.
-        /// </summary>
-        [MoonSharpHidden]
-        private LoadedContent Content => LoadedContent.Instance;
-
         private void SetupLua() {
             UserData.RegisterAssembly();
-            LuaEnvironment.Globals["State"] = State;
-            LuaEnvironment.Globals["Flow"] = this;
-            LuaEnvironment.Globals["SharpRandom"] = new Tools.LuaExtensions.SharpRandom();
-            LuaEnvironment.Globals["GetTarget"] = (Func<int, Target>)Target.GetTarget;
-            LuaEnvironment.Globals["CPResponse"] = (Func<string[], CanPlayResponse>)CanPlayResponse.New;
-            LuaEnvironment.Globals["CanPlayTest"] = new CanPlayResponse("Test");
-            LuaEnvironment.Globals["PrintTable"] = (Func<Table, string>)(
+            Environment.Lua.AsScript.Globals["State"] = State;
+            Environment.Lua.AsScript.Globals["Flow"] = this;
+            Environment.Lua.AsScript.Globals["GetTarget"] = (Func<int, Target>)Target.GetTarget;
+            Environment.Lua.AsScript.Globals["CPResponse"] = (Func<string[], CanPlayResponse>)CanPlayResponse.New;
+            Environment.Lua.AsScript.Globals["CanPlayTest"] = new CanPlayResponse("Test");
+            Environment.Lua.AsScript.Globals["PrintTable"] = (Func<Table, string>)(
                 (t) => string.Join("\n", t.Pairs.Select(
                     (p) => p.Key.ToString() + ": " + p.Value.ToPrintString()
                     )
@@ -40,8 +29,8 @@ namespace MoDuel {
 
         #region Constructor Lua Accessors 
 
-        public Card GetCard(string cardId) => Content.GetCard(cardId);
-        public Hero GetHero(string heroId) => Content.GetHero(heroId);
+        public Card GetCard(string cardId) => Environment.Content.GetCard(cardId);
+        public Hero GetHero(string heroId) => Environment.Content.GetHero(heroId);
 
         public CardInstance CreateCardInstance(Card imprint) =>  new CardInstance(imprint, CardInstanceActivator);
         public CardInstance CreateCardInstance(Card imprint, Player owner) => new CardInstance(imprint, CardInstanceActivator, owner);
@@ -59,7 +48,7 @@ namespace MoDuel {
         /// Gets a global from the <see cref="LuaEnvironment"/>.
         /// <para>Can be used to get actions as they are stored globally.</para>
         /// </summary>
-        public static DynValue GetGlobal(string varName) => Tools.LuaEnvironment.Instance.Globals.Get(varName);
+        public DynValue GetGlobal(string varName) => Environment.Lua.AsScript.Globals.Get(varName);
 
         #endregion
 
@@ -99,7 +88,7 @@ namespace MoDuel {
                 return;
             currentTriggerChain++;
             foreach (var reaction in FindReactions(trigger)) {
-                LuaEnvironment.Call(reaction.Value, arguments.Prepend(reaction.Key).ToArray());
+                Environment.Lua.AsScript.Call(reaction.Value, arguments.Prepend(reaction.Key).ToArray());
             }
             currentTriggerChain--;
         }
@@ -114,7 +103,7 @@ namespace MoDuel {
                 return;
             currentTriggerChain++;
             foreach (var reaction in FindReactions(trigger)) {
-                LuaEnvironment.Call(reaction.Value, arguments.Prepend(reaction.Key).Prepend(inciter).ToArray());
+                Environment.Lua.AsScript.Call(reaction.Value, arguments.Prepend(reaction.Key).Prepend(inciter).ToArray());
             }
             currentTriggerChain--;
         }
@@ -131,7 +120,7 @@ namespace MoDuel {
                 return;
 
             foreach (var reaction in FindReactions(trigger).Reverse()) {
-                LuaEnvironment.Call(reaction.Value, reaction.Key, values);
+                Environment.Lua.AsScript.Call(reaction.Value, reaction.Key, values);
             }
         }
 
@@ -147,7 +136,7 @@ namespace MoDuel {
                 return null;
 
             if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out DynValue reaction)) {
-                return LuaEnvironment.Call(reaction, arguments.Prepend(triggerer).ToArray());
+                return Environment.Lua.AsScript.Call(reaction, arguments.Prepend(triggerer).ToArray());
             }
             return null;
         }
@@ -163,7 +152,7 @@ namespace MoDuel {
             if (!State.OnGoing)
                 return null;
             if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out DynValue reaction)) {
-                return LuaEnvironment.Call(reaction, arguments.Prepend(triggerer).ToArray());
+                return Environment.Lua.AsScript.Call(reaction, arguments.Prepend(triggerer).ToArray());
             }
             else {
                 return DoAction(fallbackAction, arguments.Prepend(triggerer).ToArray());
@@ -183,7 +172,7 @@ namespace MoDuel {
         /// <param name="blockTime">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/>/</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
         public void PlayAnimation(string animationId, double blockTime, params string[] arguments) {
-            OutBoundDelegate?.Invoke(new AnimationData(animationId, arguments));
+            OutBoundDelegate?.Invoke(this, new AnimationData(animationId, arguments));
             if (State.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
                 _animationBlocker.PlayAnimationBlock(blockTime / State.Settings.AnimationSpeed);
             }
@@ -204,10 +193,6 @@ namespace MoDuel {
         }
 
 
-        /// <summary>
-        /// Logs actions and their arguments to <see cref="LuaEnvironment.Output"/>
-        /// </summary>
-        public bool LogActions = false;
 
         /// <summary>
         /// Calls a function stored in the lua enviornment with the provided name and arguments.
@@ -215,11 +200,8 @@ namespace MoDuel {
         /// </summary>
         /// <param name="actionId">The literal global name stored in <see cref="Script.Globals"/>. That was loaded with <see cref="ContentLoader.LoadAction(Script, string)"/></param>
         public DynValue DoAction(string actionId, params object[] arguments) {
-            if (State.OnGoing) {
-                if (LogActions)
-                    Tools.LuaEnvironment.Output?.Invoke("DoAction(" + actionId + ") args: " + string.Join(" ", arguments.Select( (a) => { return a.ToString(); })));
-                return LuaEnvironment.Globals.Get(actionId).Function.Call(arguments);
-            }
+            if (State.OnGoing)
+                return Environment.Lua.AsScript.Globals.Get(actionId).Function.Call(arguments);
             return null;
         }
 
@@ -228,11 +210,8 @@ namespace MoDuel {
         /// <para>Same as <see cref="DoAction(string, object[])"/> but forces you provide context.</para>
         /// </summary>
         public DynValue InciteAction(object inciter, string actionId, params object[] arguments) {
-            if (State.OnGoing) {
-                if (LogActions)
-                    Tools.LuaEnvironment.Output?.Invoke("InciteAction(" + actionId + ") inciter: " + inciter.ToString() + "| args: " + string.Join(" ", arguments.Select((a) => { return a.ToString(); })));
-                return LuaEnvironment.Globals.Get(actionId).Function.Call(arguments.Prepend(inciter).ToArray());
-            }
+            if (State.OnGoing)
+                return Environment.Lua.AsScript.Globals.Get(actionId).Function.Call(arguments.Prepend(inciter).ToArray());
             return null;
         }
 

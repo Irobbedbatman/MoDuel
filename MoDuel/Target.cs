@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MoonSharp.Environment;
 
 namespace MoDuel {
 
@@ -50,7 +51,7 @@ namespace MoDuel {
         /// A MoonSharp lua table.
         /// <para>Use this to store instance values in lua code on any <see cref="Target"/>.</para>
         /// </summary>
-        public Table Values = new Table(Tools.LuaEnvironment.Instance);
+        public Table Values = new Table(null); //TODO: Target correct table value.
 
 
         /// <summary>
