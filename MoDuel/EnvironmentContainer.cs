@@ -1,7 +1,7 @@
 ﻿using MoDuel.Data;
 using MoonSharp.Environment;
 
-namespace MoDuel.Tools {
+namespace MoDuel {
 
     /// <summary>
     /// Container for the lua interpreter and loaded content.
@@ -9,12 +9,15 @@ namespace MoDuel.Tools {
     /// </summary>
     public struct EnvironmentContainer {
 
+        public DuelSettings Settings;
         public LuaEnvironment Lua;
         public LoadedContent Content;
 
-        public EnvironmentContainer(LuaEnvironment luaEngine, LoadedContent contentHandler) {
+
+        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler) {
             Lua = luaEngine;
             Content = contentHandler;
+            Settings = settings;
         }
 
     }

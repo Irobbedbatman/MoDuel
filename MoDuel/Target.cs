@@ -34,6 +34,12 @@ namespace MoDuel {
         /// </summary>
         public readonly int Index = -1;
 
+        /// <summary>
+        /// A MoonSharp lua table.
+        /// <para>Use this to store instance values in lua code on any <see cref="Target"/>.</para>
+        /// </summary>
+        private readonly Dictionary<string, DynValue> Values = new Dictionary<string, DynValue>();
+
         public Target (int Index = -1) {
             if (Index == -1)
                 Index = _Indexer.GetNext();
@@ -48,11 +54,28 @@ namespace MoDuel {
         ~Target() { _Indexer.Free(Index); Targets.Remove(Index); }
 
         /// <summary>
-        /// A MoonSharp lua table.
-        /// <para>Use this to store instance values in lua code on any <see cref="Target"/>.</para>
+        /// Sets a value in <see cref="Values"/>.
         /// </summary>
-        public Table Values = new Table(null); //TODO: Target correct table value.
+        public void SetValue(string key, DynValue val) {
+            Values[key] = val;
+        }
 
+        /// <summary>
+        /// Retreives a value from <see cref="Values"/>.
+        /// <para>Returns null if the <paramref name="key"/> is not found.</para>
+        /// </summary>
+        public DynValue GetValue(string key) {
+            if (Values.TryGetValue(key, out var val))
+                return val;
+            return null;
+        }
+
+        /// <summary>
+        /// Removes a value from <see cref="Values"/>.
+        /// </summary>
+        public void ClearValue(string key) {
+            Values.Remove(key);
+        }
 
         /// <summary>
         /// Is the target a creature instance.

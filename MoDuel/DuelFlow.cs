@@ -56,8 +56,8 @@ namespace MoDuel {
         private ManualResetEvent ContinueEvent = new ManualResetEvent(false);
 
         [MoonSharpHidden]
-        public DuelFlow(EnvironmentContainer environment, DuelSettings settings, Player player1, Player player2, Player goesFirst) {
-            State = new DuelState(player1, player2, settings) {
+        public DuelFlow(EnvironmentContainer environment, Player player1, Player player2, Player goesFirst) {
+            State = new DuelState(player1, player2) {
                 CurrentTurn = new TurnData(goesFirst)
             };
             Environment = environment;
@@ -66,7 +66,7 @@ namespace MoDuel {
 
         [MoonSharpHidden]
         public Thread Start() {
-            if (State.Settings.TimeOutPlayers) {
+            if (Environment.Settings.TimeOutPlayers) {
                 TimeOutTimer.Elapsed += TimeOutTimer_Elapsed;
                 TimeOutTimer.Start();
             }
@@ -82,24 +82,24 @@ namespace MoDuel {
         /// </summary>
         private void TimeOutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
             //TODO: Thread safety
-            Environment.Lua.AsScript.Call(State.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
+            Environment.Lua.AsScript.Call(Environment.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
         }
 
         [MoonSharpHidden]
         public void Loop() {
 
             //Call the game start action. This is a user defined function that sets up anything that needs to be setup in lua.
-            State.Settings.GameStartAction.Function.Call();
+            Environment.Settings.GameStartAction.Function.Call();
 
             while (State.OnGoing) {
                 //If there is anything in the command queue we try it.
                 if (CommandQueue.Count > 0) {
                     //Stop timing out players in case commands take a long time.
-                    if (State.Settings.TimeOutPlayers)
+                    if (Environment.Settings.TimeOutPlayers)
                         TimeOutTimer.Stop();
                     if (CommandQueue.TryDequeue(out var result))
                         result.Invoke();
-                    if (State.Settings.TimeOutPlayers)
+                    if (Environment.Settings.TimeOutPlayers)
                         TimeOutTimer.Start();
                     ContinueEvent.Reset();
                     continue;

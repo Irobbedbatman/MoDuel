@@ -7,7 +7,7 @@ using MoonSharp.Interpreter;
 using System;
 using System.Linq;
 using MoonSharp.Environment;
-
+using MoDuel.Tools;
 
 namespace MoDuel {
 
@@ -15,6 +15,7 @@ namespace MoDuel {
 
         private void SetupLua() {
             UserData.RegisterAssembly();
+            JArrayProxy.Register();
             Environment.Lua.AsScript.Globals["State"] = State;
             Environment.Lua.AsScript.Globals["Flow"] = this;
             Environment.Lua.AsScript.Globals["GetTarget"] = (Func<int, Target>)Target.GetTarget;
@@ -54,15 +55,15 @@ namespace MoDuel {
 
         public void GameOver(Player winner) {
             State.OnGoing = false;
-            if (State.Settings.TimeOutPlayers)
+            if (Environment.Settings.TimeOutPlayers)
                 TimeOutTimer.Stop();
-            State.Settings.GameEndAction.Function.Call(winner);
+            Environment.Settings.GameEndAction.Function.Call(winner);
         }
 
-        public void ChangeTurns() => State.Settings.ChangeTurnAction.Function.Call();
+        public void ChangeTurns() => Environment.Settings.ChangeTurnAction.Function.Call();
 
         public void ResetTimer() {
-            if (State.Settings.TimeOutPlayers)
+            if (Environment.Settings.TimeOutPlayers)
                 TimeOutTimer.Start();
         }
 
@@ -173,8 +174,8 @@ namespace MoDuel {
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
         public void PlayAnimation(string animationId, double blockTime, params string[] arguments) {
             OutBoundDelegate?.Invoke(this, new AnimationData(animationId, arguments));
-            if (State.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
-                _animationBlocker.PlayAnimationBlock(blockTime / State.Settings.AnimationSpeed);
+            if (Environment.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
+                _animationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
             }
         }
 
@@ -187,8 +188,8 @@ namespace MoDuel {
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
         public void PlayTargetedAnimation(Player target, string animationId, double blockTime, params string[] arguments) {
             target.InvokeOutBound(new AnimationData(animationId, arguments));
-            if (State.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
-                _animationBlocker.PlayAnimationBlock(blockTime / State.Settings.AnimationSpeed);
+            if (Environment.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
+                _animationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
             }
         }
 

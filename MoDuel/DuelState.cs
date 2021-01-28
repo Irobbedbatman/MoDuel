@@ -33,7 +33,6 @@ namespace MoDuel {
         public readonly FullField Field;
 
         public bool OnGoing = false;
-        public readonly DuelSettings Settings;
 
         /// <summary>
         /// The data of any given turn, new() ones should be created each turn with the <see cref="Player"/> that's turn it is.
@@ -45,11 +44,10 @@ namespace MoDuel {
         /// </summary>
         public int TurnCount = 1;
 
-        public DuelState(Player nearPlayer, Player farPlayer, DuelSettings settings) {
+        public DuelState(Player nearPlayer, Player farPlayer) {
             Player1 = nearPlayer;
             Player2 = farPlayer;
             Field = new FullField(nearPlayer.Field, farPlayer.Field);
-            Settings = settings;
         }
 
         /// <summary>
