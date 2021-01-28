@@ -36,30 +36,25 @@ namespace MoDuel {
         public CardInstanceActivator CardInstanceActivator = new CardInstanceActivator();
 
         /// <summary>
-        /// The time it takes for a turn to timeout in milliseconds.
-        /// </summary>
-        public readonly static double TimeOutInterval = 5 * 60 * 1000;
-        //TODO: Variable time out intervals.
-
-        /// <summary>
         /// A repeating <see cref="System.Timers.Timer"/> that is used to determine when a turn should be considered timed out.
         /// <para>Pause with <see cref="System.Timers.Timer.Stop"/> and Resume with <see cref="System.Timers.Timer.Start"/></para>
         /// <para>The timer should be paused during certain actions (e.g. Animations) To allow a player equal time.</para>
         /// </summary>
-        private System.Timers.Timer TimeOutTimer = new System.Timers.Timer(TimeOutInterval);
+        private readonly System.Timers.Timer TimeOutTimer;
 
         /// <summary>
         /// Resumes the loop if the thread is stuck waiting.
         /// <para>For the loop to be stuck waiting the <see cref="DuelState.CommandQueue"/> will be empty.</para>
         /// <para>Ensures that the loop thread is only waiting when neccesary.</para>
         /// </summary>
-        private ManualResetEvent ContinueEvent = new ManualResetEvent(false);
+        private readonly ManualResetEvent ContinueEvent = new ManualResetEvent(false);
 
         [MoonSharpHidden]
         public DuelFlow(EnvironmentContainer environment, Player player1, Player player2, Player goesFirst) {
             State = new DuelState(player1, player2) {
                 CurrentTurn = new TurnData(goesFirst)
             };
+            TimeOutTimer = new System.Timers.Timer(environment.Settings.TimeOutInterval);
             Environment = environment;
             SetupLua();
         }

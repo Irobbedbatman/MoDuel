@@ -163,7 +163,7 @@ namespace MoDuel {
         /// <summary>
         /// The contoller of animation blocking.
         /// </summary>
-        private AnimationBlockingHandler _animationBlocker = new AnimationBlockingHandler();
+        private readonly AnimationBlockingHandler _animationBlocker = new AnimationBlockingHandler();
 
         /// <summary>
         /// Invokes <see cref="OutBoundDelegate"/> with the animation data.
@@ -187,13 +187,11 @@ namespace MoDuel {
         /// <param name="blockTime">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/>/</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
         public void PlayTargetedAnimation(Player target, string animationId, double blockTime, params string[] arguments) {
-            target.InvokeOutBound(new AnimationData(animationId, arguments));
+            target.SendAnimation(new AnimationData(animationId, arguments));
             if (Environment.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
                 _animationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
             }
         }
-
-
 
         /// <summary>
         /// Calls a function stored in the lua enviornment with the provided name and arguments.

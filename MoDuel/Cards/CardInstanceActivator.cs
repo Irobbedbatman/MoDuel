@@ -18,7 +18,7 @@ namespace MoDuel.Cards {
         /// <summary>
         /// The list of all enabled <see cref="CardInstance"/> for triggering effects.
         /// </summary>
-        private List<CardInstance> _enabledCIs = new List<CardInstance>();
+        private readonly List<CardInstance> _enabledCIs = new List<CardInstance>();
         public IReadOnlyList<CardInstance> EnabledCIs => _enabledCIs.AsReadOnly();
 
         public void Enable(CardInstance ci) {

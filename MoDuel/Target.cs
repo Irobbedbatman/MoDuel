@@ -15,12 +15,12 @@ namespace MoDuel {
         /// <summary>
         /// The <see cref="Tools.Indexer"/> used to generate the unique <see cref="TargetIndex"/>
         /// </summary>
-        private static Tools.Indexer _Indexer = new Tools.Indexer();
+        private static readonly Tools.Indexer _Indexer = new Tools.Indexer();
 
         /// <summary>
         /// The dictionary of all targets so that one can retreived by index.
         /// </summary>
-        private static Dictionary<int,Target> Targets = new Dictionary<int, Target>();
+        private static readonly Dictionary<int,Target> Targets = new Dictionary<int, Target>();
 
         /// <summary>
         /// Get a target with the given index.

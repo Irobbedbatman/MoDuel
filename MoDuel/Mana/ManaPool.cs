@@ -9,6 +9,7 @@ namespace MoDuel.Mana {
 
     [MoonSharp.Interpreter.MoonSharpUserData]
     public class ManaPool : IEnumerable<Mana> {
+
         /// <summary>
         /// The hidden dictionary that ties <see cref="ManaType"/> to a <see cref="Mana"/>.
         /// </summary>

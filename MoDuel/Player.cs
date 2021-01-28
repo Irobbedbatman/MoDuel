@@ -36,29 +36,13 @@ namespace MoDuel {
         /// The animations that are sent out for this specific player.
         /// </summary>
         [MoonSharpHidden]
-        private Action<AnimationData> OutBoundDelegate = delegate { };
+        public EventHandler<AnimationData> OutBoundDelegate;
 
         /// <summary>
         /// Invokes the <see cref="OutBoundDelegate"/> with the given data.
         /// </summary>
         /// <param name="data"></param>
-        public void InvokeOutBound (AnimationData data) {
-            OutBoundDelegate?.Invoke(data);
-        }
-
-        /// <summary>
-        /// Start listening to receieve animations for this specific player.
-        /// </summary>
-        [MoonSharpHidden]
-        public void StartListening(Action<AnimationData> action) => OutBoundDelegate += action;
-
-
-        /// <summary>
-        /// Stop listening to receieve animations for this specific player.
-        /// </summary>
-        [MoonSharpHidden]
-        public void StopListening(Action<AnimationData> action) => OutBoundDelegate -= action;
-
+        public void SendAnimation (AnimationData data) => OutBoundDelegate?.Invoke(this, data);
 
         /// <summary>
         /// The hero this player is currently.
