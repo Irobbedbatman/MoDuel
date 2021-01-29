@@ -19,23 +19,15 @@ namespace MoDuel.Field {
         /// </summary>
         public readonly Player Owner;
 
-        public static FieldSlot[] EmptySlots => new FieldSlot[5] { new FieldSlot(), new FieldSlot(), new FieldSlot(), new FieldSlot(), new FieldSlot()};
-
-        public SubField(FieldSlot[] slots, Player owner) {
-            if (slots.Length != 5)
-                throw new NotSupportedException("Constructor for SubField only allows 5 slots");
-            if (slots != null)
-                Slots = slots;
-            foreach(var slot in Slots) {
-                slot.ParentField = this;
-            }
-            Owner = owner;
-        }
-
         /// <summary>
         /// The slots in this field; each a <see cref="FieldSlot"/>.
         /// </summary>
         public readonly FieldSlot[] Slots = new FieldSlot[5];
+
+        public SubField(Player owner) {
+            Slots = new FieldSlot[5] { new FieldSlot(this), new FieldSlot(this), new FieldSlot(this), new FieldSlot(this), new FieldSlot(this) };
+            Owner = owner;
+        }
 
         /// <inheritdoc/>
         public override FieldSlot this[int index] => Slots[index];

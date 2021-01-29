@@ -65,7 +65,7 @@ namespace MoDuel.Cards {
         /// </summary>
         /// <param name="parameter">The paramater key in <see cref="Card.Parameters"/>.</param>
         /// <param name="fallback">The value to use if the parameter can't be found.</param>
-        public object GetLeveledParamter<T>(string parameter, object fallback = null) {
+        public T GetLeveledParamter<T>(string parameter, T fallback = default) {
             if (Imprint.Parameters?.ContainsKey(parameter) ?? false) {
                 try {
                     var num = Imprint.Parameters[parameter].ToObject<T>();
@@ -75,7 +75,7 @@ namespace MoDuel.Cards {
                 catch (Exception) { }
                 var arr = new JArrayProxy(Imprint.Parameters[parameter].ToObject<JArray>());
                 int index = Math.Max(1, Math.Min(arr.Length, Level));
-                return arr[index];
+                return (T)arr[index];
             }
             return fallback;
         }

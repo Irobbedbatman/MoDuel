@@ -12,14 +12,20 @@ namespace MoDuel {
     public partial class DuelFlow {
 
         [MoonSharpHidden]
-        private ConcurrentQueue<Action> CommandQueue = new ConcurrentQueue<Action>();
+        private readonly ConcurrentQueue<Action> CommandQueue = new ConcurrentQueue<Action>();
 
         [MoonSharpHidden]
         public void EnqueueCommand(string cmdId, Player player, params object[] args) {
             CommandQueue.Enqueue (() =>
                 DoAction(cmdId, args.ToList().Prepend(player).ToArray())
             );
+            ResetTimer();
             ContinueEvent.Set();
+        }
+
+        public void ResetTimer() {
+            if (Environment.Settings.TimeOutPlayers)
+                TimeOutTimer.Start();
         }
 
     }

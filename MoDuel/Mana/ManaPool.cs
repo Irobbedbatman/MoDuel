@@ -13,7 +13,7 @@ namespace MoDuel.Mana {
         /// <summary>
         /// The hidden dictionary that ties <see cref="ManaType"/> to a <see cref="Mana"/>.
         /// </summary>
-        private Dictionary<ManaType, Mana> _pool = new Dictionary<ManaType, Mana>();
+        private readonly Dictionary<ManaType, Mana> _pool = new Dictionary<ManaType, Mana>();
 
         /// <summary>
         /// Constructor that converts an array of <see cref="ManaType"/> and turns them into a <see cref="ManaPool"/>

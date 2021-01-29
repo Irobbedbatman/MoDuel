@@ -29,7 +29,6 @@ namespace MoDuel {
         }
 
         #region Constructor Lua Accessors 
-
         public Card GetCard(string cardId) => Environment.Content.GetCard(cardId);
         public Hero GetHero(string heroId) => Environment.Content.GetHero(heroId);
 
@@ -45,12 +44,6 @@ namespace MoDuel {
 
         public void NewTurn(Player turnOwner) { State.CurrentTurn = new TurnData(turnOwner); }
 
-        /// <summary>
-        /// Gets a global from the <see cref="LuaEnvironment"/>.
-        /// <para>Can be used to get actions as they are stored globally.</para>
-        /// </summary>
-        public DynValue GetGlobal(string varName) => Environment.Lua.AsScript.Globals.Get(varName);
-
         #endregion
 
         public void GameOver(Player winner) {
@@ -61,11 +54,6 @@ namespace MoDuel {
         }
 
         public void ChangeTurns() => Environment.Settings.ChangeTurnAction.Function.Call();
-
-        public void ResetTimer() {
-            if (Environment.Settings.TimeOutPlayers)
-                TimeOutTimer.Start();
-        }
 
         /// <summary>
         /// How many triggers have activated sequentially.

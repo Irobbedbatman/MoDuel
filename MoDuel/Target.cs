@@ -12,6 +12,13 @@ namespace MoDuel {
 
     [MoonSharpUserData]
     public abstract class Target {
+
+        /// <summary>
+        /// The index that is used when no index is specified.
+        /// </summary>
+        private const int UNSET_INDEX = -1;
+
+
         /// <summary>
         /// The <see cref="Tools.Indexer"/> used to generate the unique <see cref="TargetIndex"/>
         /// </summary>
@@ -32,7 +39,7 @@ namespace MoDuel {
         /// <summary>
         /// The unique index of this target. Can be set in a constructor; for instance when playing as a client to sync data with other connected instances.
         /// </summary>
-        public readonly int Index = -1;
+        public readonly int Index = UNSET_INDEX;
 
         /// <summary>
         /// A MoonSharp lua table.
@@ -40,12 +47,13 @@ namespace MoDuel {
         /// </summary>
         private readonly Dictionary<string, DynValue> Values = new Dictionary<string, DynValue>();
 
-        public Target (int Index = -1) {
-            if (Index == -1)
-                Index = _Indexer.GetNext();
-            this.Index = Index;
-            if (!Targets.ContainsKey(Index))
-                Targets.Add(Index, this);
+        public Target (int index = UNSET_INDEX) {
+            // If an index hasn't been provided we get the next free one.
+            if (index == UNSET_INDEX)
+                index = _Indexer.GetNext();
+            Index = index;
+            if (!Targets.ContainsKey(index))
+                Targets.Add(index, this);
         }
 
         /// <summary>

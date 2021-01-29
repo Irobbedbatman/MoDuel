@@ -65,6 +65,7 @@
     <Compile Include="DuelFlow.cs" />
     <Compile Include="DuelFlowCommands.cs" />
     <Compile Include="DuelFlowLua.cs" />
+    <Compile Include="DuelFlowQueries.cs" />
     <Compile Include="DuelSettings.cs" />
     <Compile Include="DuelState.cs" />
     <Compile Include="Field\Field.cs" />

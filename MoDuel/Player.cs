@@ -68,7 +68,7 @@ namespace MoDuel {
         /// <summary>
         /// The Hand of the player currently.
         /// </summary>
-        private HashSet<CardInstance> _currentHand = new HashSet<CardInstance>();
+        private readonly HashSet<CardInstance> _currentHand = new HashSet<CardInstance>();
         /// <summary>
         /// The Hand of the player currently; readonly.
         /// </summary>
@@ -77,7 +77,7 @@ namespace MoDuel {
         /// <summary>
         /// The Grave of the player currently.
         /// </summary>
-        private HashSet<CardInstance> _graveCards = new HashSet<CardInstance>();
+        private readonly HashSet<CardInstance> _graveCards = new HashSet<CardInstance>();
 
         /// <summary>
         /// The Grave of the player currently; readonly.
@@ -92,10 +92,10 @@ namespace MoDuel {
             return new HashSet<CardInstance>(_graveCards);
         }
 
-        public Player(string userId, Hero hero, FieldSlot[] slots, ManaPool manaPool) {
+        public Player(string userId, Hero hero, ManaPool manaPool) {
             UserId = userId;
             ManaPool = manaPool;
-            Field = new SubField(slots, this);
+            Field = new SubField(this);
             CurrentHero = new HeroInstance(hero);
         }
 

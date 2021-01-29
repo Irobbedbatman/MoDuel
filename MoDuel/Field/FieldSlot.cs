@@ -11,9 +11,10 @@ namespace MoDuel.Field {
         /// <summary>
         /// The field this slot is in.
         /// </summary>
-        public SubField ParentField = null;
+        public readonly SubField ParentField = null;
 
         public CreatureInstance _occupant = null;
+
         /// <summary>
         /// A <see cref="CreatureInstance"/> that is in the slot.
         /// <para>null if the slot is empty.</para>
@@ -36,6 +37,10 @@ namespace MoDuel.Field {
             }
         }
 
+        public FieldSlot(SubField parent) {
+            ParentField = parent;
+   
+        }
 
         /// <summary>
         /// Check to see if the slot is unoccupied.
