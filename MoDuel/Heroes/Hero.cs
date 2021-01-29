@@ -14,18 +14,18 @@ namespace MoDuel.Heroes {
         /// <summary>
         /// A dictionary with triggers being used as keys and reactions as values.
         /// <para>The <see cref="string"/> is a trigger keyword.</para>
-        /// <para>The <see cref="DynValue"/> reaction is a lua function.</para>
+        /// <para>The <see cref="Closure"/> reaction is a lua function.</para>
         /// </summary>
-        public readonly IReadOnlyDictionary<string, DynValue> TriggerReactions;
+        public readonly IReadOnlyDictionary<string, Closure> TriggerReactions;
 
         /// <summary>
         /// A dictionary to use miscellaneous values.
         /// </summary>
         public readonly IReadOnlyDictionary<string, DynValue> Parameters;
 
-        public Hero(string heroId, Dictionary<string, DynValue> triggerReactions, Dictionary<string, DynValue> parameters) {
+        public Hero(string heroId, Dictionary<string, Closure> triggerReactions, Dictionary<string, DynValue> parameters) {
             HeroId = heroId;
-            TriggerReactions = triggerReactions ?? new Dictionary<string, DynValue>();
+            TriggerReactions = triggerReactions ?? new Dictionary<string, Closure>();
             Parameters = parameters ?? new Dictionary<string, DynValue>();
         }
         

@@ -58,11 +58,11 @@ namespace MoDuel.Cards {
 
         /// <summary>
         /// One of the dictionary of triggers that are called on this card.
-        /// <para>Reaction is a <see cref="DynValue"/> lua function.</para>
+        /// <para>Reaction is a <see cref="Closure"/> lua function.</para>
         /// </summary>
-        public readonly IReadOnlyDictionary<string, DynValue> TriggerReactions, ExplicitTriggerReactions;
+        public readonly IReadOnlyDictionary<string, Closure> TriggerReactions, ExplicitTriggerReactions;
 
-        public Card(string cardID, ManaType manaType, CardType cardType, Dictionary<string, DynValue> triggers, Dictionary<string, DynValue> exTriggers, Dictionary<string, DynValue> parameters) {
+        public Card(string cardID, ManaType manaType, CardType cardType, Dictionary<string, Closure> triggers, Dictionary<string, Closure> exTriggers, Dictionary<string, DynValue> parameters) {
             CardID = cardID;
             ManaType = manaType;
             CardType = cardType;

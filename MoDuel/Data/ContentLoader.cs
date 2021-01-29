@@ -6,6 +6,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using MoDuel.Mana;
 using System.Collections.Generic;
+using MoonSharp.Environment;
 
 namespace MoDuel.Data {
 
@@ -15,39 +16,34 @@ namespace MoDuel.Data {
     /// <list type="table"><listheader>Loadable Content: </listheader><para/>
     /// <item><see cref="Card"/>s</item>,
     /// <item><see cref="Hero"/>es</item>,
-    /// <item>'GameActions' in the form <see cref="DynValue"/> lua functions.</item>
+    /// <item>'GameActions' in the form <see cref="Closure"/> lua functions.</item>
     /// </list>
     /// </para>
-    /// <para>Some methods require a <see cref="Script"/> to bake strings or files into <see cref="DynValue"/> lua functions.</para>
+    /// <para>Most methods require a <see cref="LuaEnvironment"/> to bake strings or files into <see cref="DynValue"/> lua functions.</para>
+    /// <para>Most methods require a <see cref="LoadedContent"/> to store everything once it has been loaded.</para>
     /// </summary>
     public static class ContentLoader {
 
         /// <summary>
-        /// Add the load methods to the <see cref="Script.Globals"/>.
+        /// Add the load methods to the <see cref="Script.Globals"/> in the provided <see cref="LuaEnvironment"/>.
         /// <para>These load methods are used in lua actions to load required content.</para>
         /// </summary>
-        public static void RegisterLoads(Script script) {
-            script.Globals["LoadCard"] = (Func<string, Card>)((cardId) => { return LoadCard(script, cardId); });
-            script.Globals["LoadHero"] = (Func<string, Hero>)((heroId) => { return LoadHero(script, heroId); });
-            script.Globals["LoadAction"] = (Action<string>)((actionId) => { LoadAction(script, actionId); });
+        public static void RegisterLoads(LoadedContent content, LuaEnvironment luaEnv) {
+
+            luaEnv.AsScript.Globals["LoadCard"] = (Func<string, Card>)((cardId) => { return LoadCard(cardId, content, luaEnv); });
+            luaEnv.AsScript.Globals["LoadHero"] = (Func<string, Hero>)((heroId) => { return LoadHero(heroId, content, luaEnv); });
+            luaEnv.AsScript.Globals["LoadAction"] = (Func<string, Closure>)((actionId) => { return LoadAction(actionId, content, luaEnv); });
         }
 
         /// <summary>
         /// Removes the load methods from the <see cref="Script.Globals"/>
         /// <para>These are important to use as loading content should only happen before the game starts.</para>
         /// </summary>
-        /// <param name="script"></param>
-        public static void DeregisterLoads(Script script) {
-            script.Globals.Remove("LoadCard");
-            script.Globals.Remove("LoadHero");
-            script.Globals.Remove("LoadAction");
+        public static void DeregisterLoads(LuaEnvironment luaEnv) {
+            luaEnv.AsScript.Globals.Remove("LoadCard");
+            luaEnv.AsScript.Globals.Remove("LoadHero");
+            luaEnv.AsScript.Globals.Remove("LoadAction");
         }
-
-
-        /// <summary>
-        /// Shorthand accessor for <see cref="LoadedContent.Instance"/>
-        /// </summary>
-        private static readonly LoadedContent LC = LoadedContent.Instance;
 
         /// <summary>
         /// The directory to search content from.
@@ -56,6 +52,9 @@ namespace MoDuel.Data {
         public static string ContentDirectory { get; private set; } = "";
         public static void SetContentDirectory(string dir) { ContentDirectory = dir; }
 
+        /// <summary>
+        /// Should a log be printed out each time something is loaded.
+        /// </summary>
         public static bool LogLoads = false;
 
         /// <summary>
@@ -63,13 +62,14 @@ namespace MoDuel.Data {
         /// <para>Also bakes any lua code contained within the json file.</para>
         /// <para>Also loads other linked content listed in the json file.</para>
         /// </summary>
-        /// <param name="script">The script used in the duel flow so code can be compiled now and run later.</param>
-        /// <param name="cardIndex">The index of the card to load.</param>
-        /// <returns>A card that was loaded from the json file, or the card with same <paramref name="cardIndex"/> that had already been loaded.</returns>
-        public static Card LoadCard(Script script, string cardId) {
+        /// <param name="cardId">The index of the card to load.</param>
+        /// <param name="content">The container to store the file when loaded.</param>
+        /// <param name="luaEnv">The lua environment used in the duel flow so code can be compiled now and run later.</param>
+        /// <returns>A card that was loaded from the json file, or the card with same <paramref name="cardId"/> that had already been loaded.</returns>
+        public static Card LoadCard(string cardId, LoadedContent content, LuaEnvironment luaEnv) {
             //If the card was already loaded no need to load it again.
-            if (LC.IsCardLoaded(cardId))
-                return LC.GetCard(cardId);
+            if (content.TryGetCard(cardId, out Card _card))
+                return _card;
 
             if (LogLoads)
                 Console.WriteLine("Loading: " + cardId);
@@ -86,14 +86,14 @@ namespace MoDuel.Data {
                 cJson["ID"]?.Value<string>(),
                 new ManaType(cJson["Mana"]?.Value<string>() ?? ""),
                 (CardType)Enum.Parse(typeof(CardType), cJson["Type"]?.Value<string>() ?? "Creature"),
-                GetTriggersFrom(cJson["Triggers"], script),
-                GetTriggersFrom(cJson["Explicit"], script),
-                GetParametersFrom(cJson["Parameters"], script)
+                GetTriggersFrom(cJson["Triggers"], content, luaEnv),
+                GetTriggersFrom(cJson["Explicit"], content, luaEnv),
+                GetParametersFrom(cJson["Parameters"], luaEnv)
             );
 
             //Add the loaded card to the loaded content.
-            LC.AddLoadedCard(cardId, card);
-            LoadLinkedContent(cJson["LinkedContent"], script);
+            content.AddLoadedCard(cardId, card);
+            LoadLinkedContent(cJson["LinkedContent"], content, luaEnv);
             return card;
         }
 
@@ -102,13 +102,14 @@ namespace MoDuel.Data {
         /// <para>Also bakes any lua code contained within the json file.</para>
         /// <para>Also loads other linked content listen in the json file.</para>
         /// </summary>
-        /// <param name="script">The script used in the duel flow so code can be compiled now and run later.</param>
         /// <param name="heroId">The index of the hero to load.</param>
+        /// <param name="content">The container to store the file when loaded.</param>
+        /// <param name="luaEnv">The lua environment used in the duel flow so code can be compiled now and run later.</param>
         /// <returns>A hero that was loaded from the json file, or a hero with same <paramref name="heroId"/> that had already been loaded.</returns>
-        public static Hero LoadHero(Script script, string heroId) {
-            //If the hero is already loaded no need to load it again.
-            if (LC.IsHeroLoaded(heroId))
-                return LC.GetHero(heroId);
+        public static Hero LoadHero(string heroId, LoadedContent content, LuaEnvironment luaEnv) {
+            //If the hero was already loaded no need to load it again.
+            if (content.TryGetHero(heroId, out Hero _hero))
+                return _hero;
 
             if (LogLoads)
                 Console.WriteLine("Loading: " + heroId);
@@ -124,41 +125,64 @@ namespace MoDuel.Data {
             //Get the static hero data.
             Hero hero = new Hero(
                 hJson["ID"].Value<string>(),
-                GetTriggersFrom(hJson["Triggers"], script),
-                GetParametersFrom(hJson["Parameters"], script)
+                GetTriggersFrom(hJson["Triggers"], content, luaEnv),
+                GetParametersFrom(hJson["Parameters"], luaEnv)
             );
 
             //Add the loaded hero to the loaded content.
-            LC.AddLoadedHero(heroId, hero);
-            LoadLinkedContent(hJson["LinkedContent"], script);
+            content.AddLoadedHero(heroId, hero);
+            LoadLinkedContent(hJson["LinkedContent"], content, luaEnv);
             return hero;
         }
 
         /// <summary>
         /// Loads an action coded in lua and bakes it into a <see cref="DynValue"/> function.
         /// </summary>
-        /// <param name="script">The script used in the duel flow so code can be compiled now and run later.</param>
         /// <param name="actionId">The unqiue id of the action to load.</param>
+        /// <param name="content">The container to store the file when loaded.</param>
+        /// <param name="luaEnv">The script used in the duel flow so code can be compiled now and run later.</param>
         /// <returns>A function that was baked from the lua code, or a function with same <paramref name="actionId"/> that had already been loaded.</returns>
-        public static void LoadAction(Script script, string actionId) {
+        public static Closure LoadAction(string actionId, LoadedContent content, LuaEnvironment luaEnv) {
             //If the action is alrady loaded no need to load it again.
-            if (LC.IsActionLoaded(actionId))
-                return;
+            if (content.TryGetAction(actionId, out var _func))
+                return _func;
 
             if (LogLoads)
                 Console.WriteLine("Loading: " + actionId);
 
+            // Get the file name of the action.
             string fileName = SearchForFile("Action_" + actionId + ".lua");
 
+            // Ensure the file exists.
             if (fileName == null)
-                throw new FileNotFoundException("Action " + actionId + " was not found. Content Directory: "+ ContentDirectory + " ||| Looked for 'Action_" + actionId + ".lua'");
+                throw new FileNotFoundException("Action " + actionId + " was not found. Content Directory: " + ContentDirectory + " ||| Looked for 'Action_" + actionId + ".lua'");
 
-            script.DoFile(fileName);
+            // The function we retrieve from the file.
+            Closure func = null;
 
-            //Add the loaded action to the loaded content.
-            LC.AddLoadedAction(actionId);
+            try {
+                // Construct a temporary table for the use for the function.
+                var tempTable = luaEnv.TemporaryTable(true);
+
+                // Retrieve all the globals from the file.
+                luaEnv.AsScript.DoFile(fileName, tempTable);
+                // Try to find the function by name.
+                func = tempTable.Get("actionId").Function;
+
+
+            }
+            catch (Exception e) {
+                // Display errors if the excution fails at any point.
+                Console.Write(e.StackTrace);
+                Console.WriteLine("Action " + actionId + " failed excution. Ensure function name is the same as the actionId, that is, the name of the file without the 'Action_' or the '.lua'.");
+            }
+
+            // Add the action to the list of loaded actions.
+            content.AddLoadedAction(actionId, func);
+            // And return it.
+            return func;
+
         }
-
 
         /// <summary>
         /// Searches for a file with the given key in the <see cref="ContentDirectory"/>.
@@ -180,8 +204,9 @@ namespace MoDuel.Data {
         /// <para>The format of the token should be arrays refrenced by the content type (Cards | Heroes | Actions).</para>
         /// </summary>
         /// <param name="linkedContent">The json token that has all the linked content arrays.</param>
-        /// <param name="script">The <see cref="Script"/> to run any lua code.</param>
-        private static void LoadLinkedContent(JToken linkedContent, Script script) {
+        /// <param name="content">The content the linked content will be stored in.</param>
+        /// <param name="luaEnv">The <see cref="LuaEnvironment"/> to run any lua code in the linked content.</param>
+        private static void LoadLinkedContent(JToken linkedContent, LoadedContent content, LuaEnvironment luaEnv) {
             if (linkedContent == null)
                 return;
 
@@ -190,13 +215,13 @@ namespace MoDuel.Data {
             JArray actions = (JArray)linkedContent["Actions"];
             if (cards != null)
                 foreach(string c in cards)
-                    LoadCard(script, c);
+                    LoadCard(c, content, luaEnv);
             if (heroes != null)
                 foreach (string h in heroes)
-                    LoadCard(script, h);
+                    LoadCard(h, content, luaEnv);
             if (actions != null)
                 foreach (string a in actions)
-                    LoadCard(script, a);
+                    LoadCard(a, content, luaEnv);
         }
 
         /// <summary>
@@ -205,20 +230,18 @@ namespace MoDuel.Data {
         /// <para>Performs the action <paramref name="act"/> on each found trigger/reaction.</para>
         /// </summary>
         /// <param name="triggerBlock">The block of json data to iterate over.</param>
-        /// <param name="script">The script used to compile any text to <see cref="DynValue"/> functions.</param>
-        /// <param name="act">The action performed on any found trigger/reaction. String is the trigger key and <see cref="DynValue"/> is the reaction function.</param>
-        private static Dictionary<string, DynValue> GetTriggersFrom(JToken triggerBlock, Script script) {
+        /// <param name="content">The content the triggers will be stored in.</param>
+        /// <param name="luaEnv">The lua environment that is used to compile any <see cref="DynValue"/> functions.</param>
+        /// </summary>
+        private static Dictionary<string, Closure> GetTriggersFrom(JToken triggerBlock, LoadedContent content, LuaEnvironment luaEnv) {
             if (triggerBlock == null)
                 return null;
 
-            Dictionary<string, DynValue> triggers = new Dictionary<string, DynValue>();
+            Dictionary<string, Closure> triggers = new Dictionary<string, Closure>();
             foreach (JProperty trigger in triggerBlock) {
-                if (LC.IsActionLoaded(trigger.Value.Value<string>())) 
-                    triggers.Add(trigger.Name,script.Globals.Get(trigger.Value.Value<string>()));
-                else {
-                    LoadAction(script, trigger.Value.Value<string>());
-                    triggers.Add(trigger.Name, script.Globals.Get(trigger.Value.Value<string>()));
-                }
+                if (!content.TryGetAction(trigger.Value.Value<string>(), out Closure func))
+                    func = LoadAction(trigger.Value.Value<string>(), content, luaEnv);
+                triggers.Add(trigger.Name, func);
             }
             return triggers;
         }
@@ -226,15 +249,17 @@ namespace MoDuel.Data {
         /// <summary>
         /// Gets the paramaters of a <see cref="JToken"/> and returns them in a dictionay.
         /// </summary>
-        private static Dictionary<string, DynValue> GetParametersFrom(JToken _parameters, Script script) {
-            if (_parameters == null)
+        /// <param name="paramToken">The parameters stored in json.</param>
+        /// <param name="luaEnv">The lua environment that is used to retrieve any <see cref="DynValue"/> parameters.</param>
+        private static Dictionary<string, DynValue> GetParametersFrom(JToken paramToken, LuaEnvironment luaEnv) {
+            if (paramToken == null)
                 return null;
 
             Dictionary<string, DynValue> parameters = new Dictionary<string, DynValue>();
-            foreach (JProperty param in _parameters) {
+            foreach (JProperty param in paramToken) {
                 //Convert the json data and store it in the dictionary.
                 //JArrayProxy.cs is used for Json arrays.
-                parameters.Add(param.Name, DynValue.FromObject(script, param.Value.ToObject<object>()));
+                parameters.Add(param.Name, DynValue.FromObject(luaEnv.AsScript, param.Value.ToObject<object>()));
             }
             return parameters;
         }

@@ -118,35 +118,35 @@ namespace MoDuel {
         /// <param name="trigger">The trigger keyword.</param>
         /// <returns>A list of pairs with the keys being the sender and the values are the reaction functions that should be run in sequence.</returns> 
         [MoonSharpHidden]
-        private KeyValuePair<object, DynValue>[] FindReactions(string trigger) {
+        private KeyValuePair<object, Closure>[] FindReactions(string trigger) {
 
             //TODO: Bake Reactions
 
-            List<KeyValuePair<object, DynValue>> Reactions = new List<KeyValuePair<object, DynValue>>();
+            List<KeyValuePair<object, Closure>> Reactions = new List<KeyValuePair<object, Closure>>();
             //Get the two players.
             var owner = State.CurrentTurn.TurnOwner;
             var opposer = State.GetOpposingPlayer(owner);
 
             //Set reaction to null so we can you boolean shorthand.
-            DynValue reaction = null;
+            Closure reaction = null;
 
             //Check to see if the heroes should activate any abilities.
             if (owner.CurrentHero.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
-                Reactions.Add(new KeyValuePair<object, DynValue>(owner.CurrentHero, reaction));
+                Reactions.Add(new KeyValuePair<object, Closure>(owner.CurrentHero, reaction));
             if (opposer.CurrentHero.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
-                Reactions.Add(new KeyValuePair<object, DynValue>(opposer.CurrentHero, reaction));
+                Reactions.Add(new KeyValuePair<object, Closure>(opposer.CurrentHero, reaction));
 
 
             //Get the triggerreaction of each card.
             foreach (var card in CardInstanceActivator.EnabledCIs) {
                 if (card.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
-                    Reactions.Add(new KeyValuePair<object, DynValue>(card, reaction));
+                    Reactions.Add(new KeyValuePair<object, Closure>(card, reaction));
             }
 
             //Iterate over ongoing effects in the order they were created.
             foreach (var eff in OngoingEffect.OngoingEffects) {
                 if (eff.TryGetReaction(trigger, out reaction))
-                    Reactions.Add(new KeyValuePair<object, DynValue>(eff, reaction));
+                    Reactions.Add(new KeyValuePair<object, Closure>(eff, reaction));
             }
 
             return Reactions.ToArray();

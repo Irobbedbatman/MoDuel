@@ -136,7 +136,7 @@ namespace MoDuel {
             if (!State.OnGoing)
                 return null;
 
-            if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out DynValue reaction)) {
+            if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out Closure reaction)) {
                 return Environment.Lua.AsScript.Call(reaction, arguments.Prepend(triggerer).ToArray());
             }
             return null;
@@ -152,7 +152,7 @@ namespace MoDuel {
             //Ensure that the game is ongoing.
             if (!State.OnGoing)
                 return null;
-            if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out DynValue reaction)) {
+            if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out Closure reaction)) {
                 return Environment.Lua.AsScript.Call(reaction, arguments.Prepend(triggerer).ToArray());
             }
             else {

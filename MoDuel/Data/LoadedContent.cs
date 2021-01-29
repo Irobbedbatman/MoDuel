@@ -10,35 +10,33 @@ using System.Threading.Tasks;
 
 namespace MoDuel.Data {
     /// <summary>
-    /// A static singleton that holds all the currently loaded content
+    /// A container that holds collections of loaded content.
     /// </summary>
     public class LoadedContent {
 
-        private LoadedContent() { }
-
-        /// <summary>
-        /// Accessor for the <see cref="LoadedContent"/> Singleton.
-        /// </summary>
-        public static LoadedContent Instance { get; private set; } = new LoadedContent();
+        public LoadedContent() { }
 
         #region Card Loading and Accessors.
-        private static Dictionary<string, Card> LoadedCards = new Dictionary<string, Card>();
+        private readonly Dictionary<string, Card> LoadedCards = new Dictionary<string, Card>();
         public void AddLoadedCard(string cardID, Card card) => LoadedCards.Add(cardID, card);
         public bool IsCardLoaded(string cardID) => LoadedCards.ContainsKey(cardID);
         public Card GetCard(string cardID) => LoadedCards[cardID];
+        public bool TryGetCard(string cardID, out Card card) => LoadedCards.TryGetValue(cardID, out card);
         #endregion
 
         #region Action Loading and Accessors
-        private static HashSet<string> LoadedActions = new HashSet<string>();
-        public void AddLoadedAction(string actionID) => LoadedActions.Add(actionID);
-        public bool IsActionLoaded(string actionID) => LoadedActions.Contains(actionID);
+        private readonly Dictionary<string, Closure> LoadedActions = new Dictionary<string, Closure>();
+        public void AddLoadedAction(string actionID, Closure func) => LoadedActions.Add(actionID, func);
+        public bool IsActionLoaded(string actionID) => LoadedActions.ContainsKey(actionID);
+        public bool TryGetAction(string actionID, out Closure func) => LoadedActions.TryGetValue(actionID, out func);
         #endregion
 
         #region Hero Loading and Accessors
-        private static Dictionary<string, Hero> LoadedHeroes = new Dictionary<string, Hero>();
+        private readonly Dictionary<string, Hero> LoadedHeroes = new Dictionary<string, Hero>();
         public void AddLoadedHero(string heroID, Hero hero) => LoadedHeroes.Add(heroID, hero);
         public bool IsHeroLoaded(string heroID) => LoadedHeroes.ContainsKey(heroID);
         public Hero GetHero(string heroID) => LoadedHeroes[heroID];
+        public bool TryGetHero(string heroID, out Hero hero) => LoadedHeroes.TryGetValue(heroID, out hero);
         #endregion
 
         /// <summary>
