@@ -12,12 +12,14 @@ namespace MoDuel {
         public DuelSettings Settings;
         public LuaEnvironment Lua;
         public LoadedContent Content;
+        public Tools.ManagedRandom Random;
 
 
-        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler) {
+        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler, Tools.ManagedRandom random) {
             Lua = luaEngine;
             Content = contentHandler;
             Settings = settings;
+            Random = random;
         }
 
     }

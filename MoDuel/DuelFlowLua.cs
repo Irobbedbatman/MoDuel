@@ -18,6 +18,7 @@ namespace MoDuel {
             JArrayProxy.Register();
             Environment.Lua.AsScript.Globals["State"] = State;
             Environment.Lua.AsScript.Globals["Flow"] = this;
+            Environment.Lua.AsScript.Globals["Random"] = Environment.Random;
             Environment.Lua.AsScript.Globals["GetTarget"] = (Func<int, Target>)Target.GetTarget;
             Environment.Lua.AsScript.Globals["CPResponse"] = (Func<string[], CanPlayResponse>)CanPlayResponse.New;
             Environment.Lua.AsScript.Globals["CanPlayTest"] = new CanPlayResponse("Test");
@@ -64,7 +65,7 @@ namespace MoDuel {
         /// How many triggers can be activated depth wise. Used to dodge most missable infinite loops.
         /// <para>Calling the same action within itself is one example of a endless loop unaffected.</para>
         /// </summary>
-        public static readonly float MaxTriggerChain = 22;
+        public const float MAX_TRIGGER_CHAIN = 22;
 
         /// <summary>
         /// Triggers reactions found in <see cref="FindReactions(string)"/>
@@ -73,7 +74,7 @@ namespace MoDuel {
         public void Trigger(string trigger, params object[] arguments) {
 
             //Ensure we don't go above the maximum trigger amount.
-            if (currentTriggerChain >= MaxTriggerChain)
+            if (currentTriggerChain >= MAX_TRIGGER_CHAIN)
                 return;
             currentTriggerChain++;
             foreach (var reaction in FindReactions(trigger)) {
@@ -88,7 +89,7 @@ namespace MoDuel {
         /// </summary>
         public void InciteTrigger(object inciter, string trigger, params object[] arguments) {
             //Ensure we don't go above the maximum trigger amount.
-            if (currentTriggerChain >= MaxTriggerChain)
+            if (currentTriggerChain >= MAX_TRIGGER_CHAIN)
                 return;
             currentTriggerChain++;
             foreach (var reaction in FindReactions(trigger)) {
@@ -185,20 +186,22 @@ namespace MoDuel {
         /// Calls a function stored in the lua enviornment with the provided name and arguments.
         /// <para>Returns null if <see cref="DuelState.OnGoing"/> is false.</para>
         /// </summary>
-        /// <param name="actionId">The literal global name stored in <see cref="Script.Globals"/>. That was loaded with <see cref="ContentLoader.LoadAction(Script, string)"/></param>
+        /// <param name="actionId">The action's name stored in <see cref="ContentLoader"/> That was loaded with <see cref="ContentLoader.LoadAction(Script, string)"/></param>
         public DynValue DoAction(string actionId, params object[] arguments) {
             if (State.OnGoing)
-                return Environment.Lua.AsScript.Globals.Get(actionId).Function.Call(arguments);
+                if (Environment.Content.TryGetAction(actionId, out Closure func))
+                 return Environment.Lua.AsScript.Call(func, arguments);
             return null;
         }
 
         /// <summary>
         /// Calls a function stored in the lua enviornment with the provided name and arguments.
-        /// <para>Same as <see cref="DoAction(string, object[])"/> but forces you provide context.</para>
+        /// <para>Same as <see cref="DoAction(string, object[])"/> but forces you provide a sender argument.</para>
         /// </summary>
         public DynValue InciteAction(object inciter, string actionId, params object[] arguments) {
             if (State.OnGoing)
-                return Environment.Lua.AsScript.Globals.Get(actionId).Function.Call(arguments.Prepend(inciter).ToArray());
+                if (Environment.Content.TryGetAction(actionId, out Closure func))
+                    return Environment.Lua.AsScript.Call(func, arguments.Prepend(inciter).ToArray());
             return null;
         }
 

@@ -28,6 +28,7 @@ namespace MoDuel.Data {
         private readonly Dictionary<string, Closure> LoadedActions = new Dictionary<string, Closure>();
         public void AddLoadedAction(string actionID, Closure func) => LoadedActions.Add(actionID, func);
         public bool IsActionLoaded(string actionID) => LoadedActions.ContainsKey(actionID);
+        public Closure GetAction(string actionID) => LoadedActions[actionID];
         public bool TryGetAction(string actionID, out Closure func) => LoadedActions.TryGetValue(actionID, out func);
         #endregion
 
