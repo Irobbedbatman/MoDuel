@@ -18,7 +18,6 @@ namespace MoDuel {
         /// </summary>
         private const int UNSET_INDEX = -1;
 
-
         /// <summary>
         /// The <see cref="Tools.Indexer"/> used to generate the unique <see cref="TargetIndex"/>
         /// </summary>

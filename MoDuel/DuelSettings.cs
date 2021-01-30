@@ -20,6 +20,11 @@ namespace MoDuel {
         /// </summary>
         public float AnimationSpeed = NO_ANIM;
 
+        /// <summary>
+        /// Shorthand check to see if animations should play.
+        /// </summary>
+        public bool PlayAnimations => AnimationSpeed != NO_ANIM;
+
         public bool TimeOutPlayers = false;
 
         public double TimeOutInterval = DEFAULT_TIMEOUT;
@@ -38,6 +43,11 @@ namespace MoDuel {
         /// Action that is called when the game ends.
         /// </summary>
         public DynValue GameEndAction;
+
+        /// <summary>
+        /// Action to resolve once the game is over.
+        /// </summary>
+        public Action GameCleanUp;
 
         /// <summary>
         /// Action that is called each time the turn is changed.

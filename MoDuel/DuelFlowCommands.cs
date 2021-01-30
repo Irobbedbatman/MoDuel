@@ -14,18 +14,23 @@ namespace MoDuel {
         [MoonSharpHidden]
         private readonly ConcurrentQueue<Action> CommandQueue = new ConcurrentQueue<Action>();
 
-        [MoonSharpHidden]
-        public void EnqueueCommand(string cmdId, Player player, params object[] args) {
-            CommandQueue.Enqueue (() =>
-                DoAction(cmdId, args.ToList().Prepend(player).ToArray())
-            );
-            ResetTimer();
-            ContinueEvent.Set();
+        /// <summary>
+        /// Removes all the commands from the command queue.
+        /// </summary>
+        public void ClearCommandQueue() {
+            while (!CommandQueue.IsEmpty)
+                CommandQueue.TryDequeue(out var _);
         }
 
-        public void ResetTimer() {
-            if (Environment.Settings.TimeOutPlayers)
-                TimeOutTimer.Start();
+        [MoonSharpHidden]
+        public void EnqueueCommand(string cmdId, Player player, params object[] args) {
+            //TODO: Only keep relevant commands.
+            CommandQueue.Enqueue (() => {
+                lock (ThreadLock) {
+                    DoAction(cmdId, args.ToList().Prepend(player).ToArray());
+                }
+            });
+            ContinueEvent.Set();
         }
 
     }

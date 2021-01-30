@@ -49,6 +49,13 @@ namespace MoDuel {
         /// </summary>
         private readonly ManualResetEvent ContinueEvent = new ManualResetEvent(false);
 
+        /// <summary>
+        /// Object to ensure that multiple object don't use the <see cref="Script"/> at the same time.
+        /// </summary>
+        private readonly object ThreadLock = new object();
+
+        private bool ShouldReset = false; 
+
         [MoonSharpHidden]
         public DuelFlow(EnvironmentContainer environment, Player player1, Player player2, Player goesFirst) {
             State = new DuelState(player1, player2) {
@@ -76,8 +83,18 @@ namespace MoDuel {
         /// <para>Calls <see cref="DuelSettings.TimeOutAction"/> on the current turn owner.</para>
         /// </summary>
         private void TimeOutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-            //TODO: Thread safety
-            Environment.Lua.AsScript.Call(Environment.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
+            lock (ThreadLock) {
+                ClearCommandQueue();
+                Environment.Lua.AsScript.Call(Environment.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
+            }
+        }
+
+        /// <summary>
+        /// Starts the timer again.
+        /// </summary>
+        public void ResetTimer() {
+            if (Environment.Settings.TimeOutPlayers)
+                TimeOutTimer.Start();
         }
 
         [MoonSharpHidden]
@@ -94,21 +111,19 @@ namespace MoDuel {
                         TimeOutTimer.Stop();
                     if (CommandQueue.TryDequeue(out var result))
                         result.Invoke();
-                    if (Environment.Settings.TimeOutPlayers)
-                        TimeOutTimer.Start();
+                    ResetTimer();
                     ContinueEvent.Reset();
                     continue;
                 }
                 //If the command queue is empty we wait for it to be propegated.
                 ContinueEvent.WaitOne();
             }
-            GameFinished();
+
+            // Call the cleanup function provided in settings.
+            Environment.Settings.GameCleanUp?.Invoke();
+
         }
 
-        [MoonSharpHidden]
-        public void GameFinished() {
-            //TODO: Game Finished
-        }
 
         /// <summary>
         /// Checks and returns any reactions to the given <paramref name="trigger"/>.

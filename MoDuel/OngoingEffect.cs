@@ -31,9 +31,10 @@ namespace MoDuel {
             _ongoingEffects.Add(this);
         }
 
-        public void Destroy() {
-            _ongoingEffects.Remove(this);
-        }
+        /// <summary>
+        /// Remove this <see cref="OngoingEffect"/> from this list of active ones.
+        /// </summary>
+        public void Destroy() => _ongoingEffects.Remove(this);
 
         /// <summary>
         /// Add a trigger reaction to this <see cref="OngoingEffect"/>.

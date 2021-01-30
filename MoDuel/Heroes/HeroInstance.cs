@@ -16,10 +16,11 @@ namespace MoDuel.Heroes {
         /// <summary>
         /// The <see cref="Player"/> that is using this <see cref="HeroInstance"/> as their <see cref="Player.CurrentHero"/>.
         /// </summary>
-        public Player Owner;
+        public readonly Player Owner;
 
-        public HeroInstance(Hero hero) {
+        public HeroInstance(Hero hero, Player owner) {
             Imprint = hero;
+            Owner = owner;
         }
     }
 }

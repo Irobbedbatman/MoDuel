@@ -16,11 +16,6 @@ namespace MoDuel {
     public class Player : Target {
 
         /// <summary>
-        /// The amount of experience it takes to go from the previous level to this level.
-        /// </summary>
-        public static readonly int LEVEL_2_XP = 6, LEVEL_3_XP = 14, INVALID_XP = -1;
-
-        /// <summary>
         /// The uniqueid, name, username of this player.
         /// </summary>
         public readonly string UserId;
@@ -29,8 +24,6 @@ namespace MoDuel {
         /// The <see cref="Mana.ManaPool"/> that this player has.
         /// </summary>
         public readonly ManaPool ManaPool;
-
-        private HeroInstance _currenthero;
 
         /// <summary>
         /// The animations that are sent out for this specific player.
@@ -45,14 +38,12 @@ namespace MoDuel {
         public void SendAnimation (AnimationData data) => OutBoundDelegate?.Invoke(this, data);
 
         /// <summary>
-        /// The hero this player is currently.
+        /// The <see cref="HeroInstance"/> this player is currently playing as.
         /// </summary
-        public HeroInstance CurrentHero {
-            get { return _currenthero; }
-            set {
-                value.Owner = this;
-                _currenthero = value;
-            }
+        public HeroInstance CurrentHero { get; private set; }
+
+        public void ChangeHero(Hero newHero) {
+            CurrentHero = new HeroInstance(newHero, this);
         }
 
         /// <summary>
@@ -63,7 +54,7 @@ namespace MoDuel {
         /// <summary>
         /// One of the stats for this player.
         /// </summary>
-        public int Level = 1, CurrentExp = 0, CurrentHp = 25, MaxHp = 25;
+        public int Level = 1, Exp = 0, Hp = 25, MaxHp = 25;
 
         /// <summary>
         /// The Hand of the player currently.
@@ -96,7 +87,7 @@ namespace MoDuel {
             UserId = userId;
             ManaPool = manaPool;
             Field = new SubField(this);
-            CurrentHero = new HeroInstance(hero);
+            CurrentHero = new HeroInstance(hero, this);
         }
 
         /// <summary>
@@ -144,19 +135,6 @@ namespace MoDuel {
         /// </summary>
         /// TODO: Decide if this function is still relevant.
         //public bool BroughtCard(string cardId) => InitialHand.Any((ci) => ci.Imprint.CardID == cardId);
-
-
-        public int ExpNextLevel() {
-            switch (Level) {
-                case 1:
-                    return LEVEL_2_XP;
-                case 2:
-                    return LEVEL_3_XP;
-                default:
-                    return INVALID_XP;
-            }
-
-        }
 
     }
 }

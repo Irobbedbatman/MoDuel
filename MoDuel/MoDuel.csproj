@@ -86,6 +86,7 @@
     <Compile Include="EnvironmentContainer.cs" />
     <Compile Include="Tools\Indexer.cs" />
     <Compile Include="Tools\JArrayProxy.cs" />
+    <Compile Include="Tools\ManagedRandom.cs" />
     <Compile Include="TurnData.cs" />
   </ItemGroup>
   <ItemGroup>

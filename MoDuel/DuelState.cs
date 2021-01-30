@@ -32,6 +32,9 @@ namespace MoDuel {
         /// </summary>
         public readonly FullField Field;
 
+        /// <summary>
+        /// True if the game is currently in play and hasn't finished yet.
+        /// </summary>
         public bool OnGoing = false;
 
         /// <summary>

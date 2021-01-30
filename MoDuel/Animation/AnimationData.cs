@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace MoDuel.Animation {
     public struct AnimationData {
         public readonly string AnimId;
-        public readonly string[] Arguments;
+        public readonly object[] Arguments;
 
         public AnimationData(string animId) {
             AnimId = animId;
-            Arguments = new string[0];
+            Arguments = new object[0];
         }
 
-        public AnimationData(string animId, string[] args) {
+        public AnimationData(string animId, object[] args) {
             AnimId = animId;
             Arguments = args;
         }

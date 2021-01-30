@@ -32,21 +32,29 @@ namespace MoDuel {
         #region Constructor Lua Accessors 
         public Card GetCard(string cardId) => Environment.Content.GetCard(cardId);
         public Hero GetHero(string heroId) => Environment.Content.GetHero(heroId);
-
+        public Closure GetAction(string actionId) => Environment.Content.GetAction(actionId);
         public CardInstance CreateCardInstance(Card imprint) =>  new CardInstance(imprint, CardInstanceActivator);
         public CardInstance CreateCardInstance(Card imprint, Player owner) => new CardInstance(imprint, CardInstanceActivator, owner);
 
         public CreatureInstance CreateCreature(Card imprint, FieldSlot position) => new CreatureInstance(imprint, CardInstanceActivator, position);
         public CreatureInstance CreateCreature(CardInstance card, FieldSlot position) => new CreatureInstance(card, CardInstanceActivator, position);
         public CreatureInstance CreateCreature(Card imprint, CreatureInstance previousState) => new CreatureInstance(imprint, CardInstanceActivator, previousState);
-
-        public HeroInstance CreateHeroInstance(Hero imprint) => new HeroInstance(imprint);
         public OngoingEffect CreateOngoingEffect() => new OngoingEffect();
 
-        public void NewTurn(Player turnOwner) { State.CurrentTurn = new TurnData(turnOwner); }
+        /// <summary>
+        /// Creates a new turn sets as the current turn and returns it.
+        /// </summary>
+        public TurnData NewTurn(Player turnOwner) { 
+            var newTurn = new TurnData(turnOwner);
+            State.CurrentTurn = newTurn;
+            return newTurn;
+        }
 
         #endregion
 
+        /// <summary>
+        /// Call from lua to determine a winner and end the flow.
+        /// </summary>
         public void GameOver(Player winner) {
             State.OnGoing = false;
             if (Environment.Settings.TimeOutPlayers)
@@ -150,21 +158,16 @@ namespace MoDuel {
         }
 
         /// <summary>
-        /// The contoller of animation blocking.
-        /// </summary>
-        private readonly AnimationBlockingHandler _animationBlocker = new AnimationBlockingHandler();
-
-        /// <summary>
         /// Invokes <see cref="OutBoundDelegate"/> with the animation data.
         /// <para>Blocks the thread for <paramref name="blockTime"/> if <see cref="DuelSettings.AnimationSpeed"/> is not <see cref="DuelSettings.NO_ANIM"/>.</para>
         /// </summary>
         /// <param name="animationId">The animation to play.</param>
         /// <param name="blockTime">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/>/</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
-        public void PlayAnimation(string animationId, double blockTime, params string[] arguments) {
+        public void PlayAnimation(string animationId, double blockTime, params object[] arguments) {
             OutBoundDelegate?.Invoke(this, new AnimationData(animationId, arguments));
-            if (Environment.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
-                _animationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
+            if (Environment.Settings.PlayAnimations) {
+                Environment.AnimationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
             }
         }
 
@@ -175,10 +178,10 @@ namespace MoDuel {
         /// <param name="animationId">The animation to play.</param>
         /// <param name="blockTime">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/>/</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
-        public void PlayTargetedAnimation(Player target, string animationId, double blockTime, params string[] arguments) {
+        public void PlayTargetedAnimation(Player target, string animationId, double blockTime, params object[] arguments) {
             target.SendAnimation(new AnimationData(animationId, arguments));
-            if (Environment.Settings.AnimationSpeed != DuelSettings.NO_ANIM) {
-                _animationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
+            if (Environment.Settings.PlayAnimations) {
+                Environment.AnimationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
             }
         }
 
