@@ -1,7 +1,7 @@
-using MoDuel.Animation;
 using MoDuel.Cards;
 using MoDuel.Heroes;
 using MoonSharp.Interpreter;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +38,14 @@ namespace MoDuel.Data {
         public bool IsHeroLoaded(string heroID) => LoadedHeroes.ContainsKey(heroID);
         public Hero GetHero(string heroID) => LoadedHeroes[heroID];
         public bool TryGetHero(string heroID, out Hero hero) => LoadedHeroes.TryGetValue(heroID, out hero);
+        #endregion
+
+        #region Misc File Loading and Accessors
+        private readonly Dictionary<string, JObject> LoadedFiles = new Dictionary<string, JObject>();
+        public void AddMiscFile(string filename, JObject file) => LoadedFiles.Add(filename, file);
+        public bool IsFileLoaded(string filename) => LoadedFiles.ContainsKey(filename);
+        public JObject GetFile(string filename) => LoadedFiles[filename];
+        public bool TryGetFile(string filename, out JObject file) => LoadedFiles.TryGetValue(filename, out file);
         #endregion
 
         /// <summary>

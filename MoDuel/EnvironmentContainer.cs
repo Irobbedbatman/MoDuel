@@ -1,5 +1,5 @@
-﻿using MoDuel.Animation;
-using MoDuel.Data;
+﻿using MoDuel.Data;
+using MoDuel.Tools;
 using MoonSharp.Environment;
 
 namespace MoDuel {
@@ -15,11 +15,11 @@ namespace MoDuel {
         public LoadedContent Content;
         public Tools.ManagedRandom Random;
         /// <summary>
-        /// The contoller of animation blocking.
+        /// The contoller of  blockingi playback.
         /// </summary>
-        public  AnimationBlockingHandler AnimationBlocker;
+        public  PlaybackBlockingHandler AnimationBlocker;
 
-        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler, Tools.ManagedRandom random, AnimationBlockingHandler animationBlocker) {
+        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler, Tools.ManagedRandom random, PlaybackBlockingHandler animationBlocker) {
             Lua = luaEngine;
             Content = contentHandler;
             Settings = settings;

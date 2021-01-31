@@ -8,7 +8,7 @@ using MoDuel.Heroes;
 using MoDuel.Cards;
 using MoDuel.Field;
 using MoDuel.Mana;
-using MoDuel.Animation;
+using MoDuel.Tools;
 
 namespace MoDuel {
 
@@ -29,13 +29,13 @@ namespace MoDuel {
         /// The animations that are sent out for this specific player.
         /// </summary>
         [MoonSharpHidden]
-        public EventHandler<AnimationData> OutBoundDelegate;
+        public EventHandler<ClientRequest> OutBoundDelegate;
 
         /// <summary>
         /// Invokes the <see cref="OutBoundDelegate"/> with the given data.
         /// </summary>
         /// <param name="data"></param>
-        public void SendAnimation (AnimationData data) => OutBoundDelegate?.Invoke(this, data);
+        public void SendRequest (ClientRequest data) => OutBoundDelegate?.Invoke(this, data);
 
         /// <summary>
         /// The <see cref="HeroInstance"/> this player is currently playing as.

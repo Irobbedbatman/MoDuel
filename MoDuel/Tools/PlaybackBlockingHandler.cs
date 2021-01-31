@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MoDuel.Animation {
-    public class AnimationBlockingHandler : IDisposable {
+namespace MoDuel.Tools {
+    public class PlaybackBlockingHandler : IDisposable {
 
         /// <summary>
         /// Check to see if there is currently an animation blocking happening.
@@ -16,19 +16,19 @@ namespace MoDuel.Animation {
         /// How long the current animation blocking has to play for before finishing.
         /// <para>Measured in seconds.</para>
         /// </summary>
-        public double DurationRemaining => CurrentBlockDuration - (DateTime.UtcNow - CurrentAnimationStarted).TotalSeconds;
+        public double DurationRemaining => CurrentBlockDuration - (DateTime.UtcNow - CurrentBlock).TotalSeconds;
         /// <summary>
-        /// The utc time the current animation blocking started.
+        /// The utc time the current playback blocking started.
         /// </summary>
-        public DateTime CurrentAnimationStarted { get; private set; } = DateTime.UtcNow;
+        public DateTime CurrentBlock { get; private set; } = DateTime.UtcNow;
         /// <summary>
-        /// The duration of the currently playing blocking animation. Use <see cref="DurationRemaining"/> to calculate how long the blocking has gone for.
+        /// The duration of the currently playing block. Use <see cref="DurationRemaining"/> to calculate how long the blocking has gone for.
         /// <para>Measured in seconds.</para>
         /// </summary>
         public double CurrentBlockDuration { get; private set; } = 0;
         /// <summary>
         /// Cancelation token  source used to abrubtly end the blocking.
-        /// <para>Use <see cref="EndAnimation"/> to use it.</para>
+        /// <para>Use <see cref="EndBlock"/> to use it.</para>
         /// </summary>
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
 
@@ -36,12 +36,12 @@ namespace MoDuel.Animation {
         /// Starts blocking the thread so that an animation can happen before any furthur flow on <see cref="DuelFlow"/>.
         /// </summary>
         /// <param name="blockTime">How long to block the thread for.</param>
-        public bool PlayAnimationBlock(double blockTime) {
+        public bool StartBlock(double blockTime) {
             //Ensure there isn't already an animation playing.
             if (IsRunning)
                 return false;
             //Update the current animation variables.
-            CurrentAnimationStarted = DateTime.UtcNow;
+            CurrentBlock = DateTime.UtcNow;
             CurrentBlockDuration = blockTime;
             IsRunning = true;
             //Clear and recreate the token source so we can reuse it.
@@ -65,11 +65,11 @@ namespace MoDuel.Animation {
         /// <summary>
         /// Forces the animation blocking to end by stopping the task it uses.
         /// </summary>
-        public void EndAnimation() {
+        public void EndBlock() {
             tokenSource.Cancel();
         }
 
-        //TODO: Determine if the animation handler needs to be disposed.
+        /// <inheritdoc/>
         public void Dispose() {
             tokenSource.Dispose();
         }

@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MoDuel.Cards;
-using MoDuel.Animation;
 using MoDuel.Mana;
 
 namespace MoDuel {
@@ -31,7 +30,7 @@ namespace MoDuel {
         /// The animations that are sent out from the duel flow.
         /// </summary>
         [MoonSharpHidden]
-        public EventHandler<AnimationData> OutBoundDelegate;
+        public EventHandler<ClientRequest> OutBoundDelegate;
 
         public CardInstanceActivator CardInstanceActivator = new CardInstanceActivator();
 
@@ -53,8 +52,6 @@ namespace MoDuel {
         /// Object to ensure that multiple object don't use the <see cref="Script"/> at the same time.
         /// </summary>
         private readonly object ThreadLock = new object();
-
-        private bool ShouldReset = false; 
 
         [MoonSharpHidden]
         public DuelFlow(EnvironmentContainer environment, Player player1, Player player2, Player goesFirst) {
@@ -134,8 +131,6 @@ namespace MoDuel {
         /// <returns>A list of pairs with the keys being the sender and the values are the reaction functions that should be run in sequence.</returns> 
         [MoonSharpHidden]
         private KeyValuePair<object, Closure>[] FindReactions(string trigger) {
-
-            //TODO: Bake Reactions
 
             List<KeyValuePair<object, Closure>> Reactions = new List<KeyValuePair<object, Closure>>();
             //Get the two players.

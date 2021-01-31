@@ -1,4 +1,3 @@
-using MoDuel.Animation;
 using MoDuel.Cards;
 using MoDuel.Data;
 using MoDuel.Field;
@@ -6,8 +5,8 @@ using MoDuel.Heroes;
 using MoonSharp.Interpreter;
 using System;
 using System.Linq;
-using MoonSharp.Environment;
 using MoDuel.Tools;
+using Newtonsoft.Json.Linq;
 
 namespace MoDuel {
 
@@ -33,6 +32,7 @@ namespace MoDuel {
         public Card GetCard(string cardId) => Environment.Content.GetCard(cardId);
         public Hero GetHero(string heroId) => Environment.Content.GetHero(heroId);
         public Closure GetAction(string actionId) => Environment.Content.GetAction(actionId);
+        public JObject GetJsonFile(string filename) => Environment.Content.GetFile(filename);
         public CardInstance CreateCardInstance(Card imprint) =>  new CardInstance(imprint, CardInstanceActivator);
         public CardInstance CreateCardInstance(Card imprint, Player owner) => new CardInstance(imprint, CardInstanceActivator, owner);
 
@@ -158,30 +158,31 @@ namespace MoDuel {
         }
 
         /// <summary>
-        /// Invokes <see cref="OutBoundDelegate"/> with the animation data.
-        /// <para>Blocks the thread for <paramref name="blockTime"/> if <see cref="DuelSettings.AnimationSpeed"/> is not <see cref="DuelSettings.NO_ANIM"/>.</para>
-        /// </summary>
-        /// <param name="animationId">The animation to play.</param>
-        /// <param name="blockTime">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/>/</param>
+        /// Invokes <see cref="OutBoundDelegate"/> with a request for the client to do.
+        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the animation should stop other things from happening.</para>/// </summary>
+        /// <param name="requestId">The request for the client to do.</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
-        public void PlayAnimation(string animationId, double blockTime, params object[] arguments) {
-            OutBoundDelegate?.Invoke(this, new AnimationData(animationId, arguments));
-            if (Environment.Settings.PlayAnimations) {
-                Environment.AnimationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
-            }
+        public void SendRequest(string requestId,params object[] arguments) {
+            OutBoundDelegate?.Invoke(this, new ClientRequest(requestId, arguments));
         }
 
         /// <summary>
         /// Invokes <see cref="Player.OutBoundDelegate"/> with the animation data so that individual players can recieve animations.
-        /// <para>Blocks the thread for <paramref name="blockTime"/> if <see cref="DuelSettings.AnimationSpeed"/> is not <see cref="DuelSettings.NO_ANIM"/>.</para>
-        /// </summary>
-        /// <param name="animationId">The animation to play.</param>
-        /// <param name="blockTime">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/>/</param>
+        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the animation should stop other things from happening.</para>
+        /// /// </summary>
+        /// <param name="requestId">The request for the target to do.</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
-        public void PlayTargetedAnimation(Player target, string animationId, double blockTime, params object[] arguments) {
-            target.SendAnimation(new AnimationData(animationId, arguments));
+        public void SendRequestTo(Player target, string requestId, params object[] arguments) {
+            target.SendRequest(new ClientRequest(requestId, arguments));
+        }
+
+        /// <summary>
+        /// Blocks the execution of anything on the <see cref="DuelFlow"/> <see cref="Thread"/>.
+        /// </summary>
+        /// <param name="blockDuration">How long to block the thread by, affected by <see cref="DuelSettings.AnimationSpeed"/></param>
+        public void BlockPlayback(double blockDuration) {
             if (Environment.Settings.PlayAnimations) {
-                Environment.AnimationBlocker.PlayAnimationBlock(blockTime / Environment.Settings.AnimationSpeed);
+                Environment.AnimationBlocker.StartBlock(blockDuration / Environment.Settings.AnimationSpeed);
             }
         }
 
@@ -206,6 +207,17 @@ namespace MoDuel {
                 if (Environment.Content.TryGetAction(actionId, out Closure func))
                     return Environment.Lua.AsScript.Call(func, arguments.Prepend(inciter).ToArray());
             return null;
+        }
+
+        /// <summary>
+        /// Called when a player wants to check something and get a result outside of game flow purposes.
+        /// <para>Needs to lock the thread because it is likely called from a diffrent thread.</para>
+        /// <para>The response is sent back trhough the <paramref name="response"/> action.</para>
+        /// </summary>
+        public void Query(Player querier, string query, Action<Table> response, params object[] args) {
+            lock (ThreadLock) {
+                response?.Invoke(DoAction(query, args.Prepend(querier).ToArray()).Table);
+            }
         }
 
     }

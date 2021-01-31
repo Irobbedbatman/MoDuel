@@ -53,8 +53,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animation\AnimationData.cs" />
-    <Compile Include="Animation\AnimationHandler.cs" />
+    <Compile Include="Tools\ClientRequest.cs" />
+    <Compile Include="Tools\JObjectProxy.cs" />
+    <Compile Include="Tools\PlaybackBlockingHandler.cs" />
     <Compile Include="CanPlayResponse.cs" />
     <Compile Include="Cards\CardInstanceActivator.cs" />
     <Compile Include="Cards\Card.cs" />
@@ -65,7 +66,6 @@
     <Compile Include="DuelFlow.cs" />
     <Compile Include="DuelFlowCommands.cs" />
     <Compile Include="DuelFlowLua.cs" />
-    <Compile Include="DuelFlowQueries.cs" />
     <Compile Include="DuelSettings.cs" />
     <Compile Include="DuelState.cs" />
     <Compile Include="Field\Field.cs" />

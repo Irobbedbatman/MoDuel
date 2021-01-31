@@ -1,12 +1,12 @@
 using MoDuel.Cards;
 using MoDuel.Heroes;
-using MoonSharp.Interpreter;
-using System;
-using System.IO;
-using Newtonsoft.Json.Linq;
 using MoDuel.Mana;
-using System.Collections.Generic;
 using MoonSharp.Environment;
+using MoonSharp.Interpreter;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace MoDuel.Data {
 
@@ -33,6 +33,7 @@ namespace MoDuel.Data {
             luaEnv.AsScript.Globals["LoadCard"] = (Func<string, Card>)((cardId) => { return LoadCard(cardId, content, luaEnv); });
             luaEnv.AsScript.Globals["LoadHero"] = (Func<string, Hero>)((heroId) => { return LoadHero(heroId, content, luaEnv); });
             luaEnv.AsScript.Globals["LoadAction"] = (Func<string, Closure>)((actionId) => { return LoadAction(actionId, content, luaEnv); });
+            luaEnv.AsScript.Globals["LoadJsonFile"] = (Func<string, JObject>)((filename) => { return LoadJsonFile(filename, content); });
         }
 
         /// <summary>
@@ -43,6 +44,7 @@ namespace MoDuel.Data {
             luaEnv.AsScript.Globals.Remove("LoadCard");
             luaEnv.AsScript.Globals.Remove("LoadHero");
             luaEnv.AsScript.Globals.Remove("LoadAction");
+            luaEnv.AsScript.Globals.Remove("LoadJsonFile");
         }
 
         /// <summary>
@@ -183,6 +185,23 @@ namespace MoDuel.Data {
             return func;
 
         }
+
+        /// <summary>
+        /// Loads a json file for use in lua.
+        /// </summary>
+        /// <param name="fileName">The name of the file to load.</param>
+        /// <param name="content">The container to store the file when loaded.</param>
+        public static JObject LoadJsonFile(string fileName, LoadedContent content) {
+            // Get the file name of the action.
+            string file = SearchForFile(fileName);
+            if (file == null)
+                return null;
+            //Convert the file to a json object.
+            var jFile = JObject.Parse(File.ReadAllText(fileName));
+            // Add it to the list of loaded files.
+            content.AddMiscFile(fileName, jFile);
+            return jFile;
+        } 
 
         /// <summary>
         /// Searches for a file with the given key in the <see cref="ContentDirectory"/>.
