@@ -59,10 +59,10 @@ namespace MoDuel {
             State.OnGoing = false;
             if (Environment.Settings.TimeOutPlayers)
                 TimeOutTimer.Stop();
-            Environment.Settings.GameEndAction.Function.Call(winner);
+            Environment.Settings.GameEndAction.Call(winner);
         }
 
-        public void ChangeTurns() => Environment.Settings.ChangeTurnAction.Function.Call();
+        public void ChangeTurns() => Environment.Settings.ChangeTurnAction.Call();
 
         /// <summary>
         /// How many triggers have activated sequentially.

@@ -32,17 +32,17 @@ namespace MoDuel {
         /// <summary>
         /// The <see cref="DynValue"/> function that is used when a player takes to long on their turn when <see cref="TimeOutPlayers"/> is true. 
         /// </summary>
-        public DynValue TimeOutAction;
+        public Closure TimeOutAction;
 
         /// <summary>
         /// Action that is called when the game starts.
         /// </summary>
-        public DynValue GameStartAction;
+        public Closure GameStartAction;
 
         /// <summary>
         /// Action that is called when the game ends.
         /// </summary>
-        public DynValue GameEndAction;
+        public Closure GameEndAction;
 
         /// <summary>
         /// Action to resolve once the game is over.
@@ -52,7 +52,7 @@ namespace MoDuel {
         /// <summary>
         /// Action that is called each time the turn is changed.
         /// </summary>
-        public DynValue ChangeTurnAction;
+        public Closure ChangeTurnAction;
 
     }
 }

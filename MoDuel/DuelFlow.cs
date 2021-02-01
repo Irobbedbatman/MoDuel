@@ -98,7 +98,7 @@ namespace MoDuel {
         public void Loop() {
 
             //Call the game start action. This is a user defined function that sets up anything that needs to be setup in lua.
-            Environment.Settings.GameStartAction.Function.Call();
+            Environment.Settings.GameStartAction.Call();
 
             while (State.OnGoing) {
                 //If there is anything in the command queue we try it.
