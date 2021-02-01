@@ -52,7 +52,7 @@ namespace MoDuel.Data {
         /// Get the amount of Loaded Items from each Dictionary Combined.
         /// <para>Could be used for debugging and getting an idea of memory usage.</para>
         /// </summary>
-        public int Count => LoadedCards.Count + LoadedActions.Count + LoadedHeroes.Count;
+        public int Count => LoadedCards.Count + LoadedActions.Count + LoadedHeroes.Count + LoadedFiles.Count;
 
         /// <summary>
         /// Gets the keys of all of the loaded items from each dictionary combined.
@@ -63,11 +63,13 @@ namespace MoDuel.Data {
         public string[] GetAllKeysSummary() {
             List<string> keys = new List<string>();
             foreach (var k in LoadedCards.Keys)
-                keys.Add("Card|" + k.ToString());
-            foreach (var k in LoadedActions)
+                keys.Add("Card|" + k);
+            foreach (var k in LoadedActions.Keys)
                 keys.Add("Action|" + k);
             foreach (var k in LoadedHeroes.Keys)
-                keys.Add("Hero|" + k.ToString());
+                keys.Add("Hero|" + k);
+            foreach (var k in LoadedFiles.Keys)
+                keys.Add("JFile|" + k);
             return keys.ToArray();
         }
     }

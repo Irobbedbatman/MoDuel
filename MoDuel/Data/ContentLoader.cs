@@ -169,7 +169,7 @@ namespace MoDuel.Data {
                 // Retrieve all the globals from the file.
                 luaEnv.AsScript.DoFile(fileName, tempTable);
                 // Try to find the function by name.
-                func = tempTable.Get("actionId").Function;
+                func = tempTable.Get(actionId).Function;
 
 
             }
@@ -197,7 +197,7 @@ namespace MoDuel.Data {
             if (file == null)
                 return null;
             //Convert the file to a json object.
-            var jFile = JObject.Parse(File.ReadAllText(fileName));
+            var jFile = JObject.Parse(File.ReadAllText(file));
             // Add it to the list of loaded files.
             content.AddMiscFile(fileName, jFile);
             return jFile;
