@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Tools\ClientRequest.cs" />
+    <Compile Include="Tools\CommandRefrence.cs" />
     <Compile Include="Tools\JObjectProxy.cs" />
     <Compile Include="Tools\PlaybackBlockingHandler.cs" />
     <Compile Include="CanPlayResponse.cs" />

@@ -81,7 +81,7 @@ namespace MoDuel {
         /// </summary>
         private void TimeOutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
             lock (ThreadLock) {
-                ClearCommandQueue();
+                // TODO: Clear Commands
                 Environment.Lua.AsScript.Call(Environment.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
             }
         }
@@ -102,12 +102,23 @@ namespace MoDuel {
 
             while (State.OnGoing) {
                 //If there is anything in the command queue we try it.
-                if (CommandQueue.Count > 0) {
+                if (CommandBuffer.Count > 0) {
                     //Stop timing out players in case commands take a long time.
                     if (Environment.Settings.TimeOutPlayers)
                         TimeOutTimer.Stop();
-                    if (CommandQueue.TryDequeue(out var result))
-                        result.Invoke();
+                    // We cant confirm that commands is empty at this point due to multithreading.
+                    try {
+                        var command = CommandBuffer.ElementAt(0);
+                        // We lock for removal.
+                        lock (CommandBuffer) {
+                            // Ensure the command is still in the command list it could have be replaced with a new command but we dont care about it.
+                            if (CommandBuffer.ContainsKey(command.Key))
+                                CommandBuffer.Remove(command.Key);
+                        }
+                        // Invoke the command. We can't lock the command buffer. here as it would ruin the buffer.
+                        command.Value.Invoke();
+                    }
+                    catch (Exception) { } // Commands queue was emptied on a diffrent thread.
                     ResetTimer();
                     ContinueEvent.Reset();
                     continue;
