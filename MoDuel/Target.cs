@@ -78,6 +78,22 @@ namespace MoDuel {
         }
 
         /// <summary>
+        /// Check to see if <see cref="Values"/> has a specified key.
+        /// </summary>
+        public bool HasValue(string key) => Values.ContainsKey(key);
+
+        /// <summary>
+        /// Retrieves a value from <see cref="Values"/>
+        /// <para>Returns the value provided in fallback if no value was found and also sets the corisponding value in <see cref="Values"/>.</para>
+        /// </summary>
+        public DynValue GetOrSetValue(string key, DynValue fallback) {
+            if (Values.TryGetValue(key, out var val))
+                return val;
+            SetValue(key, fallback);
+            return fallback;
+        }
+
+        /// <summary>
         /// Removes a value from <see cref="Values"/>.
         /// </summary>
         public void ClearValue(string key) {
