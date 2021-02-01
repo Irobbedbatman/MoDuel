@@ -86,7 +86,7 @@ namespace MoDuel {
                 return;
             currentTriggerChain++;
             foreach (var reaction in FindReactions(trigger)) {
-                Environment.Lua.AsScript.Call(reaction.Value, arguments.Prepend(reaction.Key).ToArray());
+                reaction.Value.Call(arguments.Prepend(reaction.Key).ToArray());
             }
             currentTriggerChain--;
         }
@@ -101,7 +101,7 @@ namespace MoDuel {
                 return;
             currentTriggerChain++;
             foreach (var reaction in FindReactions(trigger)) {
-                Environment.Lua.AsScript.Call(reaction.Value, arguments.Prepend(reaction.Key).Prepend(inciter).ToArray());
+                reaction.Value.Call(arguments.Prepend(reaction.Key).Prepend(inciter).ToArray());
             }
             currentTriggerChain--;
         }
@@ -116,9 +116,8 @@ namespace MoDuel {
             //Ensure that the game is ongoing.
             if (!State.OnGoing)
                 return;
-
             foreach (var reaction in FindReactions(trigger).Reverse()) {
-                Environment.Lua.AsScript.Call(reaction.Value, reaction.Key, values);
+                reaction.Value.Call(reaction.Key, values);
             }
         }
 
@@ -134,7 +133,7 @@ namespace MoDuel {
                 return null;
 
             if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out Closure reaction)) {
-                return Environment.Lua.AsScript.Call(reaction, arguments.Prepend(triggerer).ToArray());
+                return reaction.Call(arguments.Prepend(triggerer).ToArray());
             }
             return null;
         }
@@ -150,7 +149,7 @@ namespace MoDuel {
             if (!State.OnGoing)
                 return null;
             if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out Closure reaction)) {
-                return Environment.Lua.AsScript.Call(reaction, arguments.Prepend(triggerer).ToArray());
+                return reaction.Call(arguments.Prepend(triggerer).ToArray());
             }
             else {
                 return DoAction(fallbackAction, arguments.Prepend(triggerer).ToArray());
@@ -194,7 +193,7 @@ namespace MoDuel {
         public DynValue DoAction(string actionId, params object[] arguments) {
             if (State.OnGoing)
                 if (Environment.Content.TryGetAction(actionId, out Closure func))
-                 return Environment.Lua.AsScript.Call(func, arguments);
+                    return func.Call(arguments);
             return null;
         }
 
@@ -205,7 +204,7 @@ namespace MoDuel {
         public DynValue InciteAction(object inciter, string actionId, params object[] arguments) {
             if (State.OnGoing)
                 if (Environment.Content.TryGetAction(actionId, out Closure func))
-                    return Environment.Lua.AsScript.Call(func, arguments.Prepend(inciter).ToArray());
+                    return func.Call(arguments.Prepend(inciter).ToArray());
             return null;
         }
 
