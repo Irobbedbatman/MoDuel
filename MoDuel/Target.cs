@@ -44,7 +44,7 @@ namespace MoDuel {
         /// A MoonSharp lua table.
         /// <para>Use this to store instance values in lua code on any <see cref="Target"/>.</para>
         /// </summary>
-        private readonly Dictionary<string, DynValue> Values = new Dictionary<string, DynValue>();
+        public readonly Dictionary<string, DynValue> Values = new Dictionary<string, DynValue>();
 
         public Target (int index = UNSET_INDEX) {
             // If an index hasn't been provided we get the next free one.
