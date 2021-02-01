@@ -22,25 +22,25 @@ namespace MoDuel.Cards {
         /// A function that gets this cards cost from it's imprint's <see cref="Card.Parameters"/> and <see cref="Level"/>.
         /// <para>If <see cref="Level"/> is too high returns highest value int the <see cref="JArrayProxy"/>.</para>
         /// </summary>
-        public int ImprintCost =>  (int)(long)GetLeveledParamter<long>("Cost", (long)0);
+        public int ImprintCost =>  (int)GetLeveledParamter<long>("Cost", 0);
 
         /// <summary>
         /// A function that gets this cards attack from it's imprint's <see cref="Card.Parameters"/> and <see cref="Level"/>.
         /// <para>If <see cref="Level"/> is too high returns highest value int the <see cref="JArrayProxy"/>.</para>
         /// </summary>
-        public int ImprintAttack => (int)(long)GetLeveledParamter<long>("Attack", (long)0);
+        public int ImprintAttack => (int)GetLeveledParamter<long>("Attack", 0);
 
         /// <summary>
         /// A function that gets this cards armor from it's imprint's <see cref="Card.Parameters"/> and <see cref="Level"/>.
         /// <para>If <see cref="Level"/> is too high returns highest value int the <see cref="JArrayProxy"/>.</para>
         /// </summary>
-        public int ImprintArmor => (int)(long)GetLeveledParamter<long>("Armor", (long)0);
+        public int ImprintArmor => (int)GetLeveledParamter<long>("Armor", 0);
 
         /// <summary>
         /// A function that gets this cards life from it's imprint's <see cref="Card.Parameters"/> and <see cref="Level"/>.
         /// <para>If <see cref="Level"/> is too high returns highest value int the <see cref="JArrayProxy"/>.</para>
         /// </summary>
-        public int ImprintLife => (int)(long)GetLeveledParamter<long>("Life", (long)1);
+        public int ImprintLife => (int)GetLeveledParamter<long>("Life", 1);
 
         /// <summary>   
         /// Gets a parameter from <see cref="Imprint.Parameters"/> that's type is an <see cref="JArrayProxy"/>.
