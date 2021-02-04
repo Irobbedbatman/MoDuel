@@ -15,7 +15,7 @@ namespace MoDuel {
         public LoadedContent Content;
         public Tools.ManagedRandom Random;
         /// <summary>
-        /// The contoller of  blockingi playback.
+        /// The contoller of blockingi playback.
         /// </summary>
         public  PlaybackBlockingHandler AnimationBlocker;
 
