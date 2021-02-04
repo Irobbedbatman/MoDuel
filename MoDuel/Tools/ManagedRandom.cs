@@ -33,6 +33,16 @@ namespace MoDuel.Tools {
             return (high - low) * percent + low;
         }
 
+        /// <summary>
+        /// Retrieves a random object from a collection.
+        /// </summary>
+        public T NextItem<T>(IEnumerable<T> collection) => collection.ElementAt(Next(0, collection.Count()));
+
+        /// <summary>
+        /// Retrieves a random object from a <see cref="MoonSharp.Interpreter.Table"/>
+        /// </summary>
+        public MoonSharp.Interpreter.DynValue NextItem(MoonSharp.Interpreter.Table table) => NextItem(table.Values);
+
 
     }
 }

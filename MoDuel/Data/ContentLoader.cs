@@ -29,11 +29,11 @@ namespace MoDuel.Data {
         /// <para>These load methods are used in lua actions to load required content.</para>
         /// </summary>
         public static void RegisterLoads(LoadedContent content, LuaEnvironment luaEnv) {
-
             luaEnv.AsScript.Globals["LoadCard"] = (Func<string, Card>)((cardId) => { return LoadCard(cardId, content, luaEnv); });
             luaEnv.AsScript.Globals["LoadHero"] = (Func<string, Hero>)((heroId) => { return LoadHero(heroId, content, luaEnv); });
             luaEnv.AsScript.Globals["LoadAction"] = (Func<string, Closure>)((actionId) => { return LoadAction(actionId, content, luaEnv); });
             luaEnv.AsScript.Globals["LoadJsonFile"] = (Func<string, JObject>)((filename) => { return LoadJsonFile(filename, content); });
+            luaEnv.AsScript.Globals["Include"] = (Func<string, Table>)((filename) => { return Include(filename, content, luaEnv); });
         }
 
         /// <summary>
@@ -45,6 +45,7 @@ namespace MoDuel.Data {
             luaEnv.AsScript.Globals.Remove("LoadHero");
             luaEnv.AsScript.Globals.Remove("LoadAction");
             luaEnv.AsScript.Globals.Remove("LoadJsonFile");
+            luaEnv.AsScript.Globals.Remove("Include");
         }
 
         /// <summary>
@@ -136,6 +137,43 @@ namespace MoDuel.Data {
             LoadLinkedContent(hJson["LinkedContent"], content, luaEnv);
             return hero;
         }
+
+        /// <summary>
+        /// Load a lua file for use of it's methods more than anything.
+        /// <para>Returns a table containing all the global values in the provided file.</para>
+        /// </summary>
+        public static Table Include(string fileName, LoadedContent content, LuaEnvironment luaEnv) {
+
+            // Don't need to load the file if has been loaded already.
+            if (content.TryGetLuaFile(fileName, out Table table))
+                return table;
+
+            string fileNameFull = SearchForFile(fileName);
+
+            if (fileNameFull == null) {
+                Console.Write("File: " + fileName + " is missing.");
+                return luaEnv.TemporaryTable(false);
+            }
+            // Construct a temporary table for the use for the function.
+            var tempTable = luaEnv.TemporaryTable(false);
+
+            try {
+                // Retrieve all the globals from the file.
+                luaEnv.AsScript.DoFile(fileName, tempTable);
+            }
+            catch (Exception e) {
+                // Display errors if the excution fails at any point.
+                Console.Write(e.StackTrace);
+                Console.WriteLine("LuaFunctions found in " + fileName + " failed excution.");
+            }
+
+            // Add the action to the list of loaded actions.
+            content.AddLuaFile(fileName, tempTable);
+            // And return it.
+            return tempTable;
+
+        }
+
 
         /// <summary>
         /// Loads an action coded in lua and bakes it into a <see cref="DynValue"/> function.
