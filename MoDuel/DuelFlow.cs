@@ -82,7 +82,7 @@ namespace MoDuel {
         private void TimeOutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
             lock (ThreadLock) {
                 // TODO: Clear Commands
-                Environment.Lua.AsScript.Call(Environment.Settings.TimeOutAction, State.CurrentTurn.TurnOwner);
+                Environment.Lua.AsScript.Call(Environment.Settings.TimeOutAction, State.CurrentTurn.Owner);
             }
         }
 
@@ -148,17 +148,17 @@ namespace MoDuel {
 
             List<KeyValuePair<object, Closure>> Reactions = new List<KeyValuePair<object, Closure>>();
             //Get the two players.
-            var owner = State.CurrentTurn.TurnOwner;
+            var owner = State.CurrentTurn.Owner;
             var opposer = State.GetOpposingPlayer(owner);
 
             //Set reaction to null so we can you boolean shorthand.
             Closure reaction = null;
 
             //Check to see if the heroes should activate any abilities.
-            if (owner.CurrentHero.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
-                Reactions.Add(new KeyValuePair<object, Closure>(owner.CurrentHero, reaction));
-            if (opposer.CurrentHero.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
-                Reactions.Add(new KeyValuePair<object, Closure>(opposer.CurrentHero, reaction));
+            if (owner.Hero.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
+                Reactions.Add(new KeyValuePair<object, Closure>(owner.Hero, reaction));
+            if (opposer.Hero.Imprint.TriggerReactions?.TryGetValue(trigger, out reaction) ?? false)
+                Reactions.Add(new KeyValuePair<object, Closure>(opposer.Hero, reaction));
 
 
             //Get the triggerreaction of each card.

@@ -40,10 +40,10 @@ namespace MoDuel {
         /// <summary>
         /// The <see cref="HeroInstance"/> this player is currently playing as.
         /// </summary
-        public HeroInstance CurrentHero { get; private set; }
+        public HeroInstance Hero { get; private set; }
 
         public void ChangeHero(Hero newHero) {
-            CurrentHero = new HeroInstance(newHero, this);
+            Hero = new HeroInstance(newHero, this);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace MoDuel {
             UserId = userId;
             ManaPool = manaPool;
             Field = new SubField(this);
-            CurrentHero = new HeroInstance(hero, this);
+            Hero = new HeroInstance(hero, this);
         }
 
         /// <summary>

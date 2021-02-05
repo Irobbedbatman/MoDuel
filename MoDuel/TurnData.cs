@@ -12,7 +12,7 @@ namespace MoDuel {
         /// <summary>
         /// The player who is in control of the current turn.
         /// </summary>
-        public readonly Player TurnOwner;
+        public readonly Player Owner;
         /// <summary>
         /// How many actions the player can make this turn.
         /// </summary>
@@ -27,7 +27,7 @@ namespace MoDuel {
         public TimeSpan TimeElapsed => DateTime.UtcNow - TimeTurnStarted;
 
         public TurnData(Player turnOwner) {
-            TurnOwner = turnOwner;
+            Owner = turnOwner;
             ActionPoints = turnOwner.Level;
             TimeTurnStarted = DateTime.UtcNow;
         }
