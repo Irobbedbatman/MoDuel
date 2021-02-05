@@ -54,33 +54,33 @@ namespace MoDuel {
         /// <summary>
         /// One of the stats for this player.
         /// </summary>
-        public int Level = 1, Exp = 0, Hp = 25, MaxHp = 25;
+        public int Level = 1, Exp = 0, Life = 25, MaxLife = 25;
 
         /// <summary>
         /// The Hand of the player currently.
         /// </summary>
-        private readonly HashSet<CardInstance> _currentHand = new HashSet<CardInstance>();
+        private readonly HashSet<CardInstance> _hand = new HashSet<CardInstance>();
         /// <summary>
         /// The Hand of the player currently; readonly.
         /// </summary>
-        public IReadOnlyList<CardInstance> CurrentHand => _currentHand.ToList().AsReadOnly();
+        public IReadOnlyList<CardInstance> Hand => _hand.ToList().AsReadOnly();
 
         /// <summary>
         /// The Grave of the player currently.
         /// </summary>
-        private readonly HashSet<CardInstance> _graveCards = new HashSet<CardInstance>();
+        private readonly HashSet<CardInstance> _grave = new HashSet<CardInstance>();
 
         /// <summary>
         /// The Grave of the player currently; readonly.
         /// </summary>
-        public IReadOnlyList<CardInstance> GraveCards => _graveCards.ToList().AsReadOnly();
+        public IReadOnlyList<CardInstance> Grave => _grave.ToList().AsReadOnly();
 
         public HashSet<CardInstance> GetHandCards() {
-            return new HashSet<CardInstance>(_currentHand);
+            return new HashSet<CardInstance>(_hand);
         }
 
         public HashSet<CardInstance> GetGraveCards() {
-            return new HashSet<CardInstance>(_graveCards);
+            return new HashSet<CardInstance>(_grave);
         }
 
         public Player(string userId, Hero hero, ManaPool manaPool) {
@@ -94,41 +94,41 @@ namespace MoDuel {
         /// Adds a card to this player's hand.
         /// </summary>
         /// <param name="card"></param>
-        public void AddCardToHand(CardInstance card) => _currentHand.Add(card.SetOwner(this));
+        public void AddCardToHand(CardInstance card) => _hand.Add(card.SetOwner(this));
 
         /// <summary>
         /// Removes a card from this player's hand if it currently in there.
         /// </summary>
         /// <param name="card"></param>
         public void RemoveCardFromHand(CardInstance card) {
-            if (_currentHand.Contains(card))
-                _currentHand.Remove(card.SetOwner(null));
+            if (_hand.Contains(card))
+                _hand.Remove(card.SetOwner(null));
         }
 
         /// <summary>
         /// Adds a card to this player's grave.
         /// </summary>
         /// <param name="card"></param>
-        public void AddCardToGrave(CardInstance card) => _graveCards.Add(card.SetOwner(this));
+        public void AddCardToGrave(CardInstance card) => _grave.Add(card.SetOwner(this));
 
         /// <summary>
         /// Removes a card from this player's grave if it currently in there.
         /// </summary>
         /// <param name="card"></param>
         public void RemoveCardFromGrave(CardInstance card) {
-            if (_graveCards.Contains(card))
-                _graveCards.Remove(card.SetOwner(null));
+            if (_grave.Contains(card))
+                _grave.Remove(card.SetOwner(null));
         }
 
         /// <summary>
         /// Check to see if player has a certain card in their hand.
         /// </summary>
-        public bool IsCardInHand(CardInstance card) => _currentHand.Contains(card);
+        public bool IsCardInHand(CardInstance card) => _hand.Contains(card);
 
         /// <summary>
         /// Check to see if player has a certain card in their grave.
         /// </summary>
-        public bool IsCardInGrave(CardInstance card) => _graveCards.Contains(card);
+        public bool IsCardInGrave(CardInstance card) => _grave.Contains(card);
 
         /// <summary>
         /// Check to see if player had a certain card at the start of the game using <see cref="Card.CardID"/>.

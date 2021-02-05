@@ -95,7 +95,7 @@ namespace MoDuel.Cards {
         /// <summary>
         /// The current owner of this card.
         /// </summary>
-        public Player CurrentOwner;
+        public Player Owner;
 
         /// <summary>
         /// The owner of this card originally.
@@ -132,7 +132,7 @@ namespace MoDuel.Cards {
         /// </summary>
         /// <param name="originalOwner">The owner of this card, both the original and original owner.</param>
         public CardInstance(Card imprint, CardInstanceActivator activator, Player originalOwner) : this(imprint, activator) {
-            CurrentOwner = originalOwner;
+            Owner = originalOwner;
             OriginalOwner = originalOwner;
         }
 
@@ -141,25 +141,25 @@ namespace MoDuel.Cards {
         /// </summary>
         /// <param name="previousState">The card instance to pull original state and previous state from.</param>
         public CardInstance(Card imprint, CardInstanceActivator activator, CardInstance previousState) : this(imprint, activator) {
-            CurrentOwner = previousState.CurrentOwner;
+            Owner = previousState.Owner;
             OriginalOwner = previousState.OriginalOwner;
             PreviousState = previousState;
         }
 
         public CardInstance SetOwner(Player owner) {
-            CurrentOwner = owner;
+            Owner = owner;
             return this;
         }
 
         /// <summary>
         /// Is this card in it's owners Hand.
         /// </summary>
-        public bool InHand => CurrentOwner.IsCardInHand(this);
+        public bool InHand => Owner.IsCardInHand(this);
 
         /// <summary>
         /// Is this card in it's owners Grave.
         /// </summary>
-        public bool InGrave => CurrentOwner.IsCardInGrave(this);
+        public bool InGrave => Owner.IsCardInGrave(this);
 
         /// <summary>
         /// Checks to see if this card is imprinted off of a card with a given id.

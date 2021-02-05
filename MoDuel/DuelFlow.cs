@@ -118,7 +118,10 @@ namespace MoDuel {
                         // Invoke the command. We can't lock the command buffer. here as it would ruin the buffer.
                         command.Value.Invoke();
                     }
-                    catch (Exception) { } // Commands queue was emptied on a diffrent thread.
+                    catch (Exception e) {
+                        // Resulting code of the command could be broken or the command buffer could have been emptied.
+                        Console.Write(e.StackTrace);            
+                    } 
                     ResetTimer();
                     ContinueEvent.Reset();
                     continue;

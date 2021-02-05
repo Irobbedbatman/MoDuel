@@ -155,11 +155,11 @@ namespace MoDuel.Data {
                 return luaEnv.TemporaryTable(false);
             }
             // Construct a temporary table for the use for the function.
-            var tempTable = luaEnv.TemporaryTable(false);
+            var tempTable = luaEnv.TemporaryTable(true);
 
             try {
                 // Retrieve all the globals from the file.
-                luaEnv.AsScript.DoFile(fileName, tempTable);
+                luaEnv.AsScript.DoFile(fileNameFull, tempTable);
             }
             catch (Exception e) {
                 // Display errors if the excution fails at any point.

@@ -14,6 +14,7 @@ namespace MoDuel {
 
         private void SetupLua() {
             UserData.RegisterAssembly();
+            UserData.RegisterExtensionType(typeof(Enumerable));
             JArrayProxy.Register();
             Environment.Lua.AsScript.Globals["State"] = State;
             Environment.Lua.AsScript.Globals["Flow"] = this;
@@ -191,6 +192,7 @@ namespace MoDuel {
         /// </summary>
         /// <param name="actionId">The action's name stored in <see cref="ContentLoader"/> That was loaded with <see cref="ContentLoader.LoadAction(Script, string)"/></param>
         public DynValue DoAction(string actionId, params object[] arguments) {
+            Console.WriteLine(actionId);
             if (State.OnGoing)
                 if (Environment.Content.TryGetAction(actionId, out Closure func))
                     return func.Call(arguments);

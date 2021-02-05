@@ -10,12 +10,13 @@ namespace MoDuel.Mana {
     /// <summary>
     /// An enumarator used in <see cref="ManaPool"/> to enumarate through it's <see cref="Mana"/> components.
     /// </summary>
+    [MoonSharp.Interpreter.MoonSharpUserData]
     public class ManaEnumerator : IEnumerator<Mana> {
 
         /// <summary>
         /// The <see cref="Mana"/> array provided in the constructor to enumerate through.
         /// </summary>
-        public readonly Mana[] _mana;
+        private readonly Mana[] _mana;
 
         /// <summary>
         /// Position of the <see cref="Current"/> element in <see cref="_mana"/>

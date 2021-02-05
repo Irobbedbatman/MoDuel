@@ -1,17 +1,19 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace MoDuel.Field {
 
     /// <summary>
     /// The enumerator for iterating over an amount of field slots.
     /// </summary>
-    public class FieldEnumerator : IEnumerator {
+    [MoonSharp.Interpreter.MoonSharpUserData]
+    public class FieldEnumerator : IEnumerator<FieldSlot> {
 
         /// <summary>
         /// The slots to enumerate through,
         /// </summary>
-        public readonly FieldSlot[] _slots;
+        private readonly FieldSlot[] _slots;
 
         /// <summary>
         /// The poition in <see cref="_slots"/> we are looking at.
@@ -32,6 +34,9 @@ namespace MoDuel.Field {
         public void Reset() {
             position = -1;
         }
+
+        /// <inheritdoc/>
+        public void Dispose() { }
 
         /// <inheritdoc/>
         public FieldSlot Current {

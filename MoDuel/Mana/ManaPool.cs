@@ -61,5 +61,6 @@ namespace MoDuel.Mana {
         public IEnumerator GetEnumerator() {
             return new ManaEnumerator(_pool.Values.ToArray());
         }
+
     }
 }

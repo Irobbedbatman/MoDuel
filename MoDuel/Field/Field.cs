@@ -15,7 +15,7 @@ namespace MoDuel.Field {
     /// <para>Can be Targeted and has a unique <see cref="Target.TargetIndex"/></para>
     /// </summary>
     [MoonSharpUserData]
-    public abstract class Field : Target, IEnumerable {
+    public abstract class Field : Target, IEnumerable<FieldSlot> {
 
         public const int ERR_SLOT = -1;
 
@@ -33,7 +33,12 @@ namespace MoDuel.Field {
 
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() {
-            return (IEnumerator)GetEnumerator();
+            return GetEnumerator();
+        }
+
+        /// <inheritdoc/>
+        IEnumerator<FieldSlot> IEnumerable<FieldSlot>.GetEnumerator() {
+            return GetEnumerator();
         }
 
         /// <summary>

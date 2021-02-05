@@ -13,7 +13,7 @@ namespace MoDuel.Cards {
         /// <summary>
         /// One of the current stats for this creature.
         /// </summary>
-        public int CurrentLife, CurrentAttack, CurrentArmor, MaxLife;
+        public int Life, Attack, Armor, MaxLife;
 
         public FieldSlot _position;
         /// <summary>
@@ -28,14 +28,14 @@ namespace MoDuel.Cards {
                     if (value._occupant != null)
                         value._occupant._position = null;
                     value._occupant = this;
-                    CurrentOwner = value.ParentField.Owner;
+                    Owner = value.ParentField.Owner;
                 }
                 //If the new slot is null we still need to clear the position.
                 else {
                     if (_position != null) {
                         _position.Occupant = null;
                     }
-                    CurrentOwner = null;
+                    Owner = null;
                 }
                 _position = value;
             }

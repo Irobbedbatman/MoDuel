@@ -36,7 +36,12 @@ namespace MoDuel.Tools {
         /// <summary>
         /// Retrieves a random object from a collection.
         /// </summary>
-        public T NextItem<T>(IEnumerable<T> collection) => collection.ElementAt(Next(0, collection.Count()));
+        public T NextItem<T>(IEnumerable<T> collection) {
+            var c = collection.Count();
+            if (c > 0)
+                return collection.ElementAt(Next(0, c));
+            return default;
+        }
 
         /// <summary>
         /// Retrieves a random object from a <see cref="MoonSharp.Interpreter.Table"/>

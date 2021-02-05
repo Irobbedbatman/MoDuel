@@ -57,6 +57,10 @@ namespace MoDuel.Mana {
             LoadedTypes.Add(this);
         }
 
+        /// <inheritdoc/>
+        public override string ToString() {
+            return Name;
+        }
 
 
 
