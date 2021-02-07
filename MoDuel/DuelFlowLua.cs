@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using MoDuel.Tools;
 using Newtonsoft.Json.Linq;
+using MoDuel.Mana;
 
 namespace MoDuel {
 
@@ -16,6 +17,7 @@ namespace MoDuel {
             UserData.RegisterAssembly();
             UserData.RegisterExtensionType(typeof(Enumerable));
             JArrayProxy.Register();
+            JObjectProxy.Register();
             Environment.Lua.AsScript.Globals["State"] = State;
             Environment.Lua.AsScript.Globals["Flow"] = this;
             Environment.Lua.AsScript.Globals["Random"] = Environment.Random;
@@ -36,7 +38,7 @@ namespace MoDuel {
         public JObject GetJsonFile(string filename) => Environment.Content.GetFile(filename);
         public CardInstance CreateCardInstance(Card imprint) =>  new CardInstance(imprint, CardInstanceActivator);
         public CardInstance CreateCardInstance(Card imprint, Player owner) => new CardInstance(imprint, CardInstanceActivator, owner);
-
+        public ManaType GetMana(string name) => new ManaType(name);
         public CreatureInstance CreateCreature(Card imprint, FieldSlot position) => new CreatureInstance(imprint, CardInstanceActivator, position);
         public CreatureInstance CreateCreature(CardInstance card, FieldSlot position) => new CreatureInstance(card, CardInstanceActivator, position);
         public CreatureInstance CreateCreature(Card imprint, CreatureInstance previousState) => new CreatureInstance(imprint, CardInstanceActivator, previousState);

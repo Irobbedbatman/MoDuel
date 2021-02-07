@@ -110,7 +110,7 @@ namespace MoDuel.Cards {
         /// <summary>
         /// The cost this card is currently at.
         /// </summary>
-        public int CurrentCost { get; set; }
+        public int Cost { get; set; }
 
         /// <summary>
         /// The grave cost of this card.
