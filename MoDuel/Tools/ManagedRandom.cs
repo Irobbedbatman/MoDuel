@@ -29,7 +29,7 @@ namespace MoDuel.Tools {
         /// </summary>
         public float NextFloat(float low, float high) {
             float val = Next();
-            float percent = val / (int.MaxValue - 1);
+            float percent = val / (int.MaxValue - 1f);
             return (high - low) * percent + low;
         }
 
