@@ -32,7 +32,7 @@ namespace MoDuel {
         [MoonSharpHidden]
         public EventHandler<ClientRequest> OutBoundDelegate;
 
-        public CardInstanceActivator CardInstanceActivator = new CardInstanceActivator();
+        public readonly CardInstanceActivator CardInstanceActivator = new CardInstanceActivator();
 
         /// <summary>
         /// A repeating <see cref="System.Timers.Timer"/> that is used to determine when a turn should be considered timed out.
@@ -54,26 +54,49 @@ namespace MoDuel {
         private readonly object ThreadLock = new object();
 
         [MoonSharpHidden]
-        public DuelFlow(EnvironmentContainer environment, Player player1, Player player2, Player goesFirst) {
+        public DuelFlow(EnvironmentContainer environment, Player player1, Player player2) {
+            if (environment.Settings.TimeOutPlayers)
+                TimeOutTimer = new System.Timers.Timer(environment.Settings.TimeOutInterval);
+
+            Environment = environment;
+
+            // Get the player that is going first if one is forced to.
+            Player goesFirst;
+            if (environment.Settings.ForceIdToGoFirst == player1.UserId)
+                goesFirst = player1;
+            else if (environment.Settings.ForceIdToGoFirst == player2.UserId)
+                goesFirst = player2;
+            else
+                // If neither player is explictly going first than we randomly selected one them using the seeded random.
+                goesFirst = environment.Random.NextItem(new Player[] { player1, player2 });
+
             State = new DuelState(player1, player2) {
                 CurrentTurn = new TurnData(goesFirst)
             };
-            TimeOutTimer = new System.Timers.Timer(environment.Settings.TimeOutInterval);
-            Environment = environment;
+
             SetupLua();
         }
 
+        /// <summary>
+        /// Starts the <see cref="Loop"/> on a new thread.
+        /// <para>Will also start the cooldown for timing out players.</para>
+        /// </summary>
+        /// <returns>The thread the loop started on.</returns>
         [MoonSharpHidden]
-        public Thread Start() {
+        public Thread StartLoop() {
+
+            if (State == null || !State.Unfinished)
+                return null;
+
             if (Environment.Settings.TimeOutPlayers) {
                 TimeOutTimer.Elapsed += TimeOutTimer_Elapsed;
                 TimeOutTimer.Start();
             }
-            State.OnGoing = true;
             Thread thread = new Thread(new ThreadStart(Loop));
             thread.Start();
             return thread;
         }
+
 
         /// <summary>
         /// Action invoked when <see cref="TimeOutTimer"/> reaches its interval. 
@@ -100,7 +123,7 @@ namespace MoDuel {
             //Call the game start action. This is a user defined function that sets up anything that needs to be setup in lua.
             Environment.Settings.GameStartAction.Call();
 
-            while (State.OnGoing) {
+            while (State.Unfinished) {
                 //If there is anything in the command queue we try it.
                 if (CommandBuffer.Count > 0) {
                     //Stop timing out players in case commands take a long time.
@@ -108,15 +131,18 @@ namespace MoDuel {
                         TimeOutTimer.Stop();
                     // We cant confirm that commands is empty at this point due to multithreading.
                     try {
-                        var command = CommandBuffer.ElementAt(0);
-                        // We lock for removal.
+                        KeyValuePair<CommandRefrence, Action>? command = null;
+                        // We lock for removal and retreival.
                         lock (CommandBuffer) {
-                            // Ensure the command is still in the command list it could have be replaced with a new command but we dont care about it.
-                            if (CommandBuffer.ContainsKey(command.Key))
-                                CommandBuffer.Remove(command.Key);
+                            command = CommandBuffer.FirstOrDefault();
+                            if (command != null) {
+                                // Ensure the command is still in the command list it could have be replaced with a new command but we dont care about it.
+                                if (CommandBuffer.ContainsKey(command.Value.Key))
+                                    CommandBuffer.Remove(command.Value.Key);
+                            }
                         }
                         // Invoke the command. We can't lock the command buffer. here as it would ruin the buffer.
-                        command.Value.Invoke();
+                        command?.Value?.Invoke();
                     }
                     catch (Exception e) {
                         // Resulting code of the command could be broken or the command buffer could have been emptied.

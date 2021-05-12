@@ -18,17 +18,29 @@ namespace MoDuel {
             UserData.RegisterExtensionType(typeof(Enumerable));
             JArrayProxy.Register();
             JObjectProxy.Register();
-            Environment.Lua.AsScript.Globals["State"] = State;
             Environment.Lua.AsScript.Globals["Flow"] = this;
+            Environment.Lua.AsScript.Globals["State"] = State;
             Environment.Lua.AsScript.Globals["Random"] = Environment.Random;
             Environment.Lua.AsScript.Globals["GetTarget"] = (Func<int, Target>)Target.GetTarget;
-            Environment.Lua.AsScript.Globals["CPResponse"] = (Func<string[], CanPlayResponse>)CanPlayResponse.New;
+            Environment.Lua.AsScript.Globals["CPResponse"] = (Func<CanPlayResponse>)CanPlayResponse.New;
             Environment.Lua.AsScript.Globals["CanPlayTest"] = new CanPlayResponse("Test");
             Environment.Lua.AsScript.Globals["PrintTable"] = (Func<Table, string>)(
                 (t) => string.Join("\n", t.Pairs.Select(
                     (p) => p.Key.ToString() + ": " + p.Value.ToPrintString()
                     )
                 ));
+            Environment.Lua.AsScript.Globals["IsNumber"] = (Func<DynValue, bool>)(
+                (value) => ValueIsType(value, DataType.Number));
+            Environment.Lua.AsScript.Globals["IsString"] = (Func<DynValue, bool>)(
+                (value) => ValueIsType(value, DataType.String));
+            Environment.Lua.AsScript.Globals["IsBool"] = (Func<DynValue, bool>)(
+                (value) => ValueIsType(value, DataType.Boolean));
+            Environment.Lua.AsScript.Globals["IsTable"] = (Func<DynValue, bool>)(
+                (value) => ValueIsType(value, DataType.Table));
+            Environment.Lua.AsScript.Globals["IsObject"] = (Func<DynValue, bool>)(
+                (value) => ValueIsType(value, DataType.UserData));
+            Environment.Lua.AsScript.Globals["IsFunc"] = (Func<DynValue, bool>)(
+                (value) => ValueIsType(value, DataType.Function));
         }
 
         #region Constructor Lua Accessors 
@@ -59,7 +71,7 @@ namespace MoDuel {
         /// Call from lua to determine a winner and end the flow.
         /// </summary>
         public void GameOver(Player winner) {
-            State.OnGoing = false;
+            State.Unfinished = false;
             if (Environment.Settings.TimeOutPlayers)
                 TimeOutTimer.Stop();
             Environment.Settings.GameEndAction.Call(winner);
@@ -83,7 +95,9 @@ namespace MoDuel {
         /// <para>Use <see cref="InciteTrigger(object, string, object[])"/> if you need to provide the reason the trigger occured.</para>
         /// </summary>
         public void Trigger(string trigger, params object[] arguments) {
-
+            //Ensure that the game is ongoing.
+            if (!State.Unfinished)
+                return;
             //Ensure we don't go above the maximum trigger amount.
             if (currentTriggerChain >= MAX_TRIGGER_CHAIN)
                 return;
@@ -99,6 +113,9 @@ namespace MoDuel {
         /// <para>Inciting a trigger rather than using <see cref="Trigger(string, object[])"/> forces you to parse an <paramref name="inciter"/>.</para>
         /// </summary>
         public void InciteTrigger(object inciter, string trigger, params object[] arguments) {
+            //Ensure that the game is ongoing.
+            if (!State.Unfinished)
+                return;
             //Ensure we don't go above the maximum trigger amount.
             if (currentTriggerChain >= MAX_TRIGGER_CHAIN)
                 return;
@@ -117,7 +134,7 @@ namespace MoDuel {
         /// <param name="values">The table that is parsed by refrence so that things can chnage.</param>
         public void OverwriteTrigger(string trigger, Table values) {
             //Ensure that the game is ongoing.
-            if (!State.OnGoing)
+            if (!State.Unfinished)
                 return;
             foreach (var reaction in FindReactions(trigger).Reverse()) {
                 reaction.Value.Call(reaction.Key, values);
@@ -132,7 +149,7 @@ namespace MoDuel {
         /// <param name="arguments">The list of arguments to send to the lua functions. Prepended with <paramref name="triggerer"/>.</param>
         public DynValue ExplicitTrigger(CardInstance triggerer, string trigger, params object[] arguments) {
             //Ensure that the game is ongoing.
-            if (!State.OnGoing)
+            if (!State.Unfinished)
                 return null;
 
             if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out Closure reaction)) {
@@ -149,7 +166,7 @@ namespace MoDuel {
         /// <param name="arguments">The list of arguments to send to the lua functions. Prepended with <paramref name="triggerer"/>.</param>
         public DynValue FallbackExplicitTrigger(CardInstance triggerer, string trigger, string fallbackAction, params object[] arguments) {
             //Ensure that the game is ongoing.
-            if (!State.OnGoing)
+            if (!State.Unfinished)
                 return null;
             if (triggerer.Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out Closure reaction)) {
                 return reaction.Call(arguments.Prepend(triggerer).ToArray());
@@ -161,21 +178,21 @@ namespace MoDuel {
 
         /// <summary>
         /// Invokes <see cref="OutBoundDelegate"/> with a request for the client to do.
-        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the animation should stop other things from happening.</para>/// </summary>
+        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the reuqest should stop other things from happening.</para>/// </summary>
         /// <param name="requestId">The request for the client to do.</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
-        public void SendRequest(string requestId,params object[] arguments) {
+        public void SendRequest(string requestId, params DynValue[] arguments) {
             OutBoundDelegate?.Invoke(this, new ClientRequest(requestId, arguments));
         }
 
         /// <summary>
-        /// Invokes <see cref="Player.OutBoundDelegate"/> with the animation data so that individual players can recieve animations.
-        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the animation should stop other things from happening.</para>
+        /// Invokes <see cref="Player.OutBoundDelegate"/> with a request for the client to do.
+        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the request should stop other things from happening.</para>
         /// /// </summary>
         /// <param name="requestId">The request for the target to do.</param>
         /// <param name="arguments">Arguments sent outwards for the animation.</param>
-        public void SendRequestTo(Player target, string requestId, params object[] arguments) {
-            target.SendRequest(new ClientRequest(requestId, arguments));
+        public void SendRequestTo(Player target, string requestId, params DynValue[] arguments) {
+            target.SendRequest(requestId, arguments);
         }
 
         /// <summary>
@@ -190,12 +207,12 @@ namespace MoDuel {
 
         /// <summary>
         /// Calls a function stored in the lua enviornment with the provided name and arguments.
-        /// <para>Returns null if <see cref="DuelState.OnGoing"/> is false.</para>
+        /// <para>Returns null if <see cref="DuelState.Unfinished"/> is false.</para>
         /// </summary>
         /// <param name="actionId">The action's name stored in <see cref="ContentLoader"/> That was loaded with <see cref="ContentLoader.LoadAction(Script, string)"/></param>
         public DynValue DoAction(string actionId, params object[] arguments) {
             Console.WriteLine(actionId);
-            if (State.OnGoing)
+            if (State.Unfinished)
                 if (Environment.Content.TryGetAction(actionId, out Closure func))
                     return func.Call(arguments);
             return null;
@@ -206,7 +223,7 @@ namespace MoDuel {
         /// <para>Same as <see cref="DoAction(string, object[])"/> but forces you provide a sender argument.</para>
         /// </summary>
         public DynValue InciteAction(object inciter, string actionId, params object[] arguments) {
-            if (State.OnGoing)
+            if (State.Unfinished)
                 if (Environment.Content.TryGetAction(actionId, out Closure func))
                     return func.Call(arguments.Prepend(inciter).ToArray());
             return null;
@@ -221,6 +238,18 @@ namespace MoDuel {
             lock (ThreadLock) {
                 response?.Invoke(DoAction(query, args.Prepend(querier).ToArray()).Table);
             }
+        }
+
+        /// <summary>
+        /// Checks to see if <paramref name="value"/> is the provided <paramref name="type"/>.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type"></param>
+        /// <returns>True if value is the valid type. False otherwise or if <paramref name="value"/> is null.</returns>
+        public bool ValueIsType(DynValue value, DataType type) {
+            if (value == null)
+                return false;
+            return value.Type == type;
         }
 
     }

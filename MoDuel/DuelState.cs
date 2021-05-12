@@ -33,9 +33,9 @@ namespace MoDuel {
         public readonly FullField Field;
 
         /// <summary>
-        /// True if the game is currently in play and hasn't finished yet.
+        /// True if the game hasn't finished yet.
         /// </summary>
-        public bool OnGoing = false;
+        public bool Unfinished = true;
 
         /// <summary>
         /// The data of any given turn, new() ones should be created each turn with the <see cref="Player"/> that's turn it is.

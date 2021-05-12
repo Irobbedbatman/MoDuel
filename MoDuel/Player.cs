@@ -32,10 +32,15 @@ namespace MoDuel {
         public EventHandler<ClientRequest> OutBoundDelegate;
 
         /// <summary>
-        /// Invokes the <see cref="OutBoundDelegate"/> with the given data.
-        /// </summary>
-        /// <param name="data"></param>
-        public void SendRequest (ClientRequest data) => OutBoundDelegate?.Invoke(this, data);
+        /// Invokes <see cref="OutBoundDelegate"/> with a request for the client to do. By calling s
+        /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the request should stop other things from happening.</para>
+        /// /// </summary>
+        /// <param name="requestId">The request for the target to do.</param>
+        /// <param name="arguments">Arguments sent outwards for the animation.</param>
+        public void SendRequest(string requestId, params DynValue[] arguments) {
+            var request = new ClientRequest(requestId, arguments);
+            OutBoundDelegate?.Invoke(this, request);
+        }
 
         /// <summary>
         /// The <see cref="HeroInstance"/> this player is currently playing as.

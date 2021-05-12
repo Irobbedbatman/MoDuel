@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MoDuel {
 
@@ -77,7 +74,7 @@ namespace MoDuel {
         /// Creates a new <see cref="CanPlayResponse"/>.
         /// <para>This exists so that <see cref="DuelFlow"/>Lua can shorthand response creation.</para>
         /// </summary>
-        public static CanPlayResponse New(string[] reason) => new CanPlayResponse(reason);
+        public static CanPlayResponse New() => new CanPlayResponse();
 
         /// <summary>
         /// Accessor of this as a bool for readability.
@@ -103,10 +100,11 @@ namespace MoDuel {
         /// <summary>
         /// Adds a new reason to this <see cref="CanPlayResponse"/>.
         /// </summary>
-        public void Extend(string reason) {
+        public CanPlayResponse Extend(string reason) {
             var list = Reasons.ToList();
             list.Add(reason);
             Reasons = list.ToArray();
+            return this;
         }
 
     }

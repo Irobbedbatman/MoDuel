@@ -26,12 +26,17 @@ namespace MoDuel {
         /// <summary>
         /// The dictionary of all targets so that one can retreived by index.
         /// </summary>
-        private static readonly Dictionary<int,Target> Targets = new Dictionary<int, Target>();
+        private static readonly Dictionary<int, Target> Targets = new Dictionary<int, Target>();
 
         /// <summary>
         /// Get a target with the given index.
+        /// <para>Returns null if the index wasn't found.</para>
         /// </summary>
-        public static Target GetTarget(int targetIndex) => Targets[targetIndex];
+        public static Target GetTarget(int targetIndex) {
+            if (Targets.ContainsKey(targetIndex))
+                return Targets[targetIndex];
+            return null;
+        }
 
         //END STATIC
 

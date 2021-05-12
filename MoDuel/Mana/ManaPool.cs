@@ -19,7 +19,7 @@ namespace MoDuel.Mana {
         /// Constructor that converts an array of <see cref="ManaType"/> and turns them into a <see cref="ManaPool"/>
         /// </summary>
         /// <param name="manatypes">Array of required <see cref="ManaType"/>s for this <see cref="ManaPool"/></param>
-        public ManaPool(ManaType[] manatypes) {
+        public ManaPool(IEnumerable<ManaType> manatypes) {
             foreach (var manatype in manatypes)
                 _pool.Add(manatype, new Mana(manatype));
         }
@@ -61,6 +61,11 @@ namespace MoDuel.Mana {
         public IEnumerator GetEnumerator() {
             return new ManaEnumerator(_pool.Values.ToArray());
         }
+
+        /// <summary>
+        /// Check to see if the <see cref="ManaPool"/> has the provided <see cref="ManaType"/>.
+        /// </summary>
+        public bool HasType(ManaType type) => _pool.ContainsKey(type);
 
     }
 }

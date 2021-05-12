@@ -20,16 +20,16 @@ namespace MoDuel {
         [MoonSharpHidden]
         private readonly SortedList<CommandRefrence, Action> CommandBuffer = new SortedList<CommandRefrence, Action>();
 
-        [MoonSharpHidden]
+        [MoonSharpHidden] // TODO: Consider DynValue[] instead of object[]
         public void EnqueueCommand(string cmdId, Player player, params object[] args) {
 
             // The time this command was added.
             DateTime commandTime = DateTime.UtcNow;
 
-            // The wrapped the function we use as command, called in duelflow when neccasary.
+            // The wrapped function we use as a command, called in duelflow when it's time comes.
             void command() {
                 var span = DateTime.UtcNow - commandTime;
-                // If the command was created more than a second before excution we ignore it.
+                // If the command was created more than a second before execution it is ignored.
                 if (span.TotalSeconds > 1)
                     return;
                 lock (ThreadLock) {
@@ -39,7 +39,7 @@ namespace MoDuel {
 
             // Lock commands so that remove of commands is still thread safe.
             lock (CommandBuffer) {
-                foreach (var cmd in CommandBuffer) {
+                foreach (var cmd in CommandBuffer.ToArray()) {
                     if (cmd.Key.Player == player)
                         CommandBuffer.Remove(cmd.Key);
                 }

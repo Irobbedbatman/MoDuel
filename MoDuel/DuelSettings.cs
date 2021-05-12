@@ -10,9 +10,14 @@ namespace MoDuel {
     [MoonSharpUserData]
     public class DuelSettings {
 
-        public static float NO_ANIM = 0;
+        public const float NO_ANIM = 0;
 
-        public static double DEFAULT_TIMEOUT = 5 * 60 * 1000;
+        public const double DEFAULT_TIMEOUT = 5 * 60 * 1000;
+
+        /// <summary>
+        /// Makes the <see cref="Player"/> with the same ID to go first when <see cref="DuelFlow.InitState(Player, Player)"/> is called.
+        /// </summary>
+        public string ForceIdToGoFirst = "";
 
         /// <summary>
         /// The speed animations will played back at. defaults to no animations.

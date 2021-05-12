@@ -26,6 +26,7 @@ namespace MoDuel.Cards {
         }
 
         public void Disable(CardInstance ci) {
+            // TODO: Automatic disabling of cards.
             _enabledCIs.Remove(ci);
         }
 

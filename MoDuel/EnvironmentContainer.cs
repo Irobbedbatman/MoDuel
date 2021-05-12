@@ -13,13 +13,13 @@ namespace MoDuel {
         public DuelSettings Settings;
         public LuaEnvironment Lua;
         public LoadedContent Content;
-        public Tools.ManagedRandom Random;
+        public ManagedRandom Random;
         /// <summary>
         /// The contoller of blockingi playback.
         /// </summary>
         public  PlaybackBlockingHandler AnimationBlocker;
 
-        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler, Tools.ManagedRandom random, PlaybackBlockingHandler animationBlocker) {
+        public EnvironmentContainer(DuelSettings settings, LuaEnvironment luaEngine, LoadedContent contentHandler, ManagedRandom random, PlaybackBlockingHandler animationBlocker) {
             Lua = luaEngine;
             Content = contentHandler;
             Settings = settings;
