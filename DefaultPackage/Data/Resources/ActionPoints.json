@@ -1,0 +1,7 @@
+﻿{
+  "Name": "Action Points",
+  "ExplicitTriggers": {
+    "CanPay": "CanPayActionPoints",
+    "Pay": "PayActionPoints"
+  }
+}
