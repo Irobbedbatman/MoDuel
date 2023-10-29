@@ -1,0 +1,30 @@
+﻿{
+  "Name": "Default",
+  "Assembly": "../DefaultPackage.dll",
+  "Cards": {
+    "Goon": "./Cards/Goon.json",
+    "Mystic": "./Cards/Mystic.json"
+  },
+  "Heroes": {
+    "HoodedFigure": "./Heroes/HoodedFigure.json"
+  },
+  "Resources": {
+    "ActionPoints": "./Resources/ActionPoints.json",
+    "Life": "./Resources/Life.json",
+
+    "Fire": "./Resources/Fire.json",
+    "Water": "./Resources/Water.json",
+    "Earth": "./Resources/Earth.json",
+    "Air": "./Resources/Air.json",
+    "Light": "./Resources/Light.json",
+    "Dark": "./Resources/Dark.json",
+
+    "Gold": "./Resources/Gold.json",
+    "Mana": "./Resources/Mana.json",
+    "Void": "./Resources/Void.json"
+  },
+  "Data": {
+
+  }
+
+}

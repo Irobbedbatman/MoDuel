@@ -1,0 +1,11 @@
+﻿{
+  "Name": "Mystic",
+  "Type": "Creature",
+  "Triggers": {
+    "AfterCharge": "MysticX",
+    "Overwrite:GetDisplayedAttack": "Mysticfy"
+  }
+
+
+
+}
