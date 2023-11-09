@@ -30,12 +30,12 @@ public static class ThreadContext {
     /// <summary>
     /// The <see cref="PackageCatalogue"/> used on the current thread.
     /// </summary>
-    public static PackageCatalogue? Catalouge => DuelState?.PackageCatalogue;
+    public static PackageCatalogue? Catalogue => DuelState?.PackageCatalogue;
 
     /// <summary>
     /// Get the package with the provided <paramref name="packageName"/> that is safe to use on the current thread.
     /// </summary>
-    public static Package? GetPackageInstance(string packageName) => Catalouge?.GetPackage(packageName);
+    public static Package? GetPackageInstance(string packageName) => Catalogue?.GetPackage(packageName);
 
 
 }

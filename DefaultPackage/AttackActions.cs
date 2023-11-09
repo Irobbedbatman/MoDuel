@@ -6,7 +6,7 @@ using MoDuel.Players;
 namespace DefaultPackage;
 
 /// <summary>
-/// Actions for attac logic.
+/// Actions for attack logic.
 /// </summary>
 public static class AttackActions {
 
@@ -14,11 +14,11 @@ public static class AttackActions {
     public const double ATTACK_DURATION = 300;
 
     /// <summary>
-    /// The default attack behaviour of a card. Trys to attack the oppinging creature. If there is no creature attacks the hero.
+    /// The default attack behaviour of a card. Attempts to attack the opposing creature. If there is no creature attacks the hero.
     /// </summary>
     [ActionName(nameof(AttackDefault))]
-    public static void AttackDefault(CreatureInstance attacker) {
-        var attackerPosition = attacker.Position;
+    public static void AttackDefault(CardInstance attacker) {
+        var attackerPosition = attacker.FieldPosition;
         if (attackerPosition == null)
             return;
 
@@ -35,7 +35,7 @@ public static class AttackActions {
     /// The behaviour when ac creature attacks another creature.
     /// </summary>
     [ActionName(nameof(AttackCreature))]
-    public static void AttackCreature(CreatureInstance attacker, CreatureInstance defender) {
+    public static void AttackCreature(CardInstance attacker, CardInstance defender) {
         if (!attacker.IsAlive)
             return;
         attacker.Context.SendBlockingRequest(new ClientRequest("AttackCreature", attacker.Index, defender.Index), ATTACK_DURATION);
@@ -46,7 +46,7 @@ public static class AttackActions {
     /// The behaviour when a creature attacks the opposing hero.
     /// </summary>
     [ActionName(nameof(AttackHero))]
-    public static void AttackHero(CreatureInstance attacker, Player defender) {
+    public static void AttackHero(CardInstance attacker, Player defender) {
         if (!attacker.IsAlive)
             return;
         attacker.Context.SendBlockingRequest(new ClientRequest("AttackHero", attacker.Index), ATTACK_DURATION);

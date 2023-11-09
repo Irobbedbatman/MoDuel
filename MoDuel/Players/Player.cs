@@ -1,4 +1,3 @@
-using MessagePack;
 using MoDuel.Cards;
 using MoDuel.Client;
 using MoDuel.Field;
@@ -12,7 +11,6 @@ using MoDuel.Tools;
 
 namespace MoDuel.Players;
 
-
 /// <summary>
 /// One of the players of the duel.
 /// <para>Stores the players duel values.</para>
@@ -25,7 +23,7 @@ public class Player : Target {
     /// Player that can be used to bypass command queue to perform actions.
     /// <para>Any running code will still need to finish first.</para>
     /// <para>Priority is defined through <see cref="CommandReference.CompareTo(CommandReference)"/>.</para>
-    /// <para>This player is not state relative and uses contstructed data that may break if used as a generic player.></para>
+    /// <para>This player is not state relative and uses constructed data that may break if used as a generic player.></para>
     /// </summary>
     internal static readonly Player SysPlayer = new("System");
 
@@ -36,7 +34,7 @@ public class Player : Target {
     public const string PRIVATE_INDEX_PREFIX = "p_";
 
     /// <summary>
-    /// The uniqueid, name, username of this player.
+    /// The unique id, name, username of this player.
     /// </summary>
     public readonly string UserId;
 
@@ -48,7 +46,7 @@ public class Player : Target {
     /// <summary>
     /// A version of <see cref="Target.Values"/> that will not be serialized unless requested by this <see cref="Player"/>.
     /// </summary>
-    public readonly Dictionary<string, object?> PrivateValues = new();
+    public readonly Dictionary<string, object?> PrivateValues = [];
 
     /// <summary>
     /// The turn that the player had last this excludes their current turn.
@@ -65,7 +63,7 @@ public class Player : Target {
 
         get {
             // Get from private values.
-            if (key.ToLower().StartsWith(PRIVATE_INDEX_PREFIX)) {
+            if (key.StartsWith(PRIVATE_INDEX_PREFIX, StringComparison.CurrentCultureIgnoreCase)) {
                 // Ensure the value exists. If it doesn't attempt to use the Target.Values.
                 if (PrivateValues.TryGetValue(key, out var value))
                     return value;
@@ -76,7 +74,7 @@ public class Player : Target {
         }
         set {
             // Set to private values.
-            if (key.ToLower().StartsWith(PRIVATE_INDEX_PREFIX)) {
+            if (key.StartsWith(PRIVATE_INDEX_PREFIX, StringComparison.CurrentCultureIgnoreCase)) {
                 PrivateValues[key] = value;
             }
             base[key] = value;
@@ -86,13 +84,11 @@ public class Player : Target {
     /// <summary>
     /// The animations that are sent out for this specific player.
     /// </summary>
-    [IgnoreMember]
     public EventHandler<ClientRequest> OutBoundDelegate = delegate { };
 
     /// <summary>
-    /// The eventhandler for when the player says they are ready after a <see cref="ClientRequest"/> marked as <see cref="ClientRequest.SendReadyConfirmation"/>.
+    /// The event handler for when the player says they are ready after a <see cref="ClientRequest"/> marked as <see cref="ClientRequest.SendReadyConfirmation"/>.
     /// </summary>
-    [IgnoreMember]
     public EventHandler InBoundReadDelegate = delegate { };
 
     /// <summary>
@@ -113,21 +109,12 @@ public class Player : Target {
     /// <summary>
     /// The Hand of the player currently.
     /// </summary>
-    private readonly HashSet<CardInstance> _hand = new();
-    /// <summary>
-    /// The Hand of the player currently; readonly.
-    /// </summary>
-    public IReadOnlyList<CardInstance> Hand => _hand.ToList().AsReadOnly();
+    public readonly CardSet Hand;
 
     /// <summary>
     /// The Grave of the player currently.
     /// </summary>
-    private readonly HashSet<CardInstance> _grave = new();
-    /// <summary>
-    /// The Grave of the player currently; readonly.
-    /// </summary>
-    public IReadOnlyList<CardInstance> Grave => _grave.ToList().AsReadOnly();
-
+    public readonly CardSet Grave;
     /// <summary>
     /// The state in which this player exists.
     /// </summary>
@@ -168,9 +155,11 @@ public class Player : Target {
         UserId = meta.UserId;
         Meta = meta;
         Context = context;
-        ResourcePool = new ResourcePool(meta.ManaPool);
+        ResourcePool = new ResourcePool(meta.ResourcePoolTypes);
         Field = new SubField(this);
         Hero = new HeroInstance(meta.Hero, this);
+        Hand = new CardSet(this);
+        Grave = new CardSet(this);
     }
 
     /// <summary>
@@ -189,44 +178,38 @@ public class Player : Target {
     /// Adds a card to this player's hand.
     /// </summary>
     /// <param name="card"></param>
-    public void AddCardToHand(CardInstance card) => _hand.Add(card.SetOwner(this));
+    public void AddCardToHand(CardInstance card) => Hand.Add(card);
 
     /// <summary>
     /// Removes a card from this player's hand if it currently in there.
     /// </summary>
     /// <param name="card"></param>
-    public void RemoveCardFromHand(CardInstance card) {
-        if (_hand.Contains(card))
-            _hand.Remove(card.SetOwner(null));
-    }
+    public void RemoveCardFromHand(CardInstance card) => Hand.Remove(card);
 
     /// <summary>
     /// Adds a card to this player's grave.
     /// </summary>
     /// <param name="card"></param>
-    public void AddCardToGrave(CardInstance card) => _grave.Add(card.SetOwner(this));
+    public void AddCardToGrave(CardInstance card) => Grave.Add(card);
 
     /// <summary>
     /// Removes a card from this player's grave if it currently in there.
     /// </summary>
     /// <param name="card"></param>
-    public void RemoveCardFromGrave(CardInstance card) {
-        if (_grave.Contains(card))
-            _grave.Remove(card.SetOwner(null));
-    }
+    public void RemoveCardFromGrave(CardInstance card) => Grave.Remove(card);
 
     /// <summary>
     /// Check to see if player has a certain card in their hand.
     /// </summary>
-    public bool IsCardInHand(CardInstance card) => _hand.Contains(card);
+    public bool IsCardInHand(CardInstance card) => Hand.Contains(card);
 
     /// <summary>
     /// Check to see if player has a certain card in their grave.
     /// </summary>
-    public bool IsCardInGrave(CardInstance card) => _grave.Contains(card);
+    public bool IsCardInGrave(CardInstance card) => Grave.Contains(card);
 
     /// <summary>
-    /// Sets the hero value by creating a new <see cref="HeroInstance"/> from the providedd <see cref="Hero"/>.
+    /// Sets the hero value by creating a new <see cref="HeroInstance"/> from the provided <see cref="Hero"/>.
     /// </summary>
     public void SetHero(Hero newHero) => Hero = new HeroInstance(newHero, this);
 

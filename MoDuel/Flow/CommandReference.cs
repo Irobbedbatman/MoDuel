@@ -4,24 +4,19 @@ namespace MoDuel.Flow;
 
 /// <summary>
 /// A key used by <see cref="DuelFlow.CommandBuffer"/>.
-/// <para>Ordered by the <see cref="Time"/> they were recieved.</para>
+/// <para>Ordered by the <see cref="Time"/> they were received.</para>
 /// <para>Takes account of the <see cref="DuelFlow.SysPlayer"/>; which has priority.</para>
 /// </summary>
-public readonly struct CommandReference : IComparable<CommandReference> {
+public readonly struct CommandReference(Player player, DateTime time) : IComparable<CommandReference> {
 
     /// <summary>
     /// The player that sent the command.
     /// </summary>
-    public readonly Player Player;
+    public readonly Player Player = player;
     /// <summary>
-    /// The time the command was recieved.
+    /// The time the command was received.
     /// </summary>
-    public readonly DateTime Time;
-
-    public CommandReference(Player player, DateTime time) {
-        Player = player;
-        Time = time;
-    }
+    public readonly DateTime Time = time;
 
     public readonly int CompareTo(CommandReference cmdRef) {
 
@@ -40,12 +35,12 @@ public readonly struct CommandReference : IComparable<CommandReference> {
 
 
     /// <summary>
-    /// Equate commands sent from the same player as being equivalant.
-    /// <para>System players are always considered uneuqal.</para>
+    /// Equate commands sent from the same player as being equivalent.
+    /// <para>System players are always considered unequal.</para>
     /// </summary>
     public override readonly bool Equals(object? obj) {
 
-        // System players are always considered uneuqal.
+        // System players are always considered unequal.
         if (Player.Equals(Player.SysPlayer))
             return false;
 
@@ -57,13 +52,13 @@ public readonly struct CommandReference : IComparable<CommandReference> {
     }
 
     /// <summary>
-    /// Hashcode logic that alligns with the behaviour found in <see cref="Equals(object)"/>
+    /// Hash code logic that aligns with the behaviour found in <see cref="Equals(object)"/>
     /// </summary>
     public override readonly int GetHashCode() {
-        // System players are always considered uneuqal.
+        // System players are always considered unequal.
         if (Player.Equals(Player.SysPlayer))
             return base.GetHashCode();
-        // Derive hashcode from the player.
+        // Derive hash code from the player.
         return Player.GetHashCode();
     }
 

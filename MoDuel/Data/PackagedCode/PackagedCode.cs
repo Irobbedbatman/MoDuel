@@ -18,8 +18,7 @@ public abstract class PackagedCode {
     /// The <see cref="PackagedCode"/> used by <see cref="CreateEmptyPackagedCode(Package)"/>.
     /// <para>Doesn't load or require anything.</para>
     /// </summary>
-    private class NoPackagedCode : PackagedCode {
-        public NoPackagedCode(Package package) : base(package) { }
+    private class NoPackagedCode(Package package) : PackagedCode(package) {
         public override ICollection<Delegate> GetAllActions() => Array.Empty<Delegate>();
         public override void OnPackageLoaded(Package package) { }
         public override void OnDuelLoaded(DuelState state) { }
@@ -34,12 +33,12 @@ public abstract class PackagedCode {
     /// The collections of actions held within the <see cref="PackagedCode"/>.
     /// <para>The keys are defined through the <see cref="ActionNameAttribute"/> or the method name.</para>
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> Actions = new();
+    public readonly Dictionary<string, ActionFunction> Actions = [];
 
     /// <summary>
-    /// The depencencies that are required at load time.
+    /// The dependencies that are required at load time.
     /// </summary>
-    private readonly HashSet<DependencyAttribute> Dependencies = new();
+    private readonly HashSet<DependencyAttribute> Dependencies = [];
 
     /// <summary>
     /// Flag that is set when the packed code has been loaded.
@@ -62,9 +61,9 @@ public abstract class PackagedCode {
         OnPackageLoaded(Package);
     }
     /// <summary>
-    /// Seacrhes via reflection for all the <see cref="ActionNameAttribute"/>s and build delegates so they can be returned in <see cref="GetAllActions"/>.
+    /// Searches via reflection for all the <see cref="ActionNameAttribute"/>s and build delegates so they can be returned in <see cref="GetAllActions"/>.
     /// </summary>
-    /// <returns>All the <see cref="ActionFunction"/> delgates that could be found in the package.</returns>
+    /// <returns>All the <see cref="ActionFunction"/> delegates that could be found in the package.</returns>
     protected ICollection<Delegate> GetAllActionsViaTag() {
         var types = Assembly.GetCallingAssembly().GetTypes();
         var methods = types.SelectMany(t => t.GetMethods());
@@ -74,7 +73,7 @@ public abstract class PackagedCode {
     }
 
     /// <summary>
-    /// Builds a <see cref="Delegate"/> from the providedd <see cref="MethodInfo"/>.
+    /// Builds a <see cref="Delegate"/> from the provided <see cref="MethodInfo"/>.
     /// </summary>
     private Delegate BuildDelegate(MethodInfo methodInfo) {
 
@@ -96,13 +95,13 @@ public abstract class PackagedCode {
             Dependencies.Add(dependency);
         }
 
-        // Build and return the delegagte.
+        // Build and return the delegate.
         var lambda = Expression.Lambda(body, name, true, parameters);
         return lambda.Compile(false);
     }
 
     /// <summary>
-    /// Registers all the actions from the package and loads any depeendancies they may have.
+    /// Registers all the actions from the package and loads any dependencies they may have.
     /// </summary>
     private void RegisterActions() {
 
@@ -110,14 +109,14 @@ public abstract class PackagedCode {
 
             var methodInfo = action.Method;
             // Actions cam use an attribute to define their name or fallback to the method name.
-            var actioname = methodInfo.GetCustomAttribute<ActionNameAttribute>()?.ActionName ?? methodInfo.Name;
+            var actionName = methodInfo.GetCustomAttribute<ActionNameAttribute>()?.ActionName ?? methodInfo.Name;
 
             // Get the full item path so that it can be reloaded.
-            var actionPath = PackageCatalogue.GetFullItemPath(Package, actioname);
+            var actionPath = PackageCatalogue.GetFullItemPath(Package, actionName);
 
-            // Regsister and assign the action function.
+            // Register and assign the action function.
             ActionFunction func = new(actionPath, action);
-            Actions.Add(actioname, func);
+            Actions.Add(actionName, func);
 
             // Record every dependency that needs to be loaded.
             var dependencies = methodInfo.GetCustomAttributes<DependencyAttribute>();
@@ -150,7 +149,7 @@ public abstract class PackagedCode {
     public abstract void OnPackageLoaded(Package package);
 
     /// <summary>
-    /// The callback ocnce a new <see cref="DuelState"/> has been started.
+    /// The callback once a new <see cref="DuelState"/> has been started.
     /// </summary>
     public abstract void OnDuelLoaded(DuelState state);
 

@@ -5,7 +5,7 @@ using MoDuel.Serialization;
 namespace MoDuel.Field;
 
 /// <summary>
-/// A <see cref="Field"/> that stores <seealso cref="CreatureInstance"/>s inside an array <seealso cref="Slots"/>
+/// A <see cref="Field"/> that stores <seealso cref="CardInstance"/>s inside an array <seealso cref="Slots"/>
 /// </summary>
 [SerializeReference]
 public class SubField : Field {
@@ -26,7 +26,7 @@ public class SubField : Field {
     public FullField FullField => Context.Field;
 
     public SubField(Player owner) : base(owner.Context) {
-        Slots = new FieldSlot[5] { new FieldSlot(this, 1), new FieldSlot(this, 2), new FieldSlot(this, 3), new FieldSlot(this, 4), new FieldSlot(this, 5) };
+        Slots = [new(this, 1), new(this, 2), new(this, 3), new(this, 4), new(this, 5)];
         Owner = owner;
     }
 
@@ -36,8 +36,8 @@ public class SubField : Field {
     public override int SlotCount => Slots.Length;
 
     /// <inheritdoc/>
-    public override HashSet<CreatureInstance> GetCreatures() {
-        var keys = new HashSet<CreatureInstance>();
+    public override HashSet<CardInstance> GetCreatures() {
+        var keys = new HashSet<CardInstance>();
         for (int i = 0; i < Slots.Length; ++i) {
             var occupant = Slots[i].Occupant;
             if (occupant != null)

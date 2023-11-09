@@ -12,12 +12,12 @@ public class ResourceCost : IEnumerable<ResourceCounter>, IComparable<ResourceCo
     /// <summary>
     /// Create a <see cref="ResourceCost"/> that has no elements.
     /// </summary>
-    public static ResourceCost NewEmpty() => new();
+    public static ResourceCost NewEmpty() => [];
 
     /// <summary>
     /// Each component that makes up the total cost; each part representing one <see cref="ResourceType"/>.
     /// </summary>
-    public readonly Dictionary<ResourceType, ResourceCounter> Parts = new();
+    public readonly Dictionary<ResourceType, ResourceCounter> Parts = [];
 
     public ResourceCost() { }
 
@@ -80,7 +80,7 @@ public class ResourceCost : IEnumerable<ResourceCounter>, IComparable<ResourceCo
     }
 
     /// <summary>
-    /// Reduces the cost by the provied resource <paramref name="counter"/>.
+    /// Reduces the cost by the provide resource <paramref name="counter"/>.
     /// <para>Will do nothing if <see cref="Parts"/> does not contain the <see cref="ResourceCounter.Resource"/>.</para>
     /// </summary>
     /// <param name="allowBelow0">Can the counter be reduced below 0. If false; when reducing by amount the value will be clamped to 0 or above after the deduction.</param>
@@ -105,8 +105,8 @@ public class ResourceCost : IEnumerable<ResourceCounter>, IComparable<ResourceCo
     }
 
     /// <summary>
-    /// Comapres against another <see cref="ResourceCost"/> comparing each part found in <see cref="Parts"/>.
-    /// <para>Pefroms an explicit comparison and if that comparison provides no result compares raw values.</para>
+    /// Compares against another <see cref="ResourceCost"/> comparing each part found in <see cref="Parts"/>.
+    /// <para>Performs an explicit comparison and if that comparison provides no result compares raw values.</para>
     /// </summary>
     /// <returns>A positive number if <c>this</c> costs more than the <paramref name="other"/> <see cref="ResourceCost"/>.</returns>
     public int CompareTo(ResourceCost? other) {
@@ -119,13 +119,13 @@ public class ResourceCost : IEnumerable<ResourceCounter>, IComparable<ResourceCo
         foreach (var part in Parts.Keys.Union(other.Parts.Keys)) {
 
             // Compare using explicit trigger on the resource type.
-            int compare = part.Trigger("Compare", new object?[] {
+            int compare = part.Trigger("Compare", [
                 Parts[part],
                 other[part]
-            }) ?? 0;
+            ]) ?? 0;
 
 
-            // If the result of compare comes back indecsisive compare the counts.
+            // If the result of compare comes back indecisive compare the counts.
             // Both resource costs may not have the part so null validation is required.
             if (compare == 0)
                 compare = (Parts[part]?.Count ?? 0) - (other[part]?.Count ?? 0);
@@ -140,16 +140,16 @@ public class ResourceCost : IEnumerable<ResourceCounter>, IComparable<ResourceCo
 
     /// <summary>
     /// Combiner for two <see cref="ResourceCost"/>s.
-    /// <para>Will return a <see cref="ResourceCost"/> with each unqiue <see cref="ResourceType"/> found in <paramref name="a"/> and <paramref name="b"/>.</para>
+    /// <para>Will return a <see cref="ResourceCost"/> with each unique <see cref="ResourceType"/> found in <paramref name="a"/> and <paramref name="b"/>.</para>
     /// </summary>
     public static ResourceCost operator +(ResourceCost a, ResourceCost b) {
 
-        ResourceCost combined = new();
+        ResourceCost combined = [];
 
         // Get the parts from both costs. This ensures that the output has all required parts.
         foreach (var resource in a.Parts.Keys.Union(b.Parts.Keys)) {
 
-            // Creat the counter for the resource.
+            // Create the counter for the resource.
             ResourceCounter counter = new(resource) {
                 // Add to the counter for both costs if they have the part.
                 Count = (a?[resource]?.Count ?? 0)

@@ -43,7 +43,7 @@ public static class CardAbiltitiesSet {
     [ActionName(nameof(Mystic1))]
     public static void Mystic1(CardInstance card) {
 
-        if (card is CreatureInstance creature) {
+        if (card is CardInstance creature) {
             creature.Attack += 1;
         }
 
@@ -58,7 +58,7 @@ public static class CardAbiltitiesSet {
     [ActionName(nameof(Mystic2))]
     public static void Mystic2(CardInstance card) {
 
-        if (card is CreatureInstance creature) {
+        if (card is CardInstance creature) {
             creature.Life += 1;
             creature.MaxLife += 1;
         }

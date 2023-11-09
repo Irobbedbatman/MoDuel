@@ -6,13 +6,12 @@ using MoDuel.Json;
 using MoDuel.Players;
 using MoDuel.Resources;
 using MoDuel.State;
-using Newtonsoft.Json.Linq;
-using System.Reflection.Metadata.Ecma335;
+using System.Text.Json.Nodes;
 
 namespace DefaultPackage;
 
 /// <summary>
-/// Actions that relate to the resouce system.
+/// Actions that relate to the resource system.
 /// </summary>
 public static class ResourceActions {
 
@@ -51,14 +50,14 @@ public static class ResourceActions {
     /// <summary>
     /// Parses a json token to a <see cref="ResourceCost"/>.
     /// </summary>
-    public static ResourceCost ParseTokenToCost(JToken token, Package package, int level) {
+    public static ResourceCost ParseTokenToCost(JsonNode token, Package package, int level) {
 
         var cost = new ResourceCost();
 
-        if (token is not JObject)
+        if (token is not JsonObject)
             return cost;
 
-        foreach (JProperty property in token.Cast<JProperty>()) {
+        foreach (var property in token.GetProperties()) {
             cost.Add(ParseTokenToCounter(property, package, level));
         }
 
@@ -68,8 +67,8 @@ public static class ResourceActions {
     /// <summary>
     /// Parses a json token to a <see cref="ResourceCounter"/>.
     /// </summary>
-    public static ResourceCounter ParseTokenToCounter(JProperty property, Package package, int level) {
-        ResourceType? type = package.Catalogue.LoadResourceType(property.Name, package);
+    public static ResourceCounter ParseTokenToCounter(KeyValuePair<string, JsonNode> property, Package package, int level) {
+        ResourceType? type = package.Catalogue.LoadResourceType(property.Key, package);
         int? amount = property.Value?.BaseFallbackGetOrHighest(level).ToRawValueOrFallback(0);
         if (type == null || amount == null || amount.Value < 1)
             return new ResourceCounter(ResourceTypes.Void);
@@ -79,14 +78,14 @@ public static class ResourceActions {
     /// <summary>
     /// Parses a json token to a <see cref="ResourcePool"/>.
     /// </summary>
-    public static ResourcePool ParseTokenToPool(JToken token, Package package, int level) {
+    public static ResourcePool ParseTokenToPool(JsonNode token, Package package, int level) {
 
         var counters = new List<ResourceCounter>();
 
-        if (token is not JObject)
+        if (token is not JsonObject)
             return new ResourcePool(counters);
 
-        foreach (JProperty property in token.Cast<JProperty>()) {
+        foreach (var property in token.GetProperties()) {
             counters.Add(ParseTokenToCounter(property, package, level));
         }
 
@@ -188,10 +187,10 @@ public static class ResourceActions {
     public static bool CanPayCost(this Player player, ResourceCost cost) {
         ResourcePool pool = player.ResourcePool;
 
-        // Check to see if each resouce can be payed.
+        // Check to see if each resource can be payed.
         foreach (var counter in cost) {
-            var resouce = counter.Resource;
-            bool result = resouce.FallbackTrigger("CanPay", new ActionFunction(DefaultCanPayAmount), player, counter.Amount);
+            var resource = counter.Resource;
+            bool result = resource.FallbackTrigger("CanPay", new ActionFunction(DefaultCanPayAmount), player, counter.Amount);
             if (result == false)
                 return false;
         }
@@ -201,7 +200,7 @@ public static class ResourceActions {
 
     /// <summary>
     /// Makes the player pay the provided <paramref name="cost"/>.
-    /// <para>FIrst checks the cost can be payed.</para>
+    /// <para>First checks the cost can be payed.</para>
     /// </summary>
     /// <returns>True if the cost was payed.</returns>
     [ActionName(nameof(PayCost))]
@@ -214,8 +213,8 @@ public static class ResourceActions {
         }
 
         foreach (var counter in cost) {
-            var resouce = counter.Resource;
-            resouce.FallbackTrigger("Pay", new ActionFunction(DefaultPayAmount), player, counter.Amount);
+            var resource = counter.Resource;
+            resource.FallbackTrigger("Pay", new ActionFunction(DefaultPayAmount), player, counter.Amount);
             // TODO CLIENT: effects but should it just be through the above trigger.
         }
 

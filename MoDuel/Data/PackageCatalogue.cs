@@ -3,23 +3,23 @@ using MoDuel.Heroes;
 using MoDuel.Json;
 using MoDuel.Resources;
 using MoDuel.Serialization;
-using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
 
 
 /// <summary>
 /// A dictionary of <see cref="Package"/>s and some Properties that define how it is browsed.
-/// <para>There is no guarentee that the items in a package are available.</para>
-/// <para>If a package is updated; it is better to create a new <see cref="PackageCatalogue"/> so that entites using the old one don't lose access to information.</para>
+/// <para>There is no guarantee that the items in a package are available.</para>
+/// <para>If a package is updated; it is better to create a new <see cref="PackageCatalogue"/> so that entitles using the old one don't lose access to information.</para>
 /// </summary>
 public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
     /// <summary>
     /// Access to each <see cref="Package"/> via it's <see cref="Package.Name"/>
     /// </summary>
-    private readonly Dictionary<string, Package> Catalogue = new();
+    private readonly Dictionary<string, Package> Catalogue = [];
 
     /// <summary>
     /// The list of all the packages stored in the catalogue.
@@ -27,19 +27,19 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
     public IReadOnlyList<Package> AllPackages => Catalogue.Values.ToList();
 
     /// <summary>
-    /// The separator that seperates packages from their items. I.e: package|item
+    /// The separator that separates packages from their items. I.e: package|item
     /// </summary>
     public const char PackageItemSeparator = '|';
     /// <summary>
-    /// An alterntive way to access the <see cref="DefaultPackage"/> instead of using it's name.
+    /// An alternative way to access the <see cref="DefaultPackage"/> instead of using it's name.
     /// </summary>
-    public const string DeafultPackageIndicator = ">";
+    public const string DefaultPackageIndicator = ">";
     /// <summary>
     /// An alternative way to access packages item from the same package instead of requiring the package name. Note: this is the default behaviour when no package name is provided.
     /// </summary>
     public const string SamePackageIndicator = "?>";
     /// <summary>
-    /// A content package that is more accesible then the others. 
+    /// A content package that is more accessible then the others. 
     /// </summary>
     public Package? DefaultPackage = null;
 
@@ -74,7 +74,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
     }
 
     /// <summary>
-    /// Accessor for the a <see cref="Package"/> in the catalouge.
+    /// Accessor for the a <see cref="Package"/> in the catalogue.
     /// </summary>
     public Package? this[string packageName] => GetPackage(packageName);
 
@@ -107,7 +107,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
     /// <returns>The <see cref="Package"/> that contains the item requested.</returns>
     public Package? GetPackageFromItemPath(string itemPath, out string itemName, Package? currentPackage = null) {
 
-        // Seperate the packagename and the item name.
+        // Separate the package name and the item name.
         var pathSplit = itemPath.Split(PackageItemSeparator);
 
         if (pathSplit.Length == 1) {
@@ -117,7 +117,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
             if (currentPackage == null) {
                 return DefaultPackage;
             }
-            // If this was requested from a package assume the item is from that same paackage.
+            // If this was requested from a package assume the item is from that same package.
             return currentPackage;
         }
 
@@ -133,7 +133,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
         itemName = pathSplit[1];
 
         // If the packageName was instead an indicator instead use indicated package.
-        if (packageName == DeafultPackageIndicator) {
+        if (packageName == DefaultPackageIndicator) {
             return DefaultPackage;
         }
         if (packageName == SamePackageIndicator) {
@@ -152,9 +152,9 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
 
     /// <summary>
-    /// Uses the loader for the implmented generic type. Can also load <see cref="Package"/>s.
+    /// Uses the loader for the implemented generic type. Can also load <see cref="Package"/>s.
     /// <para>This is far slower that directly using the loader.</para>
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is seperated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public T? Load<T>(string itemPath, Package? sourcePackage = null) {
         // Packages also can be retrieved but need to be checked first.
@@ -170,7 +170,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
     /// <summary>
     /// Loads a <see cref="Card"/> file from a package using a full or partial item path.
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is seperated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public Card? LoadCard(string itemPath, Package? sourcePackage = null) {
         Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
@@ -179,7 +179,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
     /// <summary>
     /// Loads a <see cref="Hero"/> file from a package using a full or partial item path.
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is seperated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public Hero? LoadHero(string itemPath, Package? sourcePackage = null) {
         Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
@@ -188,7 +188,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
     /// <summary>
     /// Loads a <see cref="ActionFunction"/> from a package using a full or partial item path.
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is seperated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public ActionFunction LoadAction(string itemPath, Package? sourcePackage = null) {
         Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
@@ -197,16 +197,16 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
     /// <summary>
     /// Loads a json file from a package using a full or partial item path.
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is seperated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
-    public JToken LoadJson(string itemPath, Package? sourcePackage = null) {
+    public JsonNode LoadJson(string itemPath, Package? sourcePackage = null) {
         Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
         return package?.LoadJson(itemName) ?? DeadToken.Instance;
     }
 
     /// <summary>
     /// Loads a <see cref="ResourceType"/> file from a package using a full or partial item path.
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is seperated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public ResourceType? LoadResourceType(string itemPath, Package? sourcePackage = null) {
         Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
@@ -244,7 +244,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
     /// Try to load a json object stored in a file.
     /// </summary>
     /// <returns><c>true</c> if the json file was able to be loaded.</returns>
-    public bool TryGetJson(string fullItemPath, out JToken data) {
+    public bool TryGetJson(string fullItemPath, out JsonNode data) {
         data = LoadJson(fullItemPath);
         return !data.IsDead();
     }
@@ -266,13 +266,13 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
     /// </summary>
     public IEnumerable<string> GetAllItemNamesInCategory(string category) {
 
-        List<string> items = new();
+        List<string> items = [];
 
         foreach (var package in Catalogue) {
 
             // Get the keys for each package.
             IEnumerable<string> keys = package.Value.GetAllItemNamesInCategory(category);
-            // Convert the keys into the package notation with the seperator.
+            // Convert the keys into the package notation with the separator.
             IEnumerable<string> packagedKeys = keys.Select((key) => GetFullItemPath(package.Value, key));
             // Add all the keys.
             items.AddRange(packagedKeys);

@@ -1,4 +1,5 @@
 ﻿using MoDuel.Serialization;
+using System.Collections.Frozen;
 
 namespace MoDuel.Cards;
 
@@ -19,15 +20,15 @@ public class CardMeta {
     /// <summary>
     /// The raw meta data values.
     /// </summary>
-    public readonly IReadOnlyDictionary<string, object> Values;
+    public readonly FrozenDictionary<string, object> Values;
 
     public CardMeta(Card card, string? ownerName = null, IDictionary<string, object>? values = null) {
         Card = card;
         OwnerName = ownerName;
-        Values = values?.AsReadOnly() ?? new Dictionary<string, object>().AsReadOnly();
+        Values = values?.ToFrozenDictionary() ?? new Dictionary<string, object>().ToFrozenDictionary();
     }
 
-    public CardMeta(Card card, string? ownerName, IReadOnlyDictionary<string, object> values) {
+    public CardMeta(Card card, string? ownerName, FrozenDictionary<string, object> values) {
         Card = card;
         OwnerName = ownerName;
         Values = values;
@@ -44,8 +45,8 @@ public class CardMeta {
     /// Creates a new card meta from a <see cref="Card"/>
     /// </summary>
     /// <param name="card">The card that will be used.</param>
-    /// <param name="ownerName">The owner of the card that will be created. This is not neccasiry.</param>
-    /// <param name="token">A <paramref name="token"/> to be used for <see cref="Values"/>.</param>
+    /// <param name="ownerName">The owner of the card that will be created. This is not necessary.</param>
+    /// <param name="values">A set of values to be used for <see cref="Values"/>.</param>
     /// <returns>The created <see cref="CardMeta"/>.</returns>
     public static CardMeta CreateNew(Card card, string? ownerName = null, IDictionary<string, object>? values = null) => new(card, ownerName, values);
 

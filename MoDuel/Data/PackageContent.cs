@@ -2,10 +2,11 @@
 using MoDuel.Heroes;
 using MoDuel.Json;
 using MoDuel.Resources;
-using Newtonsoft.Json.Linq;
+using MoDuel.Shared.Json;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
-
 
 // See Package.cs for documentation.
 public partial class Package {
@@ -16,14 +17,14 @@ public partial class Package {
     public static bool LogLoads { get; set; } = false;
 
     /// <summary>
-    /// Logs the <paramref name="messsage"/> if <see cref="LogLoads"/> is true.
+    /// Logs the <paramref name="message"/> if <see cref="LogLoads"/> is true.
     /// </summary>
-    private static void Log(string messsage) {
-        if (LogLoads) Console.WriteLine(messsage);
+    private static void Log(string message) {
+        if (LogLoads) Console.WriteLine(message);
     }
 
     /// <summary>
-    /// A category name for consistant naming conventions.
+    /// A category name for consistent naming conventions.
     /// <para>Users can decide to store data in other categories.</para>
     /// </summary>
     public const string
@@ -53,7 +54,7 @@ public partial class Package {
     #region Load Methods
 
     /// <summary>
-    /// Uses the loader for the implmented generic type.
+    /// Uses the loader for the implemented generic type.
     /// <para>This is far slower that directly using the loader.</para>
     /// </summary>
     public T? Load<T>(string id) {
@@ -61,7 +62,7 @@ public partial class Package {
             Type cardType when cardType == typeof(Card) => LoadCard(id),
             Type heroType when heroType == typeof(Hero) => LoadHero(id),
             Type actionType when actionType == typeof(ActionFunction) => LoadAction(id),
-            Type jsonType when jsonType.IsAssignableFrom(typeof(JToken)) => LoadJson(id),
+            Type jsonType when jsonType.IsAssignableFrom(typeof(JsonNode)) => LoadJson(id),
             Type resourceType when resourceType == typeof(ResourceType) => LoadResourceType(id),
             _ => default,
         };
@@ -73,21 +74,21 @@ public partial class Package {
     /// <para>Use <see cref="LoadJson(string)"/> if you want to use an itemPath.</para>
     /// </summary>
     /// <param name="itemName">The name the json file will use for reloading.</param>
-    /// <param name="relativePath">The relative path to the jsom file from the package. Also used as the reload key.</param>
+    /// <param name="relativePath">The relative path to the json file from the package. Also used as the reload key.</param>
     /// <param name="fullPath">The full system path to the json file so that it can be loaded.</param>
     /// <returns>The json data parsed or an empty <see cref="JObject"/> if there was an error.</returns>
-    internal JObject LoadFile(string itemName, string? relativePath, string? fullPath) {
+    internal JsonObject LoadFile(string itemName, string? relativePath, string? fullPath) {
 
         // Ensure there is something to load.
         if (relativePath == null || fullPath == null) {
             Console.WriteLine($"One of the paths was missing. Relative Path: {relativePath}. FullPath: {fullPath}");
-            return new JObject();
+            return [];
         }
         try {
             if (LoadedJsonFiles.TryGetValue(relativePath, out var file)) {
                 return file;
             }
-            JObject data = JObject.Parse(File.ReadAllText(fullPath));
+            JsonObject data = CreateJson.FromFile(fullPath);
             // Provide information to serializers on where to reload this token.
             data.SetReloadItemPath(PackageCatalogue.GetFullItemPath(this, itemName));
             LoadedJsonFiles.Add(relativePath, data);
@@ -95,7 +96,7 @@ public partial class Package {
         }
         catch (Exception e) {
             Console.WriteLine(e.StackTrace);
-            return new JObject();
+            return [];
         }
     }
 
@@ -126,7 +127,7 @@ public partial class Package {
         LoadedCards.Add(id, card);
         // Load any content that is marked for loading.
         LoadLinkedContent(data[DEPENDENCIES_PROPERTY]);
-        // Assign the trigger reactions after loading to ensure no recusive loading.
+        // Assign the trigger reactions after loading to ensure no recursive loading.
         card.AssignTriggerReactions(GetTriggersFrom(data[TRIGGERS_PROPERTY]), GetTriggersFrom(data[EXPLICIT_TRIGGERS_PROPERTY]));
         return card;
     }
@@ -158,7 +159,7 @@ public partial class Package {
         Hero hero = new(this, id, data);
         //Add the loaded hero to the loaded content.
         LoadedHeroes.Add(id, hero);
-        // Assign the trigger reactions after loading to ensure no recusive loading.
+        // Assign the trigger reactions after loading to ensure no recursive loading.
         hero.AssignTriggerReactions(GetTriggersFrom(data[TRIGGERS_PROPERTY]), GetTriggersFrom(data[EXPLICIT_TRIGGERS_PROPERTY]));
         LoadLinkedContent(data[DEPENDENCIES_PROPERTY]);
         return hero;
@@ -178,10 +179,10 @@ public partial class Package {
 
 
     /// <summary>
-    /// Loads a json object from a json file if it had not been loaed already.
+    /// Loads a json object from a json file if it had not been loaded already.
     /// </summary>
-    /// <param name="id">The index used to find the fullpath to the json file within the <see cref="Package"/>.</param>
-    public JToken LoadJson(string id) {
+    /// <param name="id">The index used to find the full path to the json file within the <see cref="Package"/>.</param>
+    public JsonNode LoadJson(string id) {
 
         // Reuse loaded content.
         if (LoadedJsonReferences.TryGetValue(id, out var preloadedFile))
@@ -196,7 +197,7 @@ public partial class Package {
             return DeadToken.Instance;
         }
 
-        // Open the json data as a jobject
+        // Open the json data as a json object
         var file = LoadFile(id, relativePath, fullPath);
         LoadedJsonReferences.Add(id, file);
         return file;
@@ -204,9 +205,9 @@ public partial class Package {
 
     /// <summary>
     /// Loads a <see cref="ResourceType"/> from a json file.
-    /// <para>Also loads any linked content. Including all the actions used as implicit/explict triggers.</para>
+    /// <para>Also loads any linked content. Including all the actions used as implicit/explicit triggers.</para>
     /// </summary>
-    /// <param name="id">The index used to find the fullpath to the resource file within the <see cref="Package"/>.</param>
+    /// <param name="id">The index used to find the full path to the resource file within the <see cref="Package"/>.</param>
     /// <returns>The loaded resource type.</returns>
     public ResourceType? LoadResourceType(string id) {
         // Reuse loaded content.
@@ -215,7 +216,7 @@ public partial class Package {
 
         Log($"Loading Resource Type: {id} from package {Name}.");
 
-        // Get the full filepath and validate it.
+        // Get the full file path and validate it.
         if (!GetSystemPaths(RESOURCE_TYPE_CATEGORY, id, out var relativePath, out var fullPath)) {
             Console.WriteLine($"ResourceType: {id} not found in package.");
             return null;
@@ -247,34 +248,34 @@ public partial class Package {
     /// <summary>
     /// Goes through each category listed in <paramref name="linkedContent"/> and loads them.
     /// </summary>
-    /// <param name="linkedContent">A <see cref="JObject"/> that has refernces to other content to load.</param>
-    private void LoadLinkedContent(JToken? linkedContent) {
+    /// <param name="linkedContent">A <see cref="JObject"/> that has references to other content to load.</param>
+    private void LoadLinkedContent(JsonNode? linkedContent) {
 
         if (linkedContent == null)
             return;
 
         // Get the arrays of the other content to load.
-        JToken? cards = linkedContent[CARD_CATEGORY];
-        JToken? heroes = linkedContent[HERO_CATEGORY];
-        JToken? actions = linkedContent[ACTION_CATEGORY];
-        JToken? jsonFiles = linkedContent[JSON_DATA_CATEGORY];
-        JToken? resourceFiles = linkedContent[RESOURCE_TYPE_CATEGORY];
+        JsonNode? cards = linkedContent[CARD_CATEGORY];
+        JsonNode? heroes = linkedContent[HERO_CATEGORY];
+        JsonNode? actions = linkedContent[ACTION_CATEGORY];
+        JsonNode? jsonFiles = linkedContent[JSON_DATA_CATEGORY];
+        JsonNode? resourceFiles = linkedContent[RESOURCE_TYPE_CATEGORY];
 
         // Load any requested content.
         if (cards != null)
-            foreach (string c in cards.OfType<JValue>().Where((card) => card.Type == JTokenType.String).Select(card => card.ToString()))
+            foreach (string c in cards.GetValues().Select(card => card.GetValue<string>()).Where(card => card != null))
                 Catalogue.LoadCard(c, this);
         if (heroes != null)
-            foreach (string h in heroes.OfType<JValue>().Where((hero) => hero.Type == JTokenType.String).Select(hero => hero.ToString()))
+            foreach (string h in heroes.GetValues().Select((hero) => hero.GetValue<string>()).Where(hero => hero != null))
                 Catalogue.LoadHero(h, this);
         if (actions != null)
-            foreach (string a in actions.OfType<JValue>().Where((action) => action.Type == JTokenType.String).Select(action => action.ToString()))
+            foreach (string a in actions.GetValues().Select((action) => action.GetValue<string>()).Where(action => action != null))
                 Catalogue.LoadAction(a, this);
         if (jsonFiles != null)
-            foreach (string j in jsonFiles.OfType<JValue>().Where((json) => json.Type == JTokenType.String).Select(json => json.ToString()))
+            foreach (string j in jsonFiles.GetValues().Select((json) => json.GetValue<string>()).Where(json => json != null))
                 Catalogue.LoadJson(j, this);
         if (resourceFiles != null)
-            foreach (string j in resourceFiles.OfType<JValue>().Where((json) => json.Type == JTokenType.String).Select(json => json.ToString()))
+            foreach (string j in resourceFiles.GetValues().Select((resource) => resource.GetValue<string>()).Where(resource => resource != null))
                 Catalogue.LoadResourceType(j, this);
     }
 
@@ -283,17 +284,16 @@ public partial class Package {
     /// </summary>
     /// <param name="triggerToken">A block of json with all the trigger, reaction pairs.</param>
     /// <returns>A dictionary with the keys being the triggers and the values being the reactions.</returns>
-    public Dictionary<string, ActionFunction> GetTriggersFrom(JToken? triggerToken) {
+    public Dictionary<string, ActionFunction> GetTriggersFrom(JsonNode? triggerToken) {
 
-        if (triggerToken == null)
-            return new Dictionary<string, ActionFunction>();
+        if (triggerToken == null) return [];
 
-        Dictionary<string, ActionFunction> triggers = new();
-        foreach (JProperty trigger in triggerToken.OfType<JProperty>()) {
+        Dictionary<string, ActionFunction> triggers = [];
+        foreach (var trigger in triggerToken.GetProperties()) {
 
             // Get the trigger and the reaction.
-            string triggerKey = trigger.Name;
-            string triggerActionName = trigger.Value?.Value<string>() ?? "";
+            string triggerKey = trigger.Key;
+            string triggerActionName = trigger.Value?.ToRawValue<string>() ?? "";
 
             ActionFunction triggerAction;
 
@@ -322,7 +322,7 @@ public partial class Package {
     /// <summary>
     /// Returns a set that contains all loaded json files.
     /// </summary>
-    public IEnumerable<JToken> GetLoadedJson() => LoadedJsonReferences.Values;
+    public IEnumerable<JsonNode> GetLoadedJson() => LoadedJsonReferences.Values;
     /// <summary>
     /// Returns a set that contains all loaded <see cref="ActionFunction"/>s.
     /// </summary>
@@ -335,27 +335,27 @@ public partial class Package {
     /// <summary>
     /// All the <see cref="Card"/>s that have been loaded from their files and don't need to be reopened.
     /// </summary>
-    public readonly Dictionary<string, Card> LoadedCards = new();
+    public readonly Dictionary<string, Card> LoadedCards = [];
 
     /// <summary>
     /// All the <see cref="Hero"/>es that have been loaded from their files and don't need to be reopened.
     /// </summary>
-    private readonly Dictionary<string, Hero> LoadedHeroes = new();
+    private readonly Dictionary<string, Hero> LoadedHeroes = [];
 
     /// <summary>
-    /// All the json files that have been loaded by a key and dont need to be reopned.
+    /// All the json files that have been loaded by a key and don't need to be reopened.
     /// </summary>
-    private readonly Dictionary<string, JToken> LoadedJsonReferences = new();
+    private readonly Dictionary<string, JsonNode> LoadedJsonReferences = [];
 
     /// <summary>
     /// All the raw json files and their paths that have been loaded and don't need to be reopened.
     /// </summary>
-    private readonly Dictionary<string, JObject> LoadedJsonFiles = new();
+    private readonly Dictionary<string, JsonObject> LoadedJsonFiles = [];
 
     /// <summary>
     /// All the <see cref="ResourceType"/>s that have been loaded and don't need to be reopened.
     /// </summary>
-    private readonly Dictionary<string, ResourceType> LoadedResourceTypes = new();
+    private readonly Dictionary<string, ResourceType> LoadedResourceTypes = [];
 
     /// <summary>
     /// Get the amount of Loaded Items from each Dictionary Combined.
@@ -370,7 +370,7 @@ public partial class Package {
     /// </summary>
     /// <returns></returns>
     public string[] GetAllLoadedKeysSummary() {
-        List<string> keys = new();
+        List<string> keys = [];
         foreach (var k in LoadedCards.Keys)
             keys.Add("Card|" + k);
         foreach (var k in PackagedCode.Actions.Keys)
@@ -381,7 +381,7 @@ public partial class Package {
             keys.Add("Json|" + k);
         foreach (var k in LoadedResourceTypes.Keys)
             keys.Add("Res|" + k);
-        return keys.ToArray();
+        return [.. keys];
     }
 
     #endregion

@@ -1,4 +1,3 @@
-using MessagePack;
 using MoDuel.Client;
 using MoDuel.Data;
 using MoDuel.Players;
@@ -24,10 +23,9 @@ public partial class DuelState {
 
     /// <summary>
     /// The <see cref="Data.PackageCatalogue"/> files loaded for use in the duel can be found in.
-    /// <para>This value is not serilaized and needs to be set after deserialization.</para>
-    /// <para>TODO: Consider having this in settings and have settings be settable in derserialization.</para>
+    /// <para>This value is not serialized and needs to be set after deserialization.</para>
+    /// <para>TODO: Consider having this in settings and have settings be settable in deserialization.</para>
     /// </summary>
-    [MessagePack.IgnoreMember]
     private PackageCatalogue _packageCatalogue;
 
     /// <summary>
@@ -52,7 +50,7 @@ public partial class DuelState {
     /// <summary>
     /// Recordable game state values that are user defined.
     /// </summary>
-    public readonly Dictionary<string, object?> Values = new();
+    public readonly Dictionary<string, object?> Values = [];
 
     /// <summary>
     /// Accessor for <see cref="Values"/>.
@@ -62,7 +60,6 @@ public partial class DuelState {
     /// <summary>
     /// The animations that are sent out from the duel flow.
     /// </summary>
-    [IgnoreMember]
     public EventHandler<ClientRequest> OutBoundDelegate = delegate { };
 
     /// <summary>

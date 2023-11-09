@@ -4,12 +4,12 @@ using System.Reflection;
 namespace MoDuel.Serialization;
 
 /// <summary>
-/// Interface for data asset that allows it to be reloaded instead of reserializaed.
+/// Interface for data asset that allows it to be reloaded instead of reserialized.
 /// </summary>
 public interface IReloadable {
 
     /// <summary>
-    /// Gets the iitemPath that will be used when reloading the file from a <see cref="PackageCatalogue"/>.
+    /// Gets the itemPath that will be used when reloading the file from a <see cref="PackageCatalogue"/>.
     /// <para>Returns null if the item should not be reloaded in this way.</para>
     /// <para><see cref="GetItemPath"/> should have precedence when it and <see cref="GetStaticMethod"/> are checked.</para>
     /// </summary>

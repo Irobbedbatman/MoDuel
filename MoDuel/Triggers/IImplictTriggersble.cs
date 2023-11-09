@@ -1,8 +1,8 @@
 ﻿namespace MoDuel.Triggers;
 
 /// <summary>
-/// Objetcts that respond to global triggers; granting response.
-/// <para>Doesn't call the response; simply returns it such that it can be called when neccasary.</para>
+/// Objects that respond to global triggers; granting response.
+/// <para>Doesn't call the response; simply returns it such that it can be called when necessary.</para>
 /// </summary>
 public interface IImplicitTriggerable {
 

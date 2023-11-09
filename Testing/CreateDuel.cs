@@ -17,9 +17,9 @@ public class CreateDuel {
     public static DuelState CreateState() {
 
         // Get the default package.
-        string[] packages = new string[] {
-            "../../../../DefaultPackage\\bin\\Debug\\net7.0\\Data\\DefaultPackage.json"
-        };
+        string[] packages = [
+            "../../../../DefaultPackage\\bin\\Debug\\net8.0\\Data\\DefaultPackage.json"
+        ];
 
         Package.LogLoads = true;
 
@@ -52,8 +52,8 @@ public class CreateDuel {
         Hero hero = content.LoadHero("HoodedFigure");
 
         // Create the meta for both players.
-        PlayerMeta player1 = new("Player 1", pool, hero, hand, hand, new Dictionary<int, CardMeta>(), new Dictionary<string, object>());
-        PlayerMeta player2 = new("Player 2", pool, hero, hand, hand, new Dictionary<int, CardMeta>(), new Dictionary<string, object>());
+        PlayerMeta player1 = new("Player 1", pool, hero, hand, hand, new Dictionary<int, CardMeta>(), []);
+        PlayerMeta player2 = new("Player 2", pool, hero, hand, hand, new Dictionary<int, CardMeta>(), []);
 
         // Create and return the duel state.
         return new(player1, player2, content, settings);

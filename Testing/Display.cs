@@ -17,7 +17,7 @@ public static class Display {
 
         Console.Write("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n|");
         // Creature info is display after the field and so we need to store it while we iterate the field.
-        List<string> lines = new();
+        List<string> lines = [];
 
         foreach (var slot in field) {
 

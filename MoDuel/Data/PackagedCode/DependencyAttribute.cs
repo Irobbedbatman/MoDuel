@@ -1,13 +1,13 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Heroes;
 using MoDuel.Resources;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
 
 /// <summary>
-/// Atrribute attached to <see cref="ActionFunction"/> methods that inform the loader of a dependency it has.
+/// Attribute attached to <see cref="ActionFunction"/> methods that inform the loader of a dependency it has.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 public class DependencyAttribute : Attribute {
@@ -51,7 +51,7 @@ public class DependencyAttribute : Attribute {
     public readonly string DependencyName;
 
     /// <summary>
-    /// The <see cref="Type"/> of depencies to load when using a specific type.
+    /// The <see cref="Type"/> of decencies to load when using a specific type.
     /// </summary>
     public readonly Type? DependencyRawType;
 
@@ -98,15 +98,15 @@ public class DependencyAttribute : Attribute {
             nameof(Hero) => DependencyTypes.Hero,
             nameof(ActionFunction) or nameof(Action) => DependencyTypes.Hero,
             nameof(ResourceType) => DependencyTypes.ResourceType,
-            nameof(JToken) or nameof(JObject) => DependencyTypes.Json,
-            _ => throw new NotImplementedException($"Dependency loading for type: {type}; itempath: {DependencyName}."),
+            nameof(JsonObject) or nameof(JsonNode) => DependencyTypes.Json,
+            _ => throw new NotImplementedException($"Dependency loading for type: {type}; Item Path: {DependencyName}."),
         };
     }
 
     /// <summary>
-    /// Loads the dependency that this refrences.
+    /// Loads the dependency that this references.
     /// </summary>
-    /// <param name="catalogue">The list of all packages as the dependenancy can be external.</param>
+    /// <param name="catalogue">The list of all packages as the dependency can be external.</param>
     /// <param name="package">The package the item this attribute is attached to is within for local addressing.</param>
     /// <exception cref="NotImplementedException"></exception>
     public void LoadDependency(PackageCatalogue catalogue, Package package) {
@@ -127,15 +127,15 @@ public class DependencyAttribute : Attribute {
                 catalogue.LoadResourceType(DependencyName, package);
                 break;
             default:
-                throw new NotImplementedException($"Dependency loading for type: {DependencyType}; itempath: {DependencyName}.");
+                throw new NotImplementedException($"Dependency loading for type: {DependencyType}; Item Path: {DependencyName}.");
         }
     }
 
     /// <summary>
-    /// Loads the dependency that this refrences.
+    /// Loads the dependency that this references.
     /// </summary>
     /// <param name="type">The <see cref="DependencyRawType"/> that was provided.</param>
-    /// <param name="catalogue">The list of all packages as the dependenancy can be external.</param>
+    /// <param name="catalogue">The list of all packages as the dependency can be external.</param>
     /// <param name="package">The package the item this attribute is attached to is within for local addressing.</param>
     /// <exception cref="NotImplementedException"></exception>
     private void LoadDependency(Type? type, PackageCatalogue catalogue, Package package) {
@@ -155,12 +155,12 @@ public class DependencyAttribute : Attribute {
             case nameof(ResourceType):
                 catalogue.LoadResourceType(DependencyName, package);
                 break;
-            case nameof(JToken):
-            case nameof(JObject):
+            case nameof(JsonNode):
+            case nameof(JsonObject):
                 catalogue.LoadJson(DependencyName, package);
                 break;
             default:
-                throw new NotImplementedException($"Dependency loading for type: {type}; itempath: {DependencyName}.");
+                throw new NotImplementedException($"Dependency loading for type: {type}; Item Path: {DependencyName}.");
         }
 
     }

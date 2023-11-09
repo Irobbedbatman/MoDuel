@@ -11,7 +11,7 @@ public class CardInstanceManager {
     /// <summary>
     /// The list of all enabled <see cref="CardInstance"/> for triggering effects.
     /// </summary>
-    private readonly List<CardInstance> _cardInstances = new();
+    private readonly List<CardInstance> _cardInstances = [];
     public IReadOnlyList<CardInstance> CardInstances => _cardInstances.AsReadOnly();
 
     public void Register(CardInstance ci) {
@@ -42,7 +42,7 @@ public class CardInstanceManager {
     /// <para>Result is sorted based on the <paramref name="comparer"/> provided.</para>
     /// </summary>
     /// <param name="comparer">The comparer used to order the result.</param>
-    /// <param name="trigger">Onlt <see cref="CardInstance"/> that use this <paramref name="trigger"/> will be returned.</param>
+    /// <param name="trigger">Only <see cref="CardInstance"/> that use this <paramref name="trigger"/> will be returned.</param>
     /// <param name="selector">The predicate used to filter out results. Return true to keep.</param>
     /// <returns>A sorted list of all the <see cref="CardInstance"/>s that have reactions to the provided <paramref name="trigger"/>.</returns>
     public SortedSet<CardInstance> GetOrderedReactors(CardInstanceComparer comparer, string trigger, Func<CardInstance, bool>? selector = null) {
@@ -55,7 +55,7 @@ public class CardInstanceManager {
     }
 
     /// <summary>
-    /// Selector that returns true if the provided <see cref="CardInstance"/> is both explicitly and implictly active.
+    /// Selector that returns true if the provided <see cref="CardInstance"/> is both explicitly and implicitly active.
     /// </summary>
     public static bool ActiveSelector(CardInstance ci) => ci.Active;
 
@@ -70,9 +70,9 @@ public class CardInstanceManager {
     public static bool ExplicitActiveSelector(CardInstance ci) => ci.ExplicitTriggerActive;
 
     /// <summary>
-    /// Selector that returns true if the provided <see cref="CardInstance"/> is a <see cref="CreatureInstance"/> and is alive.
+    /// Selector that returns true if the provided <see cref="CardInstance"/> is a <see cref="CardInstance"/> and is alive.
     /// </summary>
-    public static bool AliveCreatuesSelector(CardInstance ci) => ci is CreatureInstance creature && creature.IsAlive;
+    public static bool AliveCreaturesSelector(CardInstance ci) => ci.IsAlive;
 
 
 }

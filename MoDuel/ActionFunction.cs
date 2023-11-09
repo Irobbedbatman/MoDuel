@@ -10,7 +10,7 @@ namespace MoDuel;
 public class ActionFunction : IReloadable {
 
     /// <summary>
-    /// Construcotr for an unassigned <see cref="ActionFunction"/>.
+    /// Constructor for an unassigned <see cref="ActionFunction"/>.
     /// </summary>
     public ActionFunction() { }
 
@@ -18,7 +18,7 @@ public class ActionFunction : IReloadable {
     /// Constructor for an assigned <see cref="ActionFunction"/>.
     /// </summary>
     /// <param name="fullItemPath">The path the <see cref="ActionFunction"/> was loaded from.</param>
-    /// <param name="_delegate">The <see cref="System.Delegate"/> that will be called intenally.</param>
+    /// <param name="_delegate">The <see cref="System.Delegate"/> that will be called internally.</param>
     public ActionFunction(string fullItemPath, Delegate _delegate) {
         FullItemPath = fullItemPath;
         Delegate = _delegate;
@@ -34,7 +34,7 @@ public class ActionFunction : IReloadable {
     /// <exception cref="InvalidOperationException">Thrown when the <see cref="ActionFunction"/> has already been assigned.</exception>
     public void Assign(string fullItemPath, Delegate _delegate) {
         if (IsAssigned) {
-            throw new InvalidOperationException($"An ActionFunction was assigned a new delgate when it had already been assigned one. Old Name: {FullItemPath}, New Name: {fullItemPath}.");
+            throw new InvalidOperationException($"An ActionFunction was assigned a new delegate when it had already been assigned one. Old Name: {FullItemPath}, New Name: {fullItemPath}.");
         }
         FullItemPath = fullItemPath;
         Delegate = _delegate;
@@ -43,7 +43,6 @@ public class ActionFunction : IReloadable {
     /// <summary>
     /// The internal delegate that the <see cref="ActionFunction"/> is wrapped around.
     /// </summary>
-    [MessagePack.IgnoreMember]
     private Delegate? Delegate;
 
     /// <summary>

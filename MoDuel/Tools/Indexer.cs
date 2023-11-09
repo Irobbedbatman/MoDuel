@@ -3,7 +3,7 @@
 namespace MoDuel.Tools;
 
 /// <summary>
-/// A class for handling unqiue indexed values.
+/// A class for handling unique indexed values.
 /// </summary>
 [SerializeReference]
 public class Indexer {
@@ -19,15 +19,15 @@ public class Indexer {
     private int _highestIndex = 0;
 
     /// <summary>
-    /// A stack that contains all the freed indicies for resuse.
+    /// A stack that contains all the freed indices for reuse.
     /// </summary>
-    private readonly Stack<int> _freeValues = new();
+    private readonly Stack<int> _freeValues = [];
 
     /// <summary>
     /// Gets the next unused index.
     /// <para>If there is a freed index we use that first.</para>
-    /// </summary>
-    /// <returns>A unqiue index.</returns>
+    /// </summary>s
+    /// <returns>A unique index.</returns>
     public int GetNext() {
         return _freeValues.TryPop(out int top) ? top : _highestIndex++;
     }

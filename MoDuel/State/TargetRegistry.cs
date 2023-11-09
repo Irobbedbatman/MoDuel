@@ -8,21 +8,17 @@ namespace MoDuel.State;
 /// <para>Provides indexing and lookup.</para>
 /// </summary>
 [SerializeReference]
-public class TargetRegistry {
+public class TargetRegistry(Indexer indexer) {
 
     /// <summary>
     /// The dictionary that will contain all <see cref="Target"/>s.
     /// </summary>
-    public readonly Dictionary<int, WeakReference<Target>> Lookup = new();
+    public readonly Dictionary<int, WeakReference<Target>> Lookup = [];
 
     /// <summary>
-    /// The tool that gives targets unqieu values.
+    /// The tool that gives targets unique values.
     /// </summary>
-    public readonly Indexer Indexer;
-
-    public TargetRegistry(Indexer indexer) {
-        Indexer = indexer;
-    }
+    public readonly Indexer Indexer = indexer;
 
     /// <summary>
     /// Get the next free index from the <see cref="Indexer"/>.
@@ -43,7 +39,7 @@ public class TargetRegistry {
 
     /// <summary>
     /// Removes the provided <paramref name="target"/> from the <see cref="Lookup"/> and it's <see cref="Target.Index"/> from the <see cref="Indexer"/>.
-    /// <para>Catches all error to esnure deconstructor safety.</para>
+    /// <para>Catches all error to ensure finalizer safety.</para>
     /// </summary>
     public void FreeTarget(Target target) {
         try {

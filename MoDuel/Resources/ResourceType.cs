@@ -1,21 +1,19 @@
 using MoDuel.Data;
 using MoDuel.Triggers;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Resources;
 
 /// <summary>
-/// A type for each diffrent resource. Defined by its <see cref="Name"/>. 
+/// A type for each different resource. Defined by its <see cref="Name"/>. 
 /// <para>Can be explicitly triggered to define custom behaviour.</para>
 /// </summary>
-public class ResourceType : LoadedAsset, IExplicitTriggerable {
+public class ResourceType(Package package, string id, JsonObject data) : LoadedAsset(package, id, data), IExplicitTriggerable {
 
     /// <summary>
-    /// The reactions this mana type will have when requested to react to certiain trigger keywords.
+    /// The reactions this mana type will have when requested to react to certain trigger keywords.
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> ExplicitTriggers = new();
-
-    public ResourceType(Package package, string id, JObject data) : base(package, id, data) { }
+    public readonly Dictionary<string, ActionFunction> ExplicitTriggers = [];
 
     /// <summary>
     /// Assign all the provided <paramref name="exTriggers"/> within <see cref="ExplicitTriggers"/>.

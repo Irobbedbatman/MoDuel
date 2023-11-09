@@ -6,12 +6,12 @@ namespace MoDuel.Resources;
 /// A counter that provides a <see cref="ResourceType"/> context to a count.
 /// </summary>
 [SerializeReference]
-public class ResourceCounter {
+public class ResourceCounter(ResourceType resourceType, int initialAmount = 0) {
 
     /// <summary>
     /// The <see cref="ResourceType"/> this <see cref="ResourceCounter"/> uses.
     /// </summary>
-    public ResourceType Resource;
+    public ResourceType Resource = resourceType;
 
     /// <summary>
     /// The name derived from <see cref="Resource"/>.
@@ -21,7 +21,7 @@ public class ResourceCounter {
     /// <summary>
     /// How much of this <see cref="Resource"/> has been counted.
     /// </summary>
-    public int Count { get; set; }
+    public int Count { get; set; } = initialAmount;
 
     /// <summary>
     /// How much of this <see cref="Resource"/> has been counted.
@@ -31,10 +31,4 @@ public class ResourceCounter {
         get => Count;
         set => Count = value;
     }
-
-    public ResourceCounter(ResourceType manatype, int initaalAmount = 0) {
-        Resource = manatype;
-        Count = initaalAmount;
-    }
-
 }

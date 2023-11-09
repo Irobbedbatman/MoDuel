@@ -1,4 +1,5 @@
 using MoDuel.Cards;
+using MoDuel.Players;
 using MoDuel.Serialization;
 using MoDuel.State;
 using System.Diagnostics.CodeAnalysis;
@@ -9,12 +10,12 @@ namespace MoDuel.Field;
 /// A Slot on a field that may contain a creature.
 /// </summary>
 [SerializeReference]
-public class FieldSlot : Target {
+public class FieldSlot(SubField parent, int relativePosition) : Target(parent.Context.TargetRegistry), ILocation {
 
     /// <summary>
     /// The field this slot is in.
     /// </summary>
-    public readonly SubField ParentField;
+    public readonly SubField ParentField = parent;
 
     /// <summary>
     /// The <see cref="FullField"/> this slot is in.
@@ -22,40 +23,44 @@ public class FieldSlot : Target {
     public FullField FullField => ParentField.FullField;
 
     /// <summary>
-    /// The position this <see cref="FieldSlot"/> in retlation to it's <see cref="ParentField"/>.
+    /// The position this <see cref="FieldSlot"/> in relation to it's <see cref="ParentField"/>.
     /// <para>If trying to find the position of this slot in a <see cref="FullField"/> use <see cref="Field.SlotPosition(FieldSlot)"/>.</para>
     /// </summary>
-    public readonly int RelativePosition;
+    public readonly int RelativePosition = relativePosition;
 
     /// <summary>
-    /// The positoin of this <see cref="FieldSlot"/> within the <see cref="FullField"/>.
+    /// The position of this <see cref="FieldSlot"/> within the <see cref="FullField"/>.
     /// </summary>
     public int FullPosition => FullField.SlotPosition(this);
 
     /// <summary>
-    /// The internal field to sync and esync with <see cref="CreatureInstance.Position"/>
+    /// The internal field to sync with <see cref="CardInstance.Position"/>
     /// </summary>
-    internal CreatureInstance? _occupant = null;
+    internal CardInstance? _occupant = null;
 
     /// <summary>
-    /// A <see cref="CreatureInstance"/> that is in the slot.
+    /// A <see cref="CardInstance"/> that is in the slot.
     /// <para>null if the slot is empty.</para>
     /// </summary>
-    public CreatureInstance? Occupant {
+    /// 
+    [MemberNotNullWhen(true, nameof(_occupant))]
+    public CardInstance? Occupant {
         get { return _occupant; }
         set {
+            // Don't bother setting when value is the same.
+            if (_occupant == value) return;
+            // Clear the position for the current occupant. This will clear this position too.
+            if (_occupant != null) {
+                _occupant.Position = null;
+            }
+            // If a new card is provided; update it's position. This will also update the occupant.
             if (value != null) {
-                if (value._position != null)
-                    value._position._occupant = null;
-                value._position = this;
+                value.Position = this;
             }
-            //If the creature is null we still need to clear the occupant.
+            // Otherwise mark the location as empty.
             else {
-                if (_occupant != null)
-                    _occupant._position = null;
+                _occupant = null;
             }
-
-            _occupant = value;
         }
     }
 
@@ -63,11 +68,6 @@ public class FieldSlot : Target {
     /// The context of this <see cref="FieldSlot"/> derived through it's <see cref="SubField"/>.
     /// </summary>
     public DuelState Context => ParentField.Context;
-
-    public FieldSlot(SubField parent, int relativePosition) : base(parent.Context.TargetRegistry) {
-        ParentField = parent;
-        RelativePosition = relativePosition;
-    }
 
     /// <summary>
     /// Check to see if the slot is unoccupied.
@@ -114,7 +114,7 @@ public class FieldSlot : Target {
 
 
     /// <summary>
-    /// Gets the slot ot the right. If the ther is no slot to the right will wrap around the field.
+    /// Gets the slot ot the right. If there is no slot to the right will wrap around the field.
     /// </summary>
     public FieldSlot GetSlotToTheRightWithWrapping() {
         var position = ParentField.WrapHorizontal(RelativePosition, 1);
@@ -123,10 +123,29 @@ public class FieldSlot : Target {
 
 
     /// <summary>
-    /// Gets the slot ot the left. If the ther is no slot to the left will wrap around the field.
+    /// Gets the slot ot the left. If there is no slot to the left will wrap around the field.
     /// </summary>
     public FieldSlot GetSlotToTheLeftWithWrapping() {
         var position = ParentField.WrapHorizontal(RelativePosition, -1);
         return ParentField[position];
     }
+
+    /// <inheritdoc/>
+    public void RemoveCurrentOccupant() { 
+        Occupant = null;
+    }
+
+    /// <inheritdoc/>
+    public void JustRemove(CardInstance card) {
+        _occupant = null;
+    }
+
+    /// <inheritdoc/>
+    public void JustAdd(CardInstance card) {
+        _occupant = card;
+    }
+
+    /// <inheritdoc/>
+    public Player GetOwner() => ParentField.Owner;
+
 }

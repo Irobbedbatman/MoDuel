@@ -10,7 +10,7 @@ namespace MoDuel;
 public abstract class Target {
 
     /// <summary>
-    /// The unique identifer of this target.
+    /// The unique identifier of this target.
     /// </summary>
     public readonly int Index;
 
@@ -23,7 +23,7 @@ public abstract class Target {
     /// Instance values held on this <see cref="Target"/>.
     /// <para>Serialized with state of the duel.</para>
     /// </summary>
-    public readonly Dictionary<string, object?> Values = new();
+    public readonly Dictionary<string, object?> Values = [];
 
     public Target(TargetRegistry registry, int? index = null) {
         Registry = registry;
@@ -32,7 +32,7 @@ public abstract class Target {
     }
 
     /// <summary>
-    /// Finalizer of a Target. Frees up the unqiue index to use elsewhere.
+    /// Finalizer of a Target. Frees up the unique index to use elsewhere.
     /// </summary>
     ~Target() {
         try {
@@ -47,7 +47,7 @@ public abstract class Target {
     public void SetValue(string key, object? val) => Values[key] = val;
 
     /// <summary>
-    /// Retreives a value from <see cref="Values"/>.
+    /// Retrieve a value from <see cref="Values"/>.
     /// <para>Returns null if the <paramref name="key"/> is not found.</para>
     /// </summary>
     public dynamic? GetValue(string key) {
@@ -73,7 +73,7 @@ public abstract class Target {
 
     /// <summary>
     /// Retrieves a value from <see cref="Values"/>
-    /// <para>Returns the value provided in fallback if no value was found and also sets the corisponding value in <see cref="Values"/>.</para>
+    /// <para>Returns the value provided in fallback if no value was found and also sets the corresponding value in <see cref="Values"/>.</para>
     /// </summary>
     public dynamic? GetOrSetValue(string key, object? fallback) {
         if (Values.TryGetValue(key, out var val))

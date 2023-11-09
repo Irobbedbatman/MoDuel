@@ -8,36 +8,31 @@ namespace MoDuel.Heroes;
 /// An instanced version of <see cref="Hero"/> stored in a <see cref="Player"/>.
 /// </summary>
 [SerializeReference]
-public class HeroInstance : IImplicitTriggerable, IExplicitTriggerable {
+public class HeroInstance(Hero hero, Player owner) : IImplicitTriggerable, IExplicitTriggerable {
 
     /// <summary>
     /// The <see cref="Hero"/> this <see cref="HeroInstance"/> is taken from.
     /// </summary>
-    public readonly Hero Imprint;
+    public readonly Hero Imprint = hero;
 
     /// <summary>
     /// The <see cref="Player"/> that is using this <see cref="HeroInstance"/> as their <see cref="Player.Hero"/>.
     /// </summary>
-    public readonly Player Owner;
+    public readonly Player Owner = owner;
 
     /// <summary>
     /// Trigger reactions that are used before ones that are found in <see cref="Imprint"/>.
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> NewTriggerReactions = new();
+    public readonly Dictionary<string, ActionFunction> NewTriggerReactions = [];
     /// <summary>
     /// Explicit trigger reactions that are used before ones that are found in <see cref="Imprint"/>.
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> NewExplicitTriggerReactions = new();
-
-    public HeroInstance(Hero hero, Player owner) {
-        Imprint = hero;
-        Owner = owner;
-    }
+    public readonly Dictionary<string, ActionFunction> NewExplicitTriggerReactions = [];
 
     /// <summary>
     /// Add a trigger reaction to this <see cref="HeroInstance"/>.
     /// </summary>
-    /// <param name="isExplicit">Is the trigger that is being added an explicit trigger or an implicit tirgger.</param>
+    /// <param name="isExplicit">Is the trigger that is being added an explicit trigger or an implicit trigger.</param>
     public void AddTrigger(string triggerKey, ActionFunction triggerReaction, bool isExplicit = false) {
         if (!isExplicit)
             NewTriggerReactions.Add(triggerKey, triggerReaction);
@@ -46,14 +41,14 @@ public class HeroInstance : IImplicitTriggerable, IExplicitTriggerable {
     }
 
     /// <summary>
-    /// Adds an explicit reacion to this <see cref="HeroInstance"/>.
+    /// Adds an explicit reaction to this <see cref="HeroInstance"/>.
     /// </summary>
     public void AddExplicitTrigger(string triggerKey, ActionFunction reaction) => AddTrigger(triggerKey, reaction, true);
 
     /// <summary>
     /// Removes a trigger reaction.
     /// </summary>
-    /// <param name="isExplicit">Is the trigger that is being remvoed an explicit trigger.</param>
+    /// <param name="isExplicit">Is the trigger that is being removed an explicit trigger.</param>
     public void RemoveTrigger(string triggerKey, bool isExplicit = false) {
         if (!isExplicit)
             NewTriggerReactions.Remove(triggerKey);
@@ -63,11 +58,11 @@ public class HeroInstance : IImplicitTriggerable, IExplicitTriggerable {
     /// <summary>
     /// Removes an explicit trigger reaction.
     /// </summary>
-    public void RemoveExplictTrigger(string triggerKey) => NewExplicitTriggerReactions.Remove(triggerKey);
+    public void RemoveExplicitTrigger(string triggerKey) => NewExplicitTriggerReactions.Remove(triggerKey);
 
     /// <inheritdoc/>
     public ActionFunction GetExplicitReaction(string trigger) {
-        // Priortise reactions on this instance first.
+        // Prioritize reactions on this instance first.
         if (NewExplicitTriggerReactions.TryGetValue(trigger, out var reaction))
             return reaction;
         if (Imprint.ExplicitTriggerReactions.TryGetValue(trigger, out reaction))
@@ -76,7 +71,7 @@ public class HeroInstance : IImplicitTriggerable, IExplicitTriggerable {
     }
     /// <inheritdoc/>
     public ActionFunction GetImplicitReaction(string trigger) {
-        // Priortise reactions on this instance first.
+        // Prioritize reactions on this instance first.
         if (NewTriggerReactions.TryGetValue(trigger, out var value))
             return value;
         if (Imprint.TriggerReactions.TryGetValue(trigger, out value))

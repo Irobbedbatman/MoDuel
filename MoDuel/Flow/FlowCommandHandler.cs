@@ -8,27 +8,27 @@ namespace MoDuel.Flow;
 internal class FlowCommandHandler : IDisposable {
 
     /// <summary>
-    /// The duration in seconds a <see cref="CommandReference"/> is eligble to be activated.
+    /// The duration in seconds a <see cref="CommandReference"/> is eligible to be activated.
     /// <para>This doesn't remove it from the queue; rather makes the command have no effect.</para>
     /// </summary>
     public const double CommandTimeOut = 1;
 
     /// <summary>
-    /// Wether managed resources have been disposed.
+    /// Whether managed resources have been disposed.
     /// </summary>
     private bool isDisposed;
 
     /// <summary>
-    /// The reset event that is called when a command has been recieved so as not to block the thread while waiting.
+    /// The reset event that is called when a command has been received so as not to block the thread while waiting.
     /// </summary>
     private ManualResetEvent? CommandReadySignal = new(false);
 
     /// <summary>
     /// The list of commands buffered by players.
     /// <para>Sorted by the time they were added.</para>
-    /// <para>Only one command should be stored per <see cref="Player"/>; theeir older command will be replaced.</para>
+    /// <para>Only one command should be stored per <see cref="Player"/>; their older command will be replaced.</para>
     /// </summary>
-    private readonly SortedList<CommandReference, Action> CommandBuffer = new();
+    private readonly SortedList<CommandReference, Action> CommandBuffer = [];
 
     /// <summary>
     /// Retrieves a command from a <paramref name="player"/> and adds it to the <see cref="CommandBuffer"/>.
@@ -55,8 +55,8 @@ internal class FlowCommandHandler : IDisposable {
             }
 
             // Execute the command and get a return code that represents if the command was valid.
-            bool commandSucess = action.Call(args.Prepend(player).ToArray());
-            // TODO: VALIDATION utilise command failure.
+            bool commandSuccess = action.Call(args.Prepend(player).ToArray());
+            // TODO VALIDATION: utilise command failure.
         }
 
         // Lock commands so that remove of commands is still thread safe.
@@ -64,11 +64,11 @@ internal class FlowCommandHandler : IDisposable {
 
             // Add the command to the buffer.
             var cmdRef = new CommandReference(player, commandTime);
-            // As command refernces are equal for the same player this will overwrite any old commands.
+            // As command references are equal for the same player this will overwrite any old commands.
             CommandBuffer[cmdRef] = command;
 
             if (DuelFlow.LoggingEnabled)
-                Console.WriteLine("Command Recieved");
+                Console.WriteLine("Command Received");
 
             // Tell the flow to resume.
             CommandReadySignal?.Set();
@@ -86,7 +86,7 @@ internal class FlowCommandHandler : IDisposable {
         // Record a reference to the command that will retrieved from the command buffer.
         KeyValuePair<CommandReference, Action>? command = null;
 
-        // We lock for removal and retreival.
+        // We lock for removal and retrieval.
         lock (CommandBuffer) {
             if (CommandBuffer.Count > 0) {
                 // Get the command.
@@ -105,7 +105,7 @@ internal class FlowCommandHandler : IDisposable {
             command?.Value.Invoke();
         }
         catch (Exception e) {
-            // Because invoke may cause unhandled execptions display them for debugging.
+            // Because invoke may cause unhandled exceptions display them for debugging.
             Console.Write(e.StackTrace);
         }
     }

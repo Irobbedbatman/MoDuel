@@ -7,7 +7,7 @@ namespace MoDuel.OngoingEffects;
 
 /// <summary>
 /// An effect that is made to persist as long as its active.
-/// <para>Behaviour is perfromed through implict and explicit triggers.</para>
+/// <para>Behaviour is performed through implicit and explicit triggers.</para>
 /// </summary>
 [SerializeReference]
 public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable {
@@ -27,7 +27,7 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// <para>The <see cref="string"/> is a trigger keyword.</para>
     /// <para>The <see cref="Closure"/> reaction is a lua function.</para>
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> TriggerReactions = new();
+    public readonly Dictionary<string, ActionFunction> TriggerReactions = [];
 
     /// <summary>
     /// A dictionary with triggers being used as keys and reactions as values.
@@ -35,7 +35,7 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// <para>The <see cref="string"/> is a trigger keyword.</para>
     /// <para>The <see cref="Closure"/> reaction is a lua function.</para>
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> ExplicitTriggerReactions = new();
+    public readonly Dictionary<string, ActionFunction> ExplicitTriggerReactions = [];
 
     /// <summary>
     /// The player that caused this <see cref="OngoingEffect"/> to be created.
@@ -43,13 +43,13 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     public readonly Player? Owner = null;
 
     /// <summary>
-    /// The manager that will determine the activation and deactivateion of this effect.
+    /// The manager that will determine the activation and deactivation of this effect.
     /// </summary>
     public readonly OngoingEffectManager Manager;
 
     /// <summary>
     /// Shared active state of <see cref="ExplicitTriggerActive"/> and <see cref="ImplicitTriggerActive"/>.
-    /// <para>Used to simplfy disabling both.</para>
+    /// <para>Used to simplify disabling both.</para>
     /// </summary>
     public bool Active {
         get => ExplicitTriggerActive && ImplicitTriggerActive;
@@ -72,7 +72,7 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// <summary>
     /// Creates a new ongoing effect.
     /// </summary>
-    /// <param name="setActive">Wether this effect is active immeaditly.</param>
+    /// <param name="setActive">Whether this effect is active immediately.</param>
     /// <param name="player">The owner of the effect.</param>
     public OngoingEffect(DuelState context, Player? player = null, bool setActive = true) : base(context.TargetRegistry) {
         Context = context;
@@ -86,7 +86,7 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// Activates this <see cref="OngoingEffect"/>; adding it to <see cref="OngoingEffects"/>.
     /// </summary>
     /// <returns>True if the effect could be activated.</returns>
-    public bool Register() => Manager.RegisterOngoingEffect(this);
+    public void Register() => Manager.RegisterOngoingEffect(this);
 
     /// <summary>
     /// Deactivate this <see cref="OngoingEffect"/>; removing it from <see cref="OngoingEffects"/>.
@@ -97,7 +97,7 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// <summary>
     /// Add a trigger reaction to this <see cref="OngoingEffect"/>.
     /// </summary>
-    /// <param name="isExplicit">Is the trigger that is being added an explicit trigger or an implicit tirgger.</param>
+    /// <param name="isExplicit">Is the trigger that is being added an explicit trigger or an implicit trigger.</param>
     public void AddTrigger(string triggerKey, ActionFunction triggerReaction, bool isExplicit = false) {
         if (!isExplicit)
             TriggerReactions.Add(triggerKey, triggerReaction);
@@ -113,7 +113,7 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// <summary>
     /// Removes a trigger reaction.
     /// </summary>
-    /// <param name="isExplicit">Is the trigger that is being remvoed an explicit trigger.</param>
+    /// <param name="isExplicit">Is the trigger that is being removed an explicit trigger.</param>
     public void RemoveTrigger(string triggerKey, bool isExplicit = false) {
         if (!isExplicit)
             TriggerReactions.Remove(triggerKey);
@@ -123,10 +123,10 @@ public class OngoingEffect : Target, IImplicitTriggerable, IExplicitTriggerable 
     /// <summary>
     /// Removes an explicit trigger reaction.
     /// </summary>
-    public void RemoveExplictTrigger(string triggerKey) => ExplicitTriggerReactions.Remove(triggerKey);
+    public void RemoveExplicitTrigger(string triggerKey) => ExplicitTriggerReactions.Remove(triggerKey);
 
     /// <summary>
-    /// Attermpt to get a trigger reaction from this <see cref="OngoingEffect"/>.
+    /// Attempt to get a trigger reaction from this <see cref="OngoingEffect"/>.
     /// </summary>
     public bool TryGetReaction(string trigger, out ActionFunction? value) => TriggerReactions.TryGetValue(trigger, out value);
 

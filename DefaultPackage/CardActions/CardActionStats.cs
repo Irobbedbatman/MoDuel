@@ -106,7 +106,7 @@ public static partial class CardActions {
 
         card.Context.OverwriteTrigger("CardCostOverwrite", overwriteTable);
 
-        return overwriteTable.Get<ResourceCost>("Cost") ?? new ResourceCost();
+        return overwriteTable.Get<ResourceCost>("Cost") ?? [];
     }
 
 

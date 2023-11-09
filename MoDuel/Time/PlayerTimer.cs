@@ -10,31 +10,30 @@ namespace MoDuel.Time;
 /// <para>Settings are provided through the <see cref="TimerSettings"/>.</para>
 /// </summary>
 [SerializeReference]
-public class PlayerTimer {
+public class PlayerTimer(Player player, TimerSettings settings) {
 
     /// <summary>
     /// The <see cref="Player"/> that this <see cref="PlayerTimer"/> belongs to.
     /// </summary>
-    public readonly Player Player;
+    public readonly Player Player = player;
     /// <summary>
     /// The <see cref="TimerSettings"/> that the <see cref="PlayerTimer"/> will adjust time based off.
     /// </summary>
-    private readonly TimerSettings Settings;
+    private readonly TimerSettings Settings = settings;
     /// <summary>
     /// The <see cref="Stopwatch"/> that will record the time between <see cref="Start(bool)"/> and <see cref="Stop()"/>.
     /// </summary>
-    [MessagePack.IgnoreMember]
     private readonly Stopwatch TimeTakenWatch = new();
     /// <summary>
-    /// The abosloute amount of time spent by the owning <see cref="Player"/>.
-    /// <para>Compared against <see cref="TimerSettings.AbsolouteTimeOut"/>.</para>
+    /// The absolute amount of time spent by the owning <see cref="Player"/>.
+    /// <para>Compared against <see cref="TimerSettings.AbsoluteTimeOut"/>.</para>
     /// </summary>
     public double TotalElapsed { get; private set; } = 0;
     /// <summary>
-    /// The allocated time this player has remainimg.
+    /// The allocated time this player has remaining.
     /// <para>Uses <see cref="TimerSettings"/> to refresh the value each time.</para>
     /// </summary>
-    public double TimeSaved { get; private set; } = 0;
+    public double TimeSaved { get; private set; } = settings.InitialTime;
     /// <summary>
     /// If <see cref="StartTimer(Timer)"/> has been called but <see cref="EndTimer(Timer)"/> has not.
     /// </summary>
@@ -51,14 +50,8 @@ public class PlayerTimer {
     /// </summary>
     private readonly System.Timers.Timer Timer = new() { AutoReset = false };
 
-    public PlayerTimer(Player player, TimerSettings settings) {
-        Player = player;
-        Settings = settings;
-        TimeSaved = settings.InitialTime;
-    }
-
     /// <summary>
-    /// Finalizer that disposes of unamanged resources.
+    /// Finalizer that disposes of unmanaged resources.
     /// </summary>
     ~PlayerTimer() {
         try {
@@ -70,11 +63,11 @@ public class PlayerTimer {
     /// <summary>
     /// Assign the action that will occur when the <see cref="PlayerTimer"/> reaches 0.
     /// </summary>
-    /// <param name="threadlock">The lockable object that is used to esnure the timer is thread safe.</param>
-    public void SetTimeout(object threadlock) {
+    /// <param name="threadLock">The lockable object that is used to ensure the timer is thread safe.</param>
+    public void SetTimeout(object threadLock) {
         Timer.Elapsed += delegate {
-            lock (threadlock) {
-                // Ensure the timer was not stoppped between the elapsed event and recieving the lock.
+            lock (threadLock) {
+                // Ensure the timer was not stopped between the elapsed event and receiving the lock.
                 if (Started) {
                     Settings.TimeOutAction?.Call(Player);
                 }
@@ -109,13 +102,13 @@ public class PlayerTimer {
         TimeTakenWatch.Restart();
         //Mark the timer as started; ensuring that only one timer is ongoing and validate stopping the timer.
         Started = true;
-        // Return how long the timer will go for minus without accoudning for the buffer.
+        // Return how long the timer will go for minus without accounting for the buffer.
         return Timer.Interval - Settings.Buffer;
     }
 
     /// <summary>
     /// Stops the <see cref="PlayerTimer"/> if has been <see cref="Started"/>.
-    /// <para>Reduces <see cref="TimeSaved"/> by the time diffrence since <see cref="Start(bool)"/> was called.</para>
+    /// <para>Reduces <see cref="TimeSaved"/> by the time difference since <see cref="Start(bool)"/> was called.</para>
     /// <para>Also updates the <see cref="DeficitMultiplier"/>.</para>
     /// </summary>
     /// <returns>The time taken since <see cref="Start(bool)"/> was called.</returns>
@@ -128,9 +121,9 @@ public class PlayerTimer {
         // Get the time since the timer started.
         double timeTaken = TimeTakenWatch.ElapsedMilliseconds;
 
-        // Caclulate the percentage of time taken.
+        // Calculate the percentage of time taken.
         double timeRate = timeTaken / TimeSaved;
-        // Multiply the deficit multiplier inversly based on time spent. More time spent = less time refreshed.
+        // Multiply the deficit multiplier inversely based on time spent. More time spent = less time refreshed.
         DeficitMultiplier *= 1 - (timeRate * Settings.PercentileDeficit);
 
         // Reduce the banked time by the time it took.
@@ -144,7 +137,7 @@ public class PlayerTimer {
         // Inform other aspects of the timer that it is stopped.
         Started = false;
 
-        // Return the time elasped since Start was called.
+        // Return the time elapsed since Start was called.
         return timeTaken;
     }
 
@@ -183,7 +176,7 @@ public class PlayerTimer {
     /// <summary>
     /// Updates the <see cref="Timer.Interval"/>.
     /// <para>If called while the timer is <see cref="Started"/> adjusts for the time spent.</para>
-    /// <para>Adjusing the interval manually will reset the <see cref="Timer"/> and will desync <see cref="PlayerTimer"/> information.</para>
+    /// <para>Adjusting the interval manually will reset the <see cref="Timer"/> and will desync <see cref="PlayerTimer"/> information.</para>
     /// </summary>
     /// <param name="newValue">The new <see cref="Timer.Interval"/> accounting for time spent since the timer was <see cref="Started"/>.</param>
     private void ModifyInterval(double newValue) {
@@ -191,13 +184,13 @@ public class PlayerTimer {
             // If the timer is running need to reduce the interval by the time timer has been run for.
             double elapsed = TimeTakenWatch.ElapsedMilliseconds;
             double difference = newValue - elapsed;
-            // If the timer would be run at an erroneous time run it for the minium amount of time.
+            // If the timer would be run at an erroneous time run it for the minimum amount of time.
             if (difference <= 0)
                 difference = double.Epsilon;
             Timer.Interval = difference;
         }
         else {
-            // Assign time noramlly when the timer is stopped.
+            // Assign time normally when the timer is stopped.
             Timer.Interval = newValue;
         }
     }
@@ -215,17 +208,17 @@ public class PlayerTimer {
     }
 
     /// <summary>
-    /// Gets the time remaing until timeout.
-    /// <para>Checks to see if <see cref="TimerSettings.AbsolouteTimeOut"/> will be reached before <see cref="TimeSaved"/> reahces 0.</para>
+    /// Gets the time remaining until timeout.
+    /// <para>Checks to see if <see cref="TimerSettings.AbsoluteTimeOut"/> will be reached before <see cref="TimeSaved"/> reaches 0.</para>
     /// </summary>
     public double GetTimeRemaining() {
 
         // TimeSaved does not update until after Stop is called.
         // So reduce it's value here by the time taken so far.
         double reduction = Started ? TimeTakenWatch.ElapsedMilliseconds : 0;
-        // Check to see if absolouteTimeOut will happen before the saved time runs out.
-        if (Settings.AbsolouteTimeOut - TotalElapsed < TimeSaved - reduction)
-            return Settings.AbsolouteTimeOut - TotalElapsed;
+        // Check to see if absoluteTimeOut will happen before the saved time runs out.
+        if (Settings.AbsoluteTimeOut - TotalElapsed < TimeSaved - reduction)
+            return Settings.AbsoluteTimeOut - TotalElapsed;
         else
             return TimeSaved;
 

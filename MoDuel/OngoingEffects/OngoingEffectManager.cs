@@ -12,15 +12,15 @@ public class OngoingEffectManager : IEnumerable<OngoingEffect> {
     /// <summary>
     /// The set of currently active ongoing effects.
     /// </summary>
-    public readonly HashSet<OngoingEffect> OngoingEffects = new();
+    public readonly List<OngoingEffect> OngoingEffects = [];
 
     /// <summary>
     /// Activates the provided <paramref name="effect"/> by adding to the <see cref="OngoingEffects"/>.
     /// </summary>
-    public bool RegisterOngoingEffect(OngoingEffect effect) => OngoingEffects.Add(effect);
+    public void RegisterOngoingEffect(OngoingEffect effect) => OngoingEffects.Add(effect);
 
     /// <summary>
-    /// Deactivates the provided <paramref name="effect"/> by removcing it from the <see cref="OngoingEffects"/>.
+    /// Deactivates the provided <paramref name="effect"/> by removing it from the <see cref="OngoingEffects"/>.
     /// </summary>
     public bool DeregisterOngoingEffect(OngoingEffect effect) => OngoingEffects.Remove(effect);
 

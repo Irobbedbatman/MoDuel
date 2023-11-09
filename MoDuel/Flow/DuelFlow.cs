@@ -9,7 +9,7 @@ namespace MoDuel.Flow;
 /// The flow object that wraps a <see cref="DuelState"/> to provide interaction.
 /// <para>After creation call <see cref="StartLoop"/> to start the duel.</para>
 /// </summary>
-public class DuelFlow : IDisposable {
+public class DuelFlow(DuelState state) : IDisposable {
 
     /// <summary>
     /// A flag that when enabled will cause the <see cref="DuelFlow"/> to print messages during operation.
@@ -19,7 +19,7 @@ public class DuelFlow : IDisposable {
     /// <summary>
     /// The state the <see cref="DuelFlow"/> is providing flow to.
     /// </summary>
-    public readonly DuelState State;
+    public readonly DuelState State = state;
 
     /// <summary>
     /// The sole thread that the flow utilises for executing commands.
@@ -33,7 +33,7 @@ public class DuelFlow : IDisposable {
     private bool isDisposed;
 
     /// <summary>
-    /// Wether the thread should be stopped.
+    /// Whether the thread should be stopped.
     /// </summary>
     private bool Stopped = false;
 
@@ -52,14 +52,10 @@ public class DuelFlow : IDisposable {
     /// </summary>
     private readonly FlowCommandHandler CommandHandler = new();
 
-    public DuelFlow(DuelState state) {
-        State = state;
-    }
-
     /// <summary>
     /// Starts the duel loop if it had not already been started.
     /// </summary>
-    /// <param name="startDuel">Wether to also start the duel. Note if the duel state is not started the loop will not start.</param>
+    /// <param name="startDuel">Whether to also start the duel. Note if the duel state is not started the loop will not start.</param>
     public void StartLoop(bool startDuel = true) {
 
         if (Thread != null) {
@@ -91,7 +87,7 @@ public class DuelFlow : IDisposable {
 
         ThreadContext.DuelState = State;
 
-        // Only lopp while the duel is ongoing.
+        // Only loop while the duel is ongoing.
         while (!Stopped && State.Ongoing) {
 
             // Non-blocking wait until a command is ready.
@@ -110,14 +106,14 @@ public class DuelFlow : IDisposable {
         if (LoggingEnabled)
             Console.WriteLine("Thread finished running cleanup.");
 
-        // Perfrom clean up once the loop is over.
+        // Perform clean up once the loop is over.
         OnThreadFinished?.Invoke();
         Thread = null;
     }
 
 
     /// <summary>
-    /// Enqueues the commmand sent from the <paramref name="player"/> with the corresponding <paramref name="args"/>.
+    /// Enqueues the command sent from the <paramref name="player"/> with the corresponding <paramref name="args"/>.
     /// </summary>
     /// <param name="cmdId">The key used to find the command to run.</param>
     /// <param name="player">The <see cref="Player"/> that send the command.</param>
@@ -140,7 +136,7 @@ public class DuelFlow : IDisposable {
     }
 
     /// <summary>
-    /// Finalizer to clean up unmaaged resources.
+    /// Finalizer to clean up unmanaged resources.
     /// </summary>
     ~DuelFlow() {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

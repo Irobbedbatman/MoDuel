@@ -33,7 +33,7 @@ public static class CombatActions {
         var comparer = new CardInstanceComparer(state.CurrentTurn.Owner, "AttackCompare");
 
         /// The hashset on the state that stores attack data.
-        var attackers = (HashSet<CreatureInstance>?)state.Values[READY_CREATURES];
+        var attackers = (HashSet<CardInstance>?)state.Values[READY_CREATURES];
 
         // Have each attacker attack.
         while (attackers?.Count > 0) {
@@ -49,8 +49,8 @@ public static class CombatActions {
     /// <summary>
     /// The default check on a creature to determine if the creature can attack this combat phase.
     /// </summary>
-    [ActionName(nameof(DeafultCreatureReadyCheck))]
-    public static bool DeafultCreatureReadyCheck(CreatureInstance creature, DuelState state) {
+    [ActionName(nameof(DefaultCreatureReadyCheck))]
+    public static bool DefaultCreatureReadyCheck(CardInstance creature, DuelState state) {
         if (!creature.IsAlive || creature.Owner != state.CurrentTurn.Owner || creature.Imprint.HasTag("Pacifist")) {
             return false;
         }
@@ -65,7 +65,7 @@ public static class CombatActions {
 
         var eligableAttacks = state.Field.GetCreatures().Where(
             (creature) => {
-                return creature.FallbackTrigger("ReadyToAttack", DeafultCreatureReadyCheck,
+                return creature.FallbackTrigger("ReadyToAttack", DefaultCreatureReadyCheck,
                     state);
             }).ToHashSet();
 
@@ -77,18 +77,18 @@ public static class CombatActions {
     /// <summary>
     /// Get the creature that will perform the next attack.
     /// </summary>
-    public static CreatureInstance? GetNextAttacker(DuelState state, CardInstanceComparer comparer) {
+    public static CardInstance? GetNextAttacker(DuelState state, CardInstanceComparer comparer) {
 #nullable disable
-        var creatures = (HashSet<CreatureInstance>)state.Values.GetValueOrDefault(READY_CREATURES, new HashSet<CreatureInstance>());
+        var creatures = (HashSet<CardInstance>)state.Values.GetValueOrDefault(READY_CREATURES, new HashSet<CardInstance>());
         foreach (var creature in creatures.ToArray()) {
             if (!creature.FallbackTrigger(
                 "ReadyToAttack",
-                DeafultCreatureReadyCheck,
+                DefaultCreatureReadyCheck,
                 state)) {
                 creatures.Remove(creature);
             }
         }
-        return (CreatureInstance)creatures.Order(comparer).FirstOrDefault();
+        return (CardInstance)creatures.Order(comparer).FirstOrDefault();
 #nullable enable
     }
 

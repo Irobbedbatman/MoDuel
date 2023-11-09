@@ -35,7 +35,7 @@ public class TimerSettings {
     /// <summary>
     /// A hard cutoff that ignore other time rules.
     /// </summary>
-    public double AbsolouteTimeOut = FromMinutes(15);
+    public double AbsoluteTimeOut = FromMinutes(15);
     /// <summary>
     /// An amount of time that is added to the timer so that network or timer offset; such that it doesn't seem abrupt.
     /// </summary>

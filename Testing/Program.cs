@@ -1,7 +1,7 @@
 ﻿using MoDuel.Flow;
-using MoDuel.Serialization;
 using MoDuel.State;
 using Testing;
+
 
 DuelState state = CreateDuel.CreateState();
 

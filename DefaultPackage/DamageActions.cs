@@ -49,7 +49,7 @@ public static class DamageActions {
 
         if (target is Player player)
             InflictDamageToPlayer(player, damage, lethal);
-        if (target is CreatureInstance creature) {
+        if (target is CardInstance creature) {
             InflictDamageToCreature(creature, damage, lethal);
         }
     }
@@ -80,7 +80,7 @@ public static class DamageActions {
     /// <summary>
     /// Calculates the amount of damage that will be done after armour reduction.
     /// </summary>
-    public static int DamageToArmourCalculation(CreatureInstance target, int damage) {
+    public static int DamageToArmourCalculation(CardInstance target, int damage) {
         var def = target.Armour;
         if (def - damage <= 0) {
             target.Armour = 0;
@@ -101,7 +101,7 @@ public static class DamageActions {
     /// <param name="damage">The damge to deal.</param>
     /// <param name="lethal">Can the damage reduce the targets life below 1.</param>
 
-    public static void InflictDamageToCreature(CreatureInstance creature, int damage, bool lethal = true, bool ignoreArmor = false) {
+    public static void InflictDamageToCreature(CardInstance creature, int damage, bool lethal = true, bool ignoreArmor = false) {
 
         if (!ignoreArmor)
             damage = DamageToArmourCalculation(creature, damage);

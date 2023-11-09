@@ -50,9 +50,9 @@ public partial class DuelState {
     public int TurnCount { get; private set; } = 0;
 
     /// <summary>
-    /// The <see cref="TurnData"/> history of the duel.
+    /// The <see cref="TurnData"/> history of the duel ordered by the turn count.
     /// </summary>
-    public readonly Dictionary<int, TurnData> TurnHistory = new();
+    public readonly Dictionary<int, TurnData> TurnHistory = [];
 
     /// <summary>
     /// Creates a new turn data and updates the <see cref="CurrentTurn"/> and <see cref="TurnCount"/>.

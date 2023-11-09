@@ -15,25 +15,22 @@ public static partial class CardActions {
     /// <summary>
     /// Creates a new creature based on the <paramref name="card"/> and place in <paramref name="position"/>.
     /// </summary>
-    /// <param name="card">The card to summon as a creture.</param>
-    /// <param name="position">The slot to summon the creatyre into.</param>
+    /// <param name="card">The card to summon as a creature.</param>
+    /// <param name="position">The slot to summon the creature into.</param>
     [ActionName(nameof(SummonAsCreature))]
-    public static CreatureInstance SummonAsCreature(this CardInstance card, FieldSlot position) {
+    public static CardInstance SummonAsCreature(this CardInstance card, FieldSlot position) {
 
-        CreatureInstance creature = new(card) {
-            Level = card.FallbackTrigger("GetLevel", new MoDuel.ActionFunction(CardActions.GetLevelDefault)),
-        };
 
-        creature.Attack = card.FallbackTrigger("GetAttack", new MoDuel.ActionFunction(CardActions.GetAttackDefault), creature.Level);
-        creature.Armour = card.FallbackTrigger("GetArmour", new MoDuel.ActionFunction(CardActions.GetArmourDefault), creature.Level);
-        creature.MaxLife = card.FallbackTrigger("GetMaxLife", new MoDuel.ActionFunction(CardActions.GetMaxLifeDefault), creature.Level);
-        creature.Life = creature.FallbackTrigger("GetBaseLife", new MoDuel.ActionFunction(CreatureActions.GetBaseLifeDefault));
+        card.Attack = card.FallbackTrigger("GetAttack", new MoDuel.ActionFunction(CardActions.GetAttackDefault), card.Level);
+        card.Armour = card.FallbackTrigger("GetArmour", new MoDuel.ActionFunction(CardActions.GetArmourDefault), card.Level);
+        card.MaxLife = card.FallbackTrigger("GetMaxLife", new MoDuel.ActionFunction(CardActions.GetMaxLifeDefault), card.Level);
+        card.Life = card.FallbackTrigger("GetBaseLife", new MoDuel.ActionFunction(CreatureActions.GetBaseLifeDefault));
 
-        creature.Summon(position);
+        card.Summon(position);
 
-        creature.Values["Jason"] = creature.Imprint.Data;
+        card.Values["Jason"] = card.Imprint.Data;
         
-        return creature;
+        return card;
 
         // TODO CLIENT: animations
     }
@@ -43,7 +40,7 @@ public static partial class CardActions {
     /// </summary>
     [ActionName(nameof(GetLeveledCost))]
     public static ResourceCost GetLeveledCost(this Card card, int level) {
-        return ResourceActions.ParseTokenToCost(card.Data.TryGet("Cost"), card.Package, level);
+        return ResourceActions.ParseTokenToCost(card.Data.Get("Cost"), card.Package, level);
     }
 
     /// <summary>

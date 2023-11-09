@@ -12,7 +12,7 @@ public class ResourcePool : IEnumerable<ResourceCounter> {
     /// <summary>
     /// The hidden dictionary that ties <see cref="ResourceType"/> to a <see cref="ResourceCounter"/>.
     /// </summary>
-    private readonly Dictionary<ResourceType, ResourceCounter> _pool = new();
+    private readonly Dictionary<ResourceType, ResourceCounter> _pool = [];
 
     /// <summary>
     /// Constructor that converts a collection of <see cref="ResourceType"/>s and turns them into a <see cref="ResourcePool"/>
@@ -24,11 +24,11 @@ public class ResourcePool : IEnumerable<ResourceCounter> {
     }
 
     /// <summary>
-    /// Constructor that creates the mana pool from the provided <paramref name="resouceCounters"/>.
+    /// Constructor that creates the mana pool from the provided <paramref name="resourceCounters"/>.
     /// </summary>
-    /// <param name="resouceCounters">The counter for each resource.</param>
-    public ResourcePool(IEnumerable<ResourceCounter> resouceCounters) {
-        foreach (var counter in resouceCounters) {
+    /// <param name="resourceCounters">The counter for each resource.</param>
+    public ResourcePool(IEnumerable<ResourceCounter> resourceCounters) {
+        foreach (var counter in resourceCounters) {
             _pool.Add(counter.Resource, counter);
         }
     }
@@ -37,15 +37,15 @@ public class ResourcePool : IEnumerable<ResourceCounter> {
     /// Implicit operator that converts a <see cref="ResourcePool"/> into the an array of <see cref="ResourceCounter"/>
     /// <para>Only <see cref="IEnumerable{T}"/> public accessor of <see cref="ResourcePool"/>.</para>
     /// </summary>
-    /// <param name="resource">The <see cref="ResourcePool"/> to convet.</param>
-    public static implicit operator ResourceCounter[](ResourcePool resource) { return resource._pool.Values.ToArray(); }
+    /// <param name="resource">The <see cref="ResourcePool"/> to convert.</param>
+    public static implicit operator ResourceCounter[](ResourcePool resource) { return [.. resource._pool.Values]; }
 
     /// <summary>
     /// Retrieve from <see cref="ResourcePool"/> using a <see cref="ResourceType"/> parsed from a string.
     /// </summary>
-    /// <param name="manatypestring">The string to use <see cref="Enum.Parse(Type, string)"/> on.</param>
+    /// <param name="manaTypeString">The string to use <see cref="Enum.Parse(Type, string)"/> on.</param>
     /// <returns>A <see cref="ResourceCounter"/> tied to a <see cref="CostType"/></returns>
-    public ResourceCounter? this[string manatypestring] => GetCounterByName(manatypestring) ?? null;
+    public ResourceCounter? this[string manaTypeString] => GetCounterByName(manaTypeString) ?? null;
 
     /// <summary>
     /// Retrieve from <see cref="ResourcePool"/> using a <see cref="ResourceType"/>.
@@ -78,7 +78,7 @@ public class ResourcePool : IEnumerable<ResourceCounter> {
     /// Gets the <see cref="ResourceCounter"/> from the <see cref="ResourcePool"/> that has a matching <paramref name="resourceName"/>.
     /// </summary>
     /// <param name="resourceName">The name of the <see cref="ResourceType"/> that the <see cref="ResourceCounter"/> uses.</param>
-    /// <returns>The <see cref="ResourceCounter"/> requested or <c>null</c> if it dould not be found.</returns>
+    /// <returns>The <see cref="ResourceCounter"/> requested or <c>null</c> if it could not be found.</returns>
     public ResourceCounter? GetCounterByName(string resourceName) {
         return _pool.Values.FirstOrDefault((resourceCounter) => {
             return resourceCounter.Name == resourceName;

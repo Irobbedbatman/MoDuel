@@ -47,7 +47,7 @@ public partial class DuelState {
     /// Assigns <see cref="PlayerTimers"/> for both <see cref="Player1"/> and <see cref="Player2"/>.
     /// </summary>
     /// <param name="settings"The <see cref="TimerSettings"/> both timers will use.></param>
-    /// <param name="threadLock">The lock object to handle timeouts in a threadsafe way,</param>
+    /// <param name="threadLock">The lock object to handle timeouts in a thread safe way,</param>
     public void AssignTimers(TimerSettings settings, object threadLock) {
         Player1.AssignTimer(settings, threadLock);
         Player2.AssignTimer(settings, threadLock);

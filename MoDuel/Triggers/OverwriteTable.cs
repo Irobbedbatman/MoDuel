@@ -1,9 +1,8 @@
 ﻿namespace MoDuel.Triggers;
 
 /// <summary>
-/// A managed table for use in overwrite triggers. It is effectivly a string to object dictionary.
+/// A managed table for use in overwrite triggers. It is effectively a string to object dictionary.
 /// </summary>
-[MessagePack.MessagePackObject]
 public class OverwriteTable : Dictionary<string, object?> {
 
     public OverwriteTable() { }

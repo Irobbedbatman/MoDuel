@@ -1,14 +1,15 @@
 ﻿using MoDuel.Json;
 using MoDuel.Serialization;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
 
 
 /// <summary>
-/// A json block of data that has been opened that holds refrences to files and file keys.
+/// A json block of data that has been opened that holds references to files and file keys.
 /// <para>To get files paths from a certain category within the package use <see cref="GetFullSystemPath(string, string)"/>.</para>
-/// <para>Thsis class is partial the loaded content can be found in PackageContent.cs</para>
+/// <para>This class is partial the loaded content can be found in PackageContent.cs</para>
 /// </summary>
 public partial class Package : IReloadable {
 
@@ -18,26 +19,26 @@ public partial class Package : IReloadable {
     public readonly string Name;
 
     /// <summary>
-    /// The base folder wheere the package info has been listed.
+    /// The base folder where the package info has been listed.
     /// </summary>
     public readonly string Directory;
 
     /// <summary>
     /// The JSON data that was found in the package file. 
     /// </summary>
-    public readonly JObject Data;
+    public readonly JsonObject Data;
 
     /// <summary>
     /// Shorthand accessor for <see cref="Data"/>.
     /// </summary>
-    public JToken this[string key] => Data.TryGet(key);
+    public JsonNode this[string key] => Data.Get(key);
 
     /// <summary>
     /// The list of of packages that includes this package used to load cross package content.
     /// </summary>
     public readonly PackageCatalogue Catalogue;
 
-    private Package(string name, string directory, JObject data, PackageCatalogue? catalogue = null) {
+    private Package(string name, string directory, JsonObject data, PackageCatalogue? catalogue = null) {
         Name = name;
         Directory = directory;
         Data = data;
@@ -53,11 +54,11 @@ public partial class Package : IReloadable {
     /// <returns>A new <see cref="Package"/> if the file was correct and the package was created; otherwise <c>null</c>.</returns>
     public static Package? LoadPackage(string path, PackageCatalogue? catalogue = null) {
 
-        JObject data;
+        JsonObject data;
 
         // Ensure data is loaded.
         try {
-            data = JObject.Parse(File.ReadAllText(path));
+            data = (JsonObject?)JsonNode.Parse(File.ReadAllText(path)) ?? throw new NullReferenceException();
         }
         catch {
             Console.WriteLine($"Package at {path} could not be found or loaded.");
@@ -70,7 +71,7 @@ public partial class Package : IReloadable {
         var package = new Package(
             name,
             Path.GetDirectoryName(path) ?? "",
-            data ?? new JObject(),
+            data ?? [],
             catalogue
         );
 
@@ -100,13 +101,13 @@ public partial class Package : IReloadable {
     /// <returns><c>null</c> if there was no valid <paramref name="category"/> or the <paramref name="index"/> wasn't found.</returns>
     public string? GetRelativeSystemPath(string category, string index) {
         // Ensure the category exists.
-        if (Data.TryGetValue(category, out var categoryToken)) {
+        if (Data.TryGet(category, out var categoryToken)) {
             // Ensure the category is actually a category.
-            if (categoryToken is JObject categoryValue) {
+            if (categoryToken is JsonObject categoryValue) {
                 // Check to see if the index is supplied within the category.
-                if (categoryValue.TryGetValue(index, out var locationToken)) {
+                if (categoryValue.TryGet(index, out var locationToken)) {
                     // Ensure the token is a string value.
-                    if (locationToken.Type == JTokenType.String)
+                    if (locationToken.GetValueKind() == JsonValueKind.String)
                         return locationToken.ToString();
                 }
             }
@@ -120,7 +121,7 @@ public partial class Package : IReloadable {
     public string GetFullSystemPath(string relativePath) => Path.Combine(Directory, relativePath);
 
     /// <summary>
-    /// Retreives the relative and full path to a file using <see cref="GetRelativeSystemPath(string, string)"/>.
+    /// Retrieves the relative and full path to a file using <see cref="GetRelativeSystemPath(string, string)"/>.
     /// <para>Outputs both the relative and the full path.</para>
     /// <para>Ensures the file exists.</para>
     /// </summary>
@@ -163,16 +164,13 @@ public partial class Package : IReloadable {
     public IEnumerable<string> GetAllItemNamesInCategory(string category) {
 
         // Get the data values of the category.
-        JToken? values = Data[category];
+        JsonNode? values = Data[category];
 
         // Ensure it is valid.
-        if (values == null || !values.HasValues)
+        if (values == null)
             return Array.Empty<string>();
 
-
-        return values.OfType<JProperty>().Select((value) => {
-            return value.Name;
-        });
+        return values.GetKeys();
     }
 
     /// <summary>
@@ -180,10 +178,8 @@ public partial class Package : IReloadable {
     /// </summary>
     public T? GetProperty<T>(string propertyName) {
         var value = Data[propertyName];
-        if (value is JValue jValue) {
-            if (jValue.ToRawValue() is T tValue) {
+            if (value?.ToRawValue() is T tValue) {
                 return tValue;
-            }
         }
         return default;
     }
@@ -195,7 +191,6 @@ public partial class Package : IReloadable {
         var subPath = GetProperty<string>(propertyName);
         if (subPath == null) return null;
         return Path.GetFullPath(Path.Combine(Directory, subPath));
-
     }
 
     /// <inheritdoc/>

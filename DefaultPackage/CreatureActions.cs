@@ -13,7 +13,7 @@ public static class CreatureActions {
     /// The default life a creature will be summoned with. The default is the creatures max life.
     /// </summary>
     [ActionName(nameof(GetBaseLifeDefault))]
-    public static int GetBaseLifeDefault(CreatureInstance creature) {
+    public static int GetBaseLifeDefault(CardInstance creature) {
         return creature.MaxLife;
     }
 
@@ -21,7 +21,7 @@ public static class CreatureActions {
     /// Sets the position of the creature on the field to summon it.
     /// </summary>
     [ActionName(nameof(Summon))]
-    public static void Summon(this CreatureInstance creature, FieldSlot location) {
+    public static void Summon(this CardInstance creature, FieldSlot location) {
         creature.Position = location;
         creature.Values[CombatActions.SUMMONING_SICKNESS] = true;
         // TODO CLIENT: SUmmon
@@ -29,12 +29,12 @@ public static class CreatureActions {
 
 
     [ActionName(nameof(Unsummon))]
-    public static void Unsummon(this CreatureInstance creature) {
+    public static void Unsummon(this CardInstance creature) {
         // TODO DELAY: Unsummon
     }
 
 
-    public static void MoveCreature(this CreatureInstance creature, FieldSlot newLocation) {
+    public static void MoveCreature(this CardInstance creature, FieldSlot newLocation) {
         creature.Position = newLocation;
         // TODO DELAY: Move Creature.
     }
@@ -43,7 +43,7 @@ public static class CreatureActions {
     /// Kills the creauture. The creatures original state will be sent to the grave.
     /// </summary>
     [ActionName("KillCreature")]
-    public static void Kill(this CreatureInstance creature) {
+    public static void Kill(this CardInstance creature) {
         creature.Position = null;
         var card = creature.OriginalState;
         card.MoveCardToGrave(card.OriginalOwner);

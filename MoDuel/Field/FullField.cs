@@ -29,13 +29,13 @@ public class FullField : Field {
     public FullField(DuelState context, SubField subfield1, SubField subfield2) : base(context) {
         SubField1 = subfield1;
         SubField2 = subfield2;
-        Columns = new FieldColumn[] {
+        Columns = [
             new FieldColumn(this, 1),
             new FieldColumn(this, 2),
             new FieldColumn(this, 3),
             new FieldColumn(this, 4),
             new FieldColumn(this, 5)
-        };
+        ];
     }
 
     /// <inheritdoc/>
@@ -64,16 +64,16 @@ public class FullField : Field {
     }
 
     /// <summary>
-    /// Gets the fieldSlot id of the slot accoss from the given position.
+    /// Gets the fieldSlot id of the slot access from the given position.
     /// </summary>
     /// <param name="position">The position to check from.</param>
-    /// <returns>The field slot accross from <paramref name="position"/>.</returns>
+    /// <returns>The field slot across from <paramref name="position"/>.</returns>
     public static int GetOpposingPosition(int position) => (position <= 5) ? position + 5 : position - 5;
 
     /// <inheritdoc/>
     public override FieldSlot this[int position] => (position > 5) ? SubField2[position - 5] : SubField1[position];
     /// <inheritdoc/>
-    public override HashSet<CreatureInstance> GetCreatures() => SubField1.GetCreatures().Concat(SubField2.GetCreatures()).ToHashSet();
+    public override HashSet<CardInstance> GetCreatures() => SubField1.GetCreatures().Concat(SubField2.GetCreatures()).ToHashSet();
     /// <inheritdoc/>
     public override HashSet<FieldSlot> GetEmptySlots() => SubField1.GetEmptySlots().Concat(SubField2.GetEmptySlots()).ToHashSet();
     /// <inheritdoc/>

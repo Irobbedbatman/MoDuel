@@ -120,17 +120,14 @@ public static class SystemActions {
                 card.FixedLevel = level;
             }
 
-            CreatureInstance creature = new(card) {
-                Level = card.FallbackTrigger("GetLevel", new MoDuel.ActionFunction(CardActions.GetLevelDefault))
-            };
-
-            creature.Attack = card.FallbackTrigger("GetAttack", new MoDuel.ActionFunction(CardActions.GetAttackDefault), creature.Level);
-            creature.Armour = card.FallbackTrigger("GetArmour", new MoDuel.ActionFunction(CardActions.GetArmourDefault), creature.Level);
-            creature.MaxLife = card.FallbackTrigger("GetMaxLife", new MoDuel.ActionFunction(CardActions.GetMaxLifeDefault), creature.Level);
+            card.Level = card.FallbackTrigger("GetLevel", new MoDuel.ActionFunction(CardActions.GetLevelDefault));
+            card.Attack = card.FallbackTrigger("GetAttack", new MoDuel.ActionFunction(CardActions.GetAttackDefault), card.Level);
+            card.Armour = card.FallbackTrigger("GetArmour", new MoDuel.ActionFunction(CardActions.GetArmourDefault), card.Level);
+            card.MaxLife = card.FallbackTrigger("GetMaxLife", new MoDuel.ActionFunction(CardActions.GetMaxLifeDefault), card.Level);
             // No need to get cost here.
-            creature.Life = creature.FallbackTrigger("GetBaseLife", new MoDuel.ActionFunction(CreatureActions.GetBaseLifeDefault));
+            card.Life = card.FallbackTrigger("GetBaseLife", new MoDuel.ActionFunction(CreatureActions.GetBaseLifeDefault));
             // TODO CLIENT: send message creatuer already summoned.
-            field[slot].Occupant = creature;
+            field[slot].Occupant = card;
         }
     }
 

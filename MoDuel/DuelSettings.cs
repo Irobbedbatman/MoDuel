@@ -5,7 +5,7 @@ namespace MoDuel;
 
 /// <summary>
 /// Settings that define how a duel will operate.
-/// <para>Including animation settings and optinal <see cref="ActionFunction"/>s for lua based operations at key points.</para>
+/// <para>Including animation settings and optional <see cref="ActionFunction"/>s for lua based operations at key points.</para>
 /// </summary>
 [SerializeReference]
 public class DuelSettings {
@@ -28,7 +28,7 @@ public class DuelSettings {
     /// <summary>
     /// Shorthand check to see if animations should play.
     /// </summary>
-    public bool DontBlockPlayback => BlockPlaybackDurationMultiplier == 0;
+    public bool IsPlaybackBlocked => BlockPlaybackDurationMultiplier == 0;
     /// <summary>
     /// The settings used to handle player timeouts.
     /// <para>If no settings are provided not timeouts will occur.</para>
@@ -46,7 +46,7 @@ public class DuelSettings {
     public ActionFunction GameEndAction = new();
 
     /// <summary>
-    /// A fallback action that will be called when a <see cref="Cards.CardInstance"/> doesnt have unique behaviour for the same named trigger.
+    /// A fallback action that will be called when a <see cref="Cards.CardInstance"/> doesn't have unique behaviour for the same named trigger.
     /// </summary>
     public ActionFunction
         CardGetDisplayedLevelFallback = new(),
@@ -54,6 +54,6 @@ public class DuelSettings {
         CardGetDisplayedArmourFallback = new(),
         CardGetDisplayedLifeFallback = new(),
         CardGetDisplayedCostFallback = new(),
-        CardGetisplayeDescriptionFallback = new();
+        CardGetDisplayedDescriptionFallback = new();
 
 }

@@ -1,5 +1,5 @@
 using MoDuel.Data;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Heroes;
 
@@ -7,7 +7,7 @@ namespace MoDuel.Heroes;
 /// A <see cref="Hero"/> that has been created or loaded from a file.
 /// <para>Provides access to it's <see cref="Parameters"/>, its <see cref="TriggerReactions"/> and <see cref="ExplicitTriggerReactions"/>.</para>
 /// </summary>
-public class Hero : LoadedAsset {
+public class Hero(Package package, string id, JsonObject data) : LoadedAsset(package, id, data) {
     /// <summary>
     /// A dictionary with triggers being used as keys and reactions as values.
     /// <para>The <see cref="string"/> is a trigger keyword.</para>
@@ -23,8 +23,6 @@ public class Hero : LoadedAsset {
     /// </summary>
     public IReadOnlyDictionary<string, ActionFunction> ExplicitTriggerReactions { get; private set; } = new Dictionary<string, ActionFunction>();
 
-    public Hero(Package package, string id, JObject data) : base(package, id, data) { }
-
     /// <summary>
     /// Assigns both the implicit <see cref="TriggerReactions"/> and <see cref="ExplicitTriggerReactions"/> to the <see cref="Hero"/>.
     /// </summary>
@@ -32,8 +30,8 @@ public class Hero : LoadedAsset {
         // Ensure assigning only happens once.
         if (TriggerReactions.Count > 0 || ExplicitTriggerReactions.Count > 0)
             return this;
-        TriggerReactions = triggerReactions ?? new();
-        ExplicitTriggerReactions = explicitTriggerReactions ?? new();
+        TriggerReactions = triggerReactions ?? [];
+        ExplicitTriggerReactions = explicitTriggerReactions ?? [];
         return this;
     }
 

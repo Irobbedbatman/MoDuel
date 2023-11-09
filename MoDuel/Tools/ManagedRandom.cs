@@ -24,7 +24,7 @@ public class ManagedRandom : Random {
     public object? NextItem(IEnumerable<object?> items) => NextItem<object?>(items);
 
     /// <summary>
-    /// Get the next item from a set of paramaters.
+    /// Get the next item from a set of parameters.
     /// </summary>
     public T? NextItemParams<T>(params T[] items) => NextItem((IEnumerable<T>)items);
 

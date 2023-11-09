@@ -27,13 +27,13 @@ public class PlaybackBlockingHandler : IDisposable {
     public double Duration { get; private set; } = 0;
 
     /// <summary>
-    /// Cancelation token  source used to abrubtly end the blocking.
+    /// Cancelation token  source used to abruptly end the blocking.
     /// <para>Use <see cref="EndBlock"/> to use it.</para>
     /// </summary>
     private CancellationTokenSource? tokenSource;
 
     /// <summary>
-    /// Starts blocking the thread so that an animation can happen before any furthur flow onthe current thread.
+    /// Starts blocking the thread so that an animation can happen before any further flow on the current thread.
     /// </summary>
     /// <param name="blockTime">How long to block the thread for in milliseconds.</param>
     /// <returns>Returns true if the full time was taken.</returns>

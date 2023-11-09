@@ -1,4 +1,5 @@
 ﻿using MoDuel.Cards;
+using MoDuel.Client;
 using MoDuel.Data;
 using MoDuel.Json;
 using MoDuel.Resources;
@@ -140,11 +141,11 @@ public static partial class CardActions {
     /// Get the default description blocks that will be displayed on the card.
     /// </summary>
     [ActionName(nameof(GetDisplayedDescriptionDefault))]
-    public static MoDuel.Client.ParametizedBlock[] GetDisplayedDescriptionDefault(CardInstance card) {
+    public static ParametrizedBlock[] GetDisplayedDescriptionDefault(CardInstance card) {
         // TODO DELAY: card descriptions.
-        return new MoDuel.Client.ParametizedBlock[] {
-            new MoDuel.Client.ParametizedBlock("CARD_DESC_0000001", card.Imprint.Name)
-        };
+        return [
+            new ParametrizedBlock("CARD_DESC_0000001", card.Imprint.Name)
+        ];
     }
 
 }

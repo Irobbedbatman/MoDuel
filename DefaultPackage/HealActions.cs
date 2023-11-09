@@ -20,7 +20,7 @@ public static class HealActions {
     public static void Heal(Target target, int amount) {
         if (target is Player player)
             HealPlayer(player, amount);
-        if (target is CreatureInstance creature)
+        if (target is CardInstance creature)
             HealCreature(creature, amount);
     }
 
@@ -28,7 +28,7 @@ public static class HealActions {
     /// Heals a creature the provided <paramref name="amount"/> of lie.
     /// </summary>
     [ActionName(nameof(HealCreature))]
-    public static void HealCreature(CreatureInstance creature, int amount) {
+    public static void HealCreature(CardInstance creature, int amount) {
 
         creature.Life += amount;
         creature.Life = Math.Clamp(creature.Life, 0, creature.MaxLife);

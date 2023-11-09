@@ -11,7 +11,7 @@ public record ClientRequest(string RequestId, bool SendReadyConfirmation, params
     public ClientRequest(string RequestId, params object?[] Arguments) : this(RequestId, false, Arguments) { }
 
     /// <summary>
-    /// Requires the players to send a ready confirmation when they recieve this request.
+    /// Requires the players to send a ready confirmation when they receive this request.
     /// </summary>
     /// <returns>The new <see cref="ClientRequest"/></returns>
     public ClientRequest WithReadyConfirmation() {

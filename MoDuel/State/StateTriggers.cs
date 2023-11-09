@@ -13,12 +13,12 @@ public partial class DuelState {
 
     /*
     This details some of way triggers and how args are passed around.
-    treiggerable, [args...]
+    triggerable, [args...]
     ----
     CMD
     > player, args...
     ---
-    IExplictTriggerable.(Fallback)Trigger
+    IExplicitTriggerable.(Fallback)Trigger
     > triggerable, args...
     ----
     StateGetIImplicitTriggerables.Call
@@ -26,7 +26,7 @@ public partial class DuelState {
     Incite
     > reactor, inciter, args..., 
     Overwrite
-    > reactor, overwirteTable
+    > reactor, overwriteTable
     ----
     Comparer.Call
     > comparer, object1, object2
@@ -42,14 +42,14 @@ public partial class DuelState {
     private float currentTriggerChain = 1;
 
     /// <summary>
-    /// How many triggers can be activated depth wise. Used to dodge most missable infinite loops.
+    /// How many triggers can be activated depth wise. Used to dodge infinite loops.
     /// <para>Calling the same action within itself is one example of a endless loop unaffected.</para>
     /// </summary>
     public const float MAX_TRIGGER_CHAIN = 22;
 
     /// <summary>
     /// Checks and returns any reactions to the given <paramref name="trigger"/>.
-    /// <para>Checks their hero abiltites, grave triggers, hand triggers and alive triggers in order.</para>
+    /// <para>Checks their hero abilities, grave triggers, hand triggers and alive triggers in order.</para>
     /// <para>Each type of reaction happens for both players before going to the next with the turn players first.</para>
     /// </summary>
     /// <param name="trigger">The trigger keyword.</param>
@@ -99,7 +99,7 @@ public partial class DuelState {
 
     /// <summary>
     /// Triggers reactions found in <see cref="FindReactions(string)"/>
-    /// <para>Use <see cref="InciteTrigger(object, string, object[])"/> if you need to provide the reason the trigger occured.</para>
+    /// <para>Use <see cref="InciteTrigger(object, string, object[])"/> if you need to provide the reason the trigger occurred.</para>
     /// </summary>
     public void Trigger(string trigger, params object?[] arguments) {
         //Ensure that the game is ongoing.
@@ -129,9 +129,9 @@ public partial class DuelState {
     /// <summary>
     /// A trigger that is called so that outcomes can change for specific actions.
     /// <para>Should not be used to perform game state changes only changes to the outcome of the action that trigger it.</para>
-    /// <para>Reactions recieved in <see cref="FindReactions(string)"/> are reversed so that higher priority triggerers have stronger impact.</para>
+    /// <para>Reactions received in <see cref="FindReactions(string)"/> are reversed so that higher priority triggerers have stronger impact.</para>
     /// </summary>
-    /// <param name="values">The table that is parsed by refrence so that things can chnage.</param>
+    /// <param name="values">The table that is parsed by reference so that things can change.</param>
     public void OverwriteTrigger(string trigger, Dictionary<string, object?> values) {
         if (DuelFlow.LoggingEnabled)
             Console.WriteLine("OverwriteTrigger [" + trigger + "]");
@@ -148,7 +148,7 @@ public partial class DuelState {
 
     /// <summary>
     /// Invokes <see cref="OutBoundDelegate"/> with a request for the client to do.
-    /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the reuqest should stop other things from happening.</para>/// </summary>
+    /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the request should stop other things from happening.</para>/// </summary>
     /// <param name="request">THe request to be sent to the player.</param> 
     public void SendRequest(ClientRequest request) {
         if (DuelFlow.LoggingEnabled)
@@ -173,7 +173,7 @@ public partial class DuelState {
     /// <param name="blockDuration">How long to block the thread by, affected by <see cref="DuelSettings.BlockPlaybackDurationMultiplier"/></param>
     public void BlockPlayback(double blockDuration) {
         var settings = Settings;
-        if (!settings.DontBlockPlayback) {
+        if (!settings.IsPlaybackBlocked) {
             PlaybackBlockingHandler blocker = new();
             blocker.StartBlock(blockDuration * settings.BlockPlaybackDurationMultiplier);
         }
@@ -186,7 +186,7 @@ public partial class DuelState {
     /// <param name="timeout">An amount of time in milliseconds that the blocking will finish and playback will resume.</param>
     /// <returns>A tuple with three values.
     /// <list type="number">
-    /// <item>True if timeout occureed; false if both players are ready.</item>
+    /// <item>True if timeout occurred; false if both players are ready.</item>
     /// <item>True if Player1 has responded ready.</item>
     /// <item>True if Player2 has responded ready.</item>
     /// </list>
@@ -196,7 +196,7 @@ public partial class DuelState {
             Console.WriteLine("SendBlockingRequest [" + request.RequestId + "]");
 
         // If there is no playback blocking skip the expensive operations.
-        if (Settings.DontBlockPlayback) {
+        if (Settings.IsPlaybackBlocked) {
             SendRequest(request);
             return (true, true, true);
         }
