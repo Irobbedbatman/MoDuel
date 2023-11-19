@@ -392,6 +392,30 @@ public static class Extensions {
         };
     }
 
+    /// <summary>
+    /// Try to convert the value to a raw value. Returns the result in <paramref name="result"/>.
+    /// </summary>
+    /// <returns>Returns true if the value was was able to be used as a raw value.</returns>
+    public static bool TryToRawValue(this JsonNode token, out object? result) {
+        result = null;
+        if (token.IsDead()) return false;
+        switch (token.GetValueKind()) {
+            case JsonValueKind.String:
+                result = (string?)token;
+                return true;
+            case JsonValueKind.Number:
+                result = (double?)token;
+                return true;
+            case JsonValueKind.True:
+                result = true;
+                return true;
+            case JsonValueKind.False:
+                result = false;
+                return true;
+        }
+        return false;
+    }
+
 
     /// <summary>
     /// Converts a <see cref="JsonValue"/> to the generic type.
@@ -399,15 +423,35 @@ public static class Extensions {
     /// </summary>
     public static T? ToRawValue<T>(this JsonNode token) {
         var value = ToRawValue(token);
-        if (value is T t) {
-            return t;
-        }
+        if (value is T t) return t;
         // TOOD: Convert using IConvertible interface
         try {
             return (T?)Convert.ChangeType(value, typeof(T));
         }
         catch { }
         return default;
+    }
+
+    /// <summary>
+    /// Tries to convert the token to a raw value. If the value is not of the type T returns false.
+    /// </summary>
+    /// <returns>Returns true if the value was was able to be used as a raw value.</returns>
+    public static bool TryToRawValue<T>(this JsonNode token, out T? result) {
+        if (token is JsonValue value) {
+            var rawValue = value.ToRawValue();
+            if (rawValue is T t) {
+                result = t;
+                return true;
+            }
+            try {
+                // TOOD: Convert using IConvertible interface
+                result = (T?)Convert.ChangeType(rawValue, typeof(T));
+                return true;
+            }
+            catch { }
+        }
+        result = default;
+        return false;
     }
 
     /// <summary>
