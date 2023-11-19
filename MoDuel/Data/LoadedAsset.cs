@@ -1,5 +1,6 @@
 ﻿using MoDuel.Json;
 using MoDuel.Serialization;
+using System.Collections.Frozen;
 using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
@@ -30,6 +31,13 @@ public abstract class LoadedAsset(Package package, string id, JsonObject? data =
     public readonly JsonObject Data = data.ConvertNullToEmptyToken();
 
     /// <summary>
+    /// The tags associated with this asset.
+    /// </summary>
+#nullable disable
+    public readonly FrozenSet<string> Tags = data["tags"].AsArray().Select(t => t.ToRawValue<string>()).Where(t => t != null).ToFrozenSet();
+#nullable enable
+
+    /// <summary>
     /// Accessor for the any other value contained in the <see cref="Data"/>.
     /// </summary>
     public JsonNode this[string key] => Data.Get(key);
@@ -43,7 +51,6 @@ public abstract class LoadedAsset(Package package, string id, JsonObject? data =
     /// <param name="tag">The tag to check for.</param>
     /// <param name="caseSensitive">If the tag checks should retains case sensitive checking.</param>
     /// <returns></returns>
-    public bool HasTag(string tag, bool caseSensitive = true) => this["tags"].ContainsRawValue(tag, caseSensitive);
-
+    public bool HasTag(string tag, bool caseSensitive = true) => Tags.Any(t => t.Equals(tag, caseSensitive ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase));
 
 }

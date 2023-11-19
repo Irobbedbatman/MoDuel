@@ -8,18 +8,15 @@ public class OverwriteTable : Dictionary<string, object?> {
     public OverwriteTable() { }
 
     /// <summary>
-    /// Tries to get the value with the name <paramref name="key"/>.
+    /// Tries to get the value with the name <paramref name="key"/> of the type <typeparamref name="T"/>.
     /// <para>Returns default if the value was not found or is the wrong type.</para>
     /// </summary>
     public T? Get<T>(string key) {
         var value = this.GetValueOrDefault(key, null);
-
         if (value is T tValue) {
             return tValue;
         }
-
         return default;
-
     }
 
 }

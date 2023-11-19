@@ -190,19 +190,26 @@ public partial class CardInstance : Target, IImplicitTriggerable, IExplicitTrigg
     /// </summary>
     /// <param name="tag">The tag to check.</param>
     /// <param name="caseSensitive">Whether the check should be case sensitive. Case sensitive checking is faster.</param>
-    /// <returns></returns>
+    /// <returns>True if the card has the tag false otherwise.</returns>
     public bool HasTag(string tag, bool caseSensitive = true) {
-        if (caseSensitive) {
-            if (TagsToHide.Contains(tag)) return false;
-            if (Tags.Contains(tag)) return true;
-            return Imprint.HasTag(tag, true);
-        }
-        else {
-            tag = tag.ToLowerInvariant();
-            if (TagsToHide.Select((t) => t.ToLowerInvariant()).Contains(tag)) return false;
-            if (Tags.Select((t) => t.ToLowerInvariant()).Contains(tag)) return true;
-            return Imprint.HasTag(tag, false);
-        }
+        bool result = GetTags().Any(t => t.Equals(tag, caseSensitive ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase));
+        return result;
+    }
+
+    /// <summary>
+    /// Get all the tags this card has currently. Takes into account <see cref="Imprint"/>, <see cref="Tags"/> and <see cref="TagsToHide"/>.
+    /// <para>Performs an overwrite trigger under the name "CardGetTags".</para>
+    /// </summary>
+    /// <returns>An array containing each tag.</returns>
+    public string[] GetTags() {
+        var tags = Imprint.Tags.Union(Tags).Except(TagsToHide).ToList();
+        OverwriteTable overwriteTable = new() {
+            { "Tags", tags },
+            { "Card", this }
+        };
+        Context.OverwriteTrigger("CardGetTags", overwriteTable);
+        return overwriteTable.Get<IEnumerable<string>>("Tags")?.ToArray() ?? [];
+
     }
 
 }

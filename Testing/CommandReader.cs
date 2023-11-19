@@ -11,7 +11,7 @@ public static class CommandReader {
     /// <summary>
     /// Parse the <paramref name="command"/> and sends a new command to the <paramref name="flow"/>.
     /// </summary>
-    /// <param name="flow">The deul flow that will use the command.</param>
+    /// <param name="flow">The duel flow that will use the command.</param>
     /// <param name="player">The player that will send the command.</param>
     /// <param name="command">The un-parsed command read from user.</param>
     /// <returns>True if the duel should keep going. False if the application should terminate.</returns>
@@ -43,13 +43,13 @@ public static class CommandReader {
                 break;
             case "disc":
             case "discard":
-                var dicard = GetTargetIndex(split, 1);
-                flow.EnqueueCommand(player, "CmdDiscard", dicard);
+                var discard = GetTargetIndex(split, 1);
+                flow.EnqueueCommand(player, "CmdDiscard", discard);
                 break;
             case "play":
-                var playcard = GetTargetIndex(split, 1);
+                var playCard = GetTargetIndex(split, 1);
                 var target = GetTargetIndex(split, 2);
-                flow.EnqueueCommand(player, "CmdPlayCard", playcard, target);
+                flow.EnqueueCommand(player, "CmdPlayCard", playCard, target);
                 break;
             case "hand":
                 Display.Collection("Your Hand", player.Hand);

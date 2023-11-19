@@ -132,7 +132,7 @@ public partial class DuelState {
     /// <para>Reactions received in <see cref="FindReactions(string)"/> are reversed so that higher priority triggerers have stronger impact.</para>
     /// </summary>
     /// <param name="values">The table that is parsed by reference so that things can change.</param>
-    public void OverwriteTrigger(string trigger, Dictionary<string, object?> values) {
+    public void OverwriteTrigger(string trigger, OverwriteTable values) {
         if (DuelFlow.LoggingEnabled)
             Console.WriteLine("OverwriteTrigger [" + trigger + "]");
         //Ensure that the game is ongoing.

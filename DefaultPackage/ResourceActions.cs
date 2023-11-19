@@ -6,6 +6,7 @@ using MoDuel.Json;
 using MoDuel.Players;
 using MoDuel.Resources;
 using MoDuel.State;
+using MoDuel.Triggers;
 using System.Text.Json.Nodes;
 
 namespace DefaultPackage;
@@ -29,7 +30,7 @@ public static class ResourceActions {
         state.Trigger("BeforeCharge", player);
         var resource = state.Random.NextItem(player.ResourcePool)?.Resource;
 
-        Dictionary<string, object?> overwrite = new() {
+        OverwriteTable overwrite = new() {
             { "Player", player },
             { "Resource", resource },
             { "Amount", 1 },

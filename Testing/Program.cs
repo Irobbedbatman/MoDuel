@@ -2,7 +2,6 @@
 using MoDuel.State;
 using Testing;
 
-
 DuelState state = CreateDuel.CreateState();
 
 using (DuelFlow flow = new(state)) {
