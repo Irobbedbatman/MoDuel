@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -413,6 +414,7 @@ public static class Extensions {
     /// Tries to convert the <see cref="JsonNode"/> to it's corresponding .NET type.
     /// <para>If there is no valid value it will instead return <paramref name="fallback"/>.</para>
     /// </summary>
+    [return: NotNullIfNotNull(nameof(fallback))]
     public static object? ToRawValueOrFallback(this JsonNode token, object fallback) {
         var result = ToRawValue(token);
         if (result == null) {
@@ -426,6 +428,7 @@ public static class Extensions {
     /// Tries to convert the <see cref="JsonNode"/> to the provided generic type.
     /// <para>If there is no valid value it will instead return <paramref name="fallback"/>.</para>
     /// </summary>
+    [return: NotNullIfNotNull(nameof(fallback))]
     public static T? ToRawValueOrFallback<T>(this JsonNode token, T? fallback) {
         if (token == DeadToken.Instance) return fallback;
         object? result = token.GetValueKind() switch {
@@ -439,14 +442,14 @@ public static class Extensions {
             JsonValueKind.Array => fallback,
             _ => fallback
         };
-        if (result == null) return default;
+        if (result == null) return fallback;
         if (result is T t) return t;
         // TOOD: Convert using IConvertible interface
         try {
             return (T?)Convert.ChangeType(result, typeof(T));
         }
         catch { }
-        return default;
+        return fallback;
     }
 
     /// <summary>
