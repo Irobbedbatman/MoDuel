@@ -3,7 +3,7 @@
 namespace MoDuel.Json;
 
 /// <summary>
-/// Solely use to house the <see cref="DeadToken.Instance"/> which is a <see cref="JToken"/> that is missing.
+/// Solely use to house the <see cref="DeadToken.Instance"/> which is a <see cref="JsonNode"/> that is missing.
 /// </summary>
 public static class DeadToken {
 

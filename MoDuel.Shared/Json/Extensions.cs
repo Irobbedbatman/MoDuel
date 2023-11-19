@@ -41,7 +41,7 @@ public static class Extensions {
     }
 
     /// <summary>
-    /// Returns the reference or an empty <see cref="JObject"/> when used and the reference is null.
+    /// Returns the reference or an empty <see cref="JsonObject"/> when used and the reference is null.
     /// </summary>
     public static JsonObject ConvertNullToEmptyToken(this JsonNode? tokenMaybe) {
         if (tokenMaybe is JsonObject obj)
@@ -358,14 +358,14 @@ public static class Extensions {
     }
 
     /// <summary>
-    /// Converts a <see cref="JToken"/> to a json string so that it can be recreated in <see cref="FromJString(string)"/>.
+    /// Converts a <see cref="JsonNode"/> to a json string so that it can be recreated in <see cref="FromJString(string)"/>.
     /// </summary>
     public static string ToJString(this JsonNode token) {
         return token.ToString();
     }
 
     /// <summary>
-    /// Reconstructs a <see cref="JToken"/> from the string created in <see cref="ToJString(JsonNode)"/>.
+    /// Reconstructs a <see cref="JsonNode"/> from the string created in <see cref="ToJString(JsonNode)"/>.
     /// </summary>
     public static JsonNode FromJString(string jString) {
         return JsonNode.Parse(jString) ?? DeadToken.Instance;

@@ -4,13 +4,13 @@ using System.Text.Json.Nodes;
 namespace MoDuel.Json;
 
 /// <summary>
-/// A proxy for a <see cref="JToken"/> that does not store that jtoken.
+/// A proxy for a <see cref="JsonNode"/> that does not store that JsonNode.
 /// <para>This is important to use for serialization as only the <see cref="Root"/> needs to be heavily serialized.</para>
 /// </summary>
 public class JsonProxy(JsonNode subValue) {
 
     /// <summary>
-    /// Whether the <see cref="JsonProxy"/> should return to a <see cref="JToken"/> after deserialization.
+    /// Whether the <see cref="JsonProxy"/> should return to a <see cref="JsonNode"/> after deserialization.
     /// </summary>
     internal bool ForceToToken = false;
 

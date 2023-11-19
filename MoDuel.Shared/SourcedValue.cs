@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace MoDuel.Shared;
+namespace MoDuel;
 
 /// <summary>
 /// A value that can be marked with multiple sources. Useful if a value should remain while there is any source but not remain when all sources are removed.
