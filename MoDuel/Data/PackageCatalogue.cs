@@ -3,53 +3,17 @@ using MoDuel.Heroes;
 using MoDuel.Json;
 using MoDuel.Resources;
 using MoDuel.Serialization;
-using System.Collections;
+using MoDuel.Shared.Data;
 using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
-
 
 /// <summary>
 /// A dictionary of <see cref="Package"/>s and some Properties that define how it is browsed.
 /// <para>There is no guarantee that the items in a package are available.</para>
 /// <para>If a package is updated; it is better to create a new <see cref="PackageCatalogue"/> so that entitles using the old one don't lose access to information.</para>
 /// </summary>
-public class PackageCatalogue : IReloadable, IEnumerable<Package> {
-
-    /// <summary>
-    /// Access to each <see cref="Package"/> via it's <see cref="Package.Name"/>
-    /// </summary>
-    private readonly Dictionary<string, Package> Catalogue = [];
-
-    /// <summary>
-    /// The list of all the packages stored in the catalogue.
-    /// </summary>
-    public IReadOnlyList<Package> AllPackages => Catalogue.Values.ToList();
-
-    /// <summary>
-    /// The separator that separates packages from their items. I.e: package|item
-    /// </summary>
-    public const char PackageItemSeparator = '|';
-    /// <summary>
-    /// An alternative way to access the <see cref="DefaultPackage"/> instead of using it's name.
-    /// </summary>
-    public const string DefaultPackageIndicator = ">";
-    /// <summary>
-    /// An alternative way to access packages item from the same package instead of requiring the package name. Note: this is the default behaviour when no package name is provided.
-    /// </summary>
-    public const string SamePackageIndicator = "?>";
-    /// <summary>
-    /// A content package that is more accessible then the others. 
-    /// </summary>
-    public Package? DefaultPackage = null;
-
-    /// <summary>
-    /// Constructor of a self container package.
-    /// </summary>
-    internal PackageCatalogue(Package package) {
-        Catalogue.Add(package.Name, package);
-        DefaultPackage = package;
-    }
+public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>, IReloadable {
 
     /// <summary>
     /// Creates a <see cref="PackageCatalogue"/> by creating all the packages found at the <paramref name="locations"/>.
@@ -59,9 +23,9 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
         foreach (var location in locations) {
             if (location != null) {
                 // Create the package at each location.
-                Package? package = Package.LoadPackage(location);
+                Package? package = Package.LoadPackage(location, this);
                 if (package != null) {
-                    Catalogue.Add(package.Name, package);
+                    Packages.Add(package.Name, package);
                 }
                 else {
                     Console.WriteLine($"No package could be found at location: {location}");
@@ -73,83 +37,7 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
         DefaultPackage = this["Default"] ?? this["default"] ?? this[""] ?? null;
     }
 
-    /// <summary>
-    /// Accessor for the a <see cref="Package"/> in the catalogue.
-    /// </summary>
-    public Package? this[string packageName] => GetPackage(packageName);
-
-    /// <summary>
-    /// Recreates the full item path of an item.
-    /// <para>The item path is: <paramref name="package"/>.Name + <see cref="PackageItemSeparator"/> + <paramref name="itemName"/>.</para>
-    /// </summary>
-    /// <param name="package">The package the item was found in.</param>
-    /// <param name="itemName">The name of the item inside the package.</param>
-    /// <returns>The full path to the item.</returns>
-    public static string GetFullItemPath(Package package, string itemName) {
-        return string.Concat(package.Name, PackageItemSeparator, itemName);
-    }
-
-    /// <summary>
-    /// Retrieves the package with the provided name if it exists.
-    /// </summary>
-    public Package? GetPackage(string packageName) => Catalogue.TryGetValue(packageName ?? "", out var value) ? value : null;
-
-    /// <summary>
-    /// Retrieves a package from an <paramref name="itemPath"/> and also keeps the <paramref name="itemName"/> as a remainder of that path.
-    /// <para>By not providing a full <paramref name="itemPath"/> and instead only a <paramref name="itemName"/> the returned package will be the <paramref name="currentPackage"/> if it exists or <see cref="DefaultPackage"/></para>
-    /// </summary>
-    /// <param name="itemPath">
-    /// A coded path that should be the <see cref="Package.Name"/> followed by the <see cref="PackageItemSeparator"/> then the <paramref name="itemName"/>.
-    /// <para>Only an <paramref name="itemName"/> could also be provided; this will use the <paramref name="currentPackage"/> if it exists or <see cref="DefaultPackage"/>.</para>
-    /// </param>
-    /// <param name="itemName">The remaining portion of <paramref name="itemPath"/> that is the item requested inside the package.</param>
-    /// <param name="currentPackage">The package that is requesting the package; used if the requested item is in the same package.</param>
-    /// <returns>The <see cref="Package"/> that contains the item requested.</returns>
-    public Package? GetPackageFromItemPath(string itemPath, out string itemName, Package? currentPackage = null) {
-
-        // Separate the package name and the item name.
-        var pathSplit = itemPath.Split(PackageItemSeparator);
-
-        if (pathSplit.Length == 1) {
-            // Item name is all that was provided.
-            itemName = itemPath;
-            // If this was not requested from a package assume the item is in the default package.
-            if (currentPackage == null) {
-                return DefaultPackage;
-            }
-            // If this was requested from a package assume the item is from that same package.
-            return currentPackage;
-        }
-
-        // Should only be a package id or a package id and item.
-        if (pathSplit.Length > 2) {
-            itemName = "";
-            return null;
-        }
-
-        // Get the packageName
-        string packageName = pathSplit[0];
-        // Get the itemName
-        itemName = pathSplit[1];
-
-        // If the packageName was instead an indicator instead use indicated package.
-        if (packageName == DefaultPackageIndicator) {
-            return DefaultPackage;
-        }
-        if (packageName == SamePackageIndicator) {
-            // If it was a same package request require there be a same package to use.
-            if (currentPackage != null)
-                return currentPackage;
-            return null;
-        }
-
-        // Get the ContentPackage based on it's name.
-        return GetPackage(packageName);
-
-    }
-
-    #region Cross Package Content Loaders
-
+    #region Package Content Loaders
 
     /// <summary>
     /// Uses the loader for the implemented generic type. Can also load <see cref="Package"/>s.
@@ -260,32 +148,4 @@ public class PackageCatalogue : IReloadable, IEnumerable<Package> {
 
     #endregion
 
-    /// <summary>
-    /// Retrieve the name of every item in every <see cref="Package"/> that belongs to <paramref name="category"/>.
-    /// <para>Each item will use package notation; including the <see cref="PackageItemSeparator"/>.</para>
-    /// </summary>
-    public IEnumerable<string> GetAllItemNamesInCategory(string category) {
-
-        List<string> items = [];
-
-        foreach (var package in Catalogue) {
-
-            // Get the keys for each package.
-            IEnumerable<string> keys = package.Value.GetAllItemNamesInCategory(category);
-            // Convert the keys into the package notation with the separator.
-            IEnumerable<string> packagedKeys = keys.Select((key) => GetFullItemPath(package.Value, key));
-            // Add all the keys.
-            items.AddRange(packagedKeys);
-        }
-
-        return items;
-    }
-
-    public IEnumerator<Package> GetEnumerator() {
-        return AllPackages.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() {
-        return ((IEnumerable)AllPackages).GetEnumerator();
-    }
 }
