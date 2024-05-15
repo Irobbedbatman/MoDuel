@@ -4,8 +4,7 @@ using System.Text.Json.Nodes;
 namespace MoDuel.Json;
 
 /// <summary>
-/// A proxy for a <see cref="JToken"/> that does not store that jtoken.
-/// <para>This is important to use for serialization as only the <see cref="Root"/> needs to be heavily serialized.</para>
+/// A proxy for a <see cref="JToken"/> that does not store that json token; instead storing the path.
 /// </summary>
 public class JsonProxy(JsonNode subValue) {
 

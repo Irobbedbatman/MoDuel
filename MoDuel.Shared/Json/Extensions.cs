@@ -12,14 +12,14 @@ public static class Extensions {
     /// <summary>
     /// Checks whether the token is the root node of the json data.
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
+    /// <param name="token">The token to check.</param>
+    /// <returns>True if the token is the root of the json data.</returns>
     public static bool IsRoot(this JsonNode token) {
         return token.Root == token;
     }
 
     /// <summary>
-    /// Retrieve the json node after traversing the bath. If the path is invalid the <see cref="DeadToken.Instance"/> will be returned instead.
+    /// Retrieve the json node after traversing the path. If the path is invalid the <see cref="DeadToken.Instance"/> will be returned instead.
     /// </summary>
     public static JsonNode GetUsingPath(this JsonNode token, string path) {
         // TODOD: GetAtPath
