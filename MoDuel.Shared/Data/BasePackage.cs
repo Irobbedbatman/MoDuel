@@ -1,14 +1,15 @@
 ﻿using MoDuel.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace MoDuel.Shared.Data;
-public abstract class BasePackage<P,C> where C : BasePackageCatalogue<P,C> where P : BasePackage<P,C>  {
+
+/// <summary>
+/// The base structure of a package.
+/// </summary>
+/// <typeparam name="P">The type that will be used as the package.</typeparam>
+/// <typeparam name="C">The type that will be used as the catalogue, which will contain this package..</typeparam>
+public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> where P : BasePackage<P, C> {
 
     /// <summary>
     /// The name of the package and the key used to represent it in short form.
