@@ -7,13 +7,9 @@ namespace MoDuel.Json;
 /// </summary>
 public static class DeadToken {
 
-#nullable disable
-
     /// <summary>
     /// Token to use when json data is missing.
     /// </summary>
     public static readonly JsonValue Instance = JsonValue.Create("DEAD_TOKEN");
-
-#nullable enable
 
 }
