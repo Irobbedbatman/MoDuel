@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace MoDuel.Shared;
+namespace MoDuel;
 
 /// <summary>
 /// A collection that records multiple <see cref="SourcedValue{T}"/>s and provides set utility alongside specialized utility to handle the values.

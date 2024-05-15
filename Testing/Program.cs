@@ -1,6 +1,17 @@
 ﻿using MoDuel.Flow;
+using MoDuel.Json;
 using MoDuel.State;
+using System.Text.Json.Nodes;
 using Testing;
+
+var json = JsonNode.Parse("""{"a":3}""")?.AsObject();
+
+
+
+var x = json?["a"];
+
+Console.WriteLine(x);
+
 
 DuelState state = CreateDuel.CreateState();
 

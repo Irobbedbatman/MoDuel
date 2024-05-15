@@ -34,7 +34,7 @@ public abstract class LoadedAsset(Package package, string id, JsonObject? data =
     /// The tags associated with this asset.
     /// </summary>
 #nullable disable
-    public readonly FrozenSet<string> Tags = data["tags"].AsArray().Select(t => t.ToRawValue<string>()).Where(t => t != null).ToFrozenSet();
+    public readonly FrozenSet<string> Tags = data["tags"]?.AsArray().Select(t => t.ToRawValue<string>()).Where(t => t != null).ToFrozenSet();
 #nullable enable
 
     /// <summary>

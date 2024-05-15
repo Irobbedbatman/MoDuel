@@ -9,7 +9,7 @@ namespace MoDuel.Json;
 public class JsonProxy(JsonNode subValue) {
 
     /// <summary>
-    /// Whether the <see cref="JsonProxy"/> should return to a <see cref="JToken"/> after deserialization.
+    /// Whether the <see cref="JsonProxy"/> should return to a <see cref="JsonNode"/> after deserialization.
     /// </summary>
     internal bool ForceToToken = false;
 

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -41,7 +42,7 @@ public static class Extensions {
     }
 
     /// <summary>
-    /// Returns the reference or an empty <see cref="JObject"/> when used and the reference is null.
+    /// Returns the reference or an empty <see cref="JsonObject"/> when used and the reference is null.
     /// </summary>
     public static JsonObject ConvertNullToEmptyToken(this JsonNode? tokenMaybe) {
         if (tokenMaybe is JsonObject obj)
@@ -358,14 +359,14 @@ public static class Extensions {
     }
 
     /// <summary>
-    /// Converts a <see cref="JToken"/> to a json string so that it can be recreated in <see cref="FromJString(string)"/>.
+    /// Converts a <see cref="JsonNode"/> to a json string so that it can be recreated in <see cref="FromJString(string)"/>.
     /// </summary>
     public static string ToJString(this JsonNode token) {
         return token.ToString();
     }
 
     /// <summary>
-    /// Reconstructs a <see cref="JToken"/> from the string created in <see cref="ToJString(JsonNode)"/>.
+    /// Reconstructs a <see cref="JsonNode"/> from the string created in <see cref="ToJString(JsonNode)"/>.
     /// </summary>
     public static JsonNode FromJString(string jString) {
         return JsonNode.Parse(jString) ?? DeadToken.Instance;
@@ -391,6 +392,30 @@ public static class Extensions {
         };
     }
 
+    /// <summary>
+    /// Try to convert the value to a raw value. Returns the result in <paramref name="result"/>.
+    /// </summary>
+    /// <returns>Returns true if the value was was able to be used as a raw value.</returns>
+    public static bool TryToRawValue(this JsonNode token, out object? result) {
+        result = null;
+        if (token.IsDead()) return false;
+        switch (token.GetValueKind()) {
+            case JsonValueKind.String:
+                result = (string?)token;
+                return true;
+            case JsonValueKind.Number:
+                result = (double?)token;
+                return true;
+            case JsonValueKind.True:
+                result = true;
+                return true;
+            case JsonValueKind.False:
+                result = false;
+                return true;
+        }
+        return false;
+    }
+
 
     /// <summary>
     /// Converts a <see cref="JsonValue"/> to the generic type.
@@ -398,9 +423,7 @@ public static class Extensions {
     /// </summary>
     public static T? ToRawValue<T>(this JsonNode token) {
         var value = ToRawValue(token);
-        if (value is T t) {
-            return t;
-        }
+        if (value is T t) return t;
         // TOOD: Convert using IConvertible interface
         try {
             return (T?)Convert.ChangeType(value, typeof(T));
@@ -410,9 +433,32 @@ public static class Extensions {
     }
 
     /// <summary>
+    /// Tries to convert the token to a raw value. If the value is not of the type T returns false.
+    /// </summary>
+    /// <returns>Returns true if the value was was able to be used as a raw value.</returns>
+    public static bool TryToRawValue<T>(this JsonNode token, out T? result) {
+        if (token is JsonValue value) {
+            var rawValue = value.ToRawValue();
+            if (rawValue is T t) {
+                result = t;
+                return true;
+            }
+            try {
+                // TOOD: Convert using IConvertible interface
+                result = (T?)Convert.ChangeType(rawValue, typeof(T));
+                return true;
+            }
+            catch { }
+        }
+        result = default;
+        return false;
+    }
+
+    /// <summary>
     /// Tries to convert the <see cref="JsonNode"/> to it's corresponding .NET type.
     /// <para>If there is no valid value it will instead return <paramref name="fallback"/>.</para>
     /// </summary>
+    [return: NotNullIfNotNull(nameof(fallback))]
     public static object? ToRawValueOrFallback(this JsonNode token, object fallback) {
         var result = ToRawValue(token);
         if (result == null) {
@@ -426,6 +472,7 @@ public static class Extensions {
     /// Tries to convert the <see cref="JsonNode"/> to the provided generic type.
     /// <para>If there is no valid value it will instead return <paramref name="fallback"/>.</para>
     /// </summary>
+    [return: NotNullIfNotNull(nameof(fallback))]
     public static T? ToRawValueOrFallback<T>(this JsonNode token, T? fallback) {
         if (token == DeadToken.Instance) return fallback;
         object? result = token.GetValueKind() switch {
@@ -439,14 +486,14 @@ public static class Extensions {
             JsonValueKind.Array => fallback,
             _ => fallback
         };
-        if (result == null) return default;
+        if (result == null) return fallback;
         if (result is T t) return t;
         // TOOD: Convert using IConvertible interface
         try {
             return (T?)Convert.ChangeType(result, typeof(T));
         }
         catch { }
-        return default;
+        return fallback;
     }
 
     /// <summary>
