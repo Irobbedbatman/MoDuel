@@ -49,8 +49,7 @@ internal class FlowCommandHandler : IDisposable {
             var span = DateTime.UtcNow - commandTime;
             // If the command was created more than a second before execution it is ignored. System commands don't have this limitation.
             if (span.TotalSeconds > CommandTimeOut) {
-                if (DuelFlow.LoggingEnabled)
-                    Console.WriteLine($"Command timed out. It was buffered for {span.TotalSeconds} seconds");
+                LogSettings.LogEvent($"Command timed out. It was buffered for {span.TotalSeconds} seconds", LogSettings.LogEvents.FlowCommands);
                 return;
             }
 
@@ -67,8 +66,7 @@ internal class FlowCommandHandler : IDisposable {
             // As command references are equal for the same player this will overwrite any old commands.
             CommandBuffer[cmdRef] = command;
 
-            if (DuelFlow.LoggingEnabled)
-                Console.WriteLine("Command Received");
+            LogSettings.LogEvent("Command Received", LogSettings.LogEvents.FlowCommands);
 
             // Tell the flow to resume.
             CommandReadySignal?.Set();
@@ -100,13 +98,13 @@ internal class FlowCommandHandler : IDisposable {
 
         try {
             // Invoke the command and allow commands to be added while its is running.
-            if (DuelFlow.LoggingEnabled && command != null)
-                Console.WriteLine("Running provided command.");
+            if (command != null)
+                LogSettings.LogEvent("Running provided command.", LogSettings.LogEvents.FlowCommands);
             command?.Value.Invoke();
         }
         catch (Exception e) {
             // Because invoke may cause unhandled exceptions display them for debugging.
-            Console.Write(e.StackTrace);
+            LogSettings.LogEvent(e.StackTrace ?? "", LogSettings.LogEvents.FlowCommands);
         }
     }
 
@@ -117,22 +115,22 @@ internal class FlowCommandHandler : IDisposable {
     /// </summary>
     public void WaitUntilCommandReady() {
 
-        // Lock the buffer in case the ready signal is signaled between now and reset.
+        // Lock the buffer in case the ready signal is signalled between now and reset.
         lock (CommandBuffer) {
 
             // If the command buffer has a value no reason to block.
             if (CommandBuffer.Count > 0)
                 return;
 
-            if (DuelFlow.LoggingEnabled)
-                Console.WriteLine("No Commands are ready. Waiting for one.");
+
+            LogSettings.LogEvent("No Commands are ready. Waiting for one.", LogSettings.LogEvents.FlowCommands);
 
             // Reset the signal so that WaitOne will block.
             CommandReadySignal?.Reset();
 
         }
 
-        // Wait until a command is signaled.
+        // Wait until a command is signalled.
         CommandReadySignal?.WaitOne();
 
     }
@@ -142,9 +140,7 @@ internal class FlowCommandHandler : IDisposable {
     /// <para>This will stop the thread that is using it from being blocked.</para>
     /// </summary>
     public void ForceReadyState() {
-        if (DuelFlow.LoggingEnabled) {
-            Console.WriteLine("Forcing the ready state on the command handler.");
-        }
+        LogSettings.LogEvent("Forcing the ready state on the command handler.", LogSettings.LogEvents.FlowCommands);
         CommandReadySignal?.Set();
     }
 
@@ -157,9 +153,7 @@ internal class FlowCommandHandler : IDisposable {
             CommandReadySignal.Dispose();
             CommandReadySignal = null;
         }
-        else if (DuelFlow.LoggingEnabled) {
-            Console.WriteLine("Attempt to dispose of command queue signal when it was already disposed.");
-        }
+        LogSettings.LogEvent("Attempt to dispose of command queue signal when it was already disposed.", LogSettings.LogEvents.FlowCommands);
     }
 
     /// <inheritdoc/>

@@ -1,55 +1,60 @@
+using MoDuel.Abilities;
 using MoDuel.Data;
-using MoDuel.Triggers;
+using MoDuel.Shared.Structures;
+using MoDuel.State;
+using MoDuel.Tools;
 using System.Text.Json.Nodes;
 
 namespace MoDuel.Resources;
 
 /// <summary>
-/// A type for each different resource. Defined by its <see cref="Name"/>. 
-/// <para>Can be explicitly triggered to define custom behaviour.</para>
+/// A resource type loaded from a file.
+/// <para>Has abilities to </para>
 /// </summary>
-public class ResourceType(Package package, string id, JsonObject data) : LoadedAsset(package, id, data), IExplicitTriggerable {
+public class ResourceType : LoadedAsset, IAbilityEntity {
+
+#nullable disable
+    public static readonly ResourceType Missing = new(null, "", null);
+#nullable enable
 
     /// <summary>
-    /// The reactions this mana type will have when requested to react to certain trigger keywords.
+    /// The list of abilities tied to the resource type.
     /// </summary>
-    public readonly Dictionary<string, ActionFunction> ExplicitTriggers = [];
+    public readonly List<AbilityReference> Abilities = [];
 
-    /// <summary>
-    /// Assign all the provided <paramref name="exTriggers"/> within <see cref="ExplicitTriggers"/>.
-    /// </summary>
-    internal void AssignExplicitTriggers(Dictionary<string, ActionFunction> exTriggers) {
-        if (exTriggers == null)
-            return;
-        foreach (var exTrigger in exTriggers) {
-            ExplicitTriggers.Add(exTrigger.Key, exTrigger.Value);
-        }
+    public ResourceType(Package package, string id, JsonObject data) : base(package, id, data) {
+
     }
 
     /// <inheritdoc/>
     public override string ToString() => Name;
 
     /// <inheritdoc/>
-    public ActionFunction GetExplicitReaction(string trigger) {
-        return ExplicitTriggers.TryGetValue(trigger, out var reaction) ? reaction : new ActionFunction();
+    public IEnumerable<AbilityReference> GetAbilities() => Abilities;
+
+    /// <inheritdoc/>
+    public void RemoveAbility(AbilityReference ability) {
+        Abilities.Remove(ability);
+    }
+
+    /// <summary>
+    /// Add an ability to the <see cref="ResourceType"/>.
+    /// </summary>
+    public void AddAbility(AbilityReference ability) {
+        Abilities.Add(ability);
     }
 
     /// <inheritdoc/>
-    public dynamic? Trigger(string trigger, object?[] arguments) {
-        return GetExplicitReaction(trigger)?.Call(arguments.Prepend(this).ToArray());
-    }
+    public DuelState GetState() => ThreadContext.DuelState;
 
-    /// <inheritdoc/>
-    public dynamic? FallbackTrigger(string trigger, ActionFunction fallback, params object?[] arguments) {
-        var reaction = GetExplicitReaction(trigger);
-        if (reaction.IsAssigned)
-            return reaction.Call(arguments.Prepend(this).ToArray());
-        return fallback?.Call(arguments.Prepend(this).ToArray());
-    }
+    /// <summary>
+    /// Calls a trigger. This is currently implemented in the <see cref="IAbilityEntity"/>.
+    /// </summary>
+    public void AbilityTrigger(string triggerKey, DataTable data) => ((IAbilityEntity)this).Trigger(triggerKey, data);
 
-    /// <inheritdoc/>
-    public dynamic? FallbackTrigger(string trigger, Delegate fallback, params object?[] arguments) {
-        return FallbackTrigger(trigger, new ActionFunction(fallback), arguments);
-    }
+    /// <summary>
+    /// Calls a data trigger. This is currently implemented in the <see cref="IAbilityEntity"/>.
+    /// </summary>
+    public void AbilityDataTrigger<T>(string triggerKey, ref T data) where T : DataTable => ((IAbilityEntity)this).DataTrigger(triggerKey, ref data);
 
 }

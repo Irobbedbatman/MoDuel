@@ -1,4 +1,3 @@
-using MoDuel.Client;
 using MoDuel.Data;
 using MoDuel.Players;
 using MoDuel.Serialization;
@@ -16,6 +15,7 @@ namespace MoDuel.State;
 /// <item>StateEntities.cs | Target data.</item>
 /// <item>StateStatus.cs | The state machine.</item>
 /// <item>StateTriggers.cs | The trigger reactions for the state.</item>
+/// <item>StateCommunication.cs | Communication outbound.</item>
 /// </list>
 /// </summary>
 [SerializeReference]
@@ -58,19 +58,16 @@ public partial class DuelState {
     public object? this[string key] { get => Values[key]; set => Values[key] = value; }
 
     /// <summary>
-    /// The animations that are sent out from the duel flow.
-    /// </summary>
-    public EventHandler<ClientRequest> OutBoundDelegate = delegate { };
-
-    /// <summary>
     /// The player that will or did have the first turn.
     /// </summary>
-    public Player FirstPlayer;
+    public readonly Player FirstPlayer;
 
     public DuelState(PlayerMeta player1, PlayerMeta player2, PackageCatalogue packageCatalogue, DuelSettings settings) {
         _packageCatalogue = packageCatalogue;
         Settings = settings;
         Random = settings.RandomSeed.HasValue ? new(settings.RandomSeed.Value) : new();
+
+        GlobalEntity = new GlobalEntity(this);
 
         Player1 = new(this, player1);
         Player2 = new(this, player2);
@@ -79,6 +76,11 @@ public partial class DuelState {
         FirstPlayer = GetPlayerByUserID(Settings.ForceIdToGoFirst) ?? Random.NextItemParams(Player1, Player2) ?? Player1;
         CurrentTurn = new(FirstPlayer);
         Field = new(this, Player1.Field, Player2.Field);
+
+        // Add all the abilities to the global entity.
+        foreach (var ability in Settings.GlobalAbilities) {
+            GlobalEntity.AddAbility(new Abilities.AbilityReference(GlobalEntity, new Sources.SourceImprint(Settings), ability));
+        }
 
         // Use the on duel loaded hook on all the packaged code.
         foreach (var package in _packageCatalogue) {
@@ -92,7 +94,7 @@ public partial class DuelState {
     /// </summary>
     internal void Start() {
         if (Started) {
-            Console.WriteLine("Failed to Start duel as it has already started.");
+            LogSettings.LogEvent("Failed to Start duel as it has already started.", LogSettings.LogEvents.State);
             return;
         }
         Started = true;
@@ -102,7 +104,7 @@ public partial class DuelState {
     /// <summary>
     /// Calls the game clean up action if the duel is finished.
     /// </summary>
-    internal void CleanupOnGameFinished() {
+    internal void CleanUpOnGameFinished() {
         if (Finished)
             Settings.GameEndAction.Call(this);
     }

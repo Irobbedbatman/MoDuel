@@ -1,4 +1,5 @@
 ﻿using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 using MoDuel.State;
 
@@ -11,7 +12,7 @@ public static class TurnActions {
 
 
     /// <summary>
-    /// Action used to chaneg the turn to the next next players.
+    /// Action used to change the turn to the next next players.
     /// </summary>
     [ActionName(nameof(ChangeTurn))]
     public static void ChangeTurn(DuelState state) {

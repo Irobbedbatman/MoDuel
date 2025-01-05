@@ -1,9 +1,11 @@
-﻿using MoDuel.Cards;
+﻿using MoDuel.Abilities;
+using MoDuel.Cards;
 using MoDuel.Heroes;
-using MoDuel.Json;
 using MoDuel.Resources;
 using MoDuel.Serialization;
 using MoDuel.Shared.Data;
+using MoDuel.Shared.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
@@ -28,7 +30,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
                     Packages.Add(package.Name, package);
                 }
                 else {
-                    Console.WriteLine($"No package could be found at location: {location}");
+                    LogSettings.LogEvent($"No package could be found at location: {location}", LogSettings.LogEvents.DataLoadingError);
                 }
             }
         }
@@ -84,6 +86,15 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     }
 
     /// <summary>
+    /// Loads a <see cref="Ability"/> from a package using a full or partial item path.
+    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
+    /// </summary>
+    public Ability LoadAbility(string itemPath, Package? sourcePackage = null) {
+        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        return package?.LoadAbility(itemName) ?? Ability.Missing;
+    }
+
+    /// <summary>
     /// Loads a json file from a package using a full or partial item path.
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
@@ -105,7 +116,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// Try to load a <see cref="Card"/>.
     /// </summary>
     /// <returns><c>true</c> if the <see cref="Card"/> was able to be loaded.</returns>
-    public bool TryGetCard(string fullItemPath, out Card? card) {
+    public bool TryGetCard(string fullItemPath, [NotNullWhen(true)] out Card? card) {
         card = LoadCard(fullItemPath);
         return card != null;
     }
@@ -114,7 +125,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// Try to load a <see cref="Hero"/>.
     /// </summary>
     /// <returns><c>true</c> if the <see cref="Hero"/> was able to be loaded.</returns>
-    public bool TryGetHero(string fullItemPath, out Hero? hero) {
+    public bool TryGetHero(string fullItemPath, [NotNullWhen(true)] out Hero? hero) {
         hero = LoadHero(fullItemPath);
         return hero != null;
     }
@@ -123,16 +134,25 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// Try to load a <see cref="ActionFunction"/>.
     /// </summary>
     /// <returns><c>true</c> if the <see cref="ActionFunction"/> was able to be loaded.</returns>
-    public bool TryGetAction(string fullItemPath, out ActionFunction? action) {
+    public bool TryGetAction(string fullItemPath, [NotNullWhen(true)] out ActionFunction? action) {
         action = LoadAction(fullItemPath);
         return action.IsAssigned;
+    }
+
+    /// <summary>
+    /// Try to load a <see cref="Ability"/>.
+    /// </summary>
+    /// <returns><c>true</c> if the <see cref="Ability"/> was able to be loaded.</returns>
+    public bool TryGetAbility(string fullItemPath, [NotNullWhen(true)] out Ability? ability) {
+        ability = LoadAbility(fullItemPath);
+        return ability != Ability.Missing;
     }
 
     /// <summary>
     /// Try to load a json object stored in a file.
     /// </summary>
     /// <returns><c>true</c> if the json file was able to be loaded.</returns>
-    public bool TryGetJson(string fullItemPath, out JsonNode data) {
+    public bool TryGetJson(string fullItemPath, [NotNullWhen(true)] out JsonNode data) {
         data = LoadJson(fullItemPath);
         return !data.IsDead();
     }
@@ -141,11 +161,19 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// Try to load a <see cref="ResourceType"/> stored in a file.
     /// </summary>
     /// <returns><c>true</c> if the <see cref="ResourceType"/> was loaded.</returns>
-    public bool TryLoadResourceType(string fullItemPath, out ResourceType? resourceType) {
+    public bool TryGetResourceType(string fullItemPath, [NotNullWhen(true)] out ResourceType? resourceType) {
         resourceType = LoadResourceType(fullItemPath);
         return resourceType != null;
     }
 
     #endregion
+
+    /// <summary>
+    /// Get all the resource types that have been loaded for all the loaded packages.
+    /// </summary>
+    public IEnumerable<ResourceType> GetAllLoadedResourceTypes() {
+        return Packages.SelectMany(p => p.Value.GetLoadedResourceTypes());
+    }
+
 
 }

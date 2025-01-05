@@ -1,4 +1,4 @@
-﻿using MoDuel.Json;
+﻿using MoDuel.Shared.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -130,7 +130,7 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
 
         // Ensure it is valid.
         if (values == null)
-            return Array.Empty<string>();
+            return [];
 
         return values.GetKeys();
     }

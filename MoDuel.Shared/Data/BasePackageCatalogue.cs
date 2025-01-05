@@ -20,7 +20,7 @@ public class BasePackageCatalogue<P, C> : IEnumerable<P> where P : BasePackage<P
     /// <summary>
     /// The list of all the packages stored in the catalogue.
     /// </summary>
-    public IReadOnlyList<P> AllPackages => Packages.Values.ToList();
+    public IReadOnlyList<P> AllPackages => [.. Packages.Values];
 
     /// <summary>
     /// The separator that separates packages from their items. I.e: package|item

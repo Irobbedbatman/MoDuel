@@ -1,3 +1,4 @@
+using MoDuel.Abilities;
 using MoDuel.Cards;
 using MoDuel.Client;
 using MoDuel.Field;
@@ -5,6 +6,7 @@ using MoDuel.Flow;
 using MoDuel.Heroes;
 using MoDuel.Resources;
 using MoDuel.Serialization;
+using MoDuel.Shared.Structures;
 using MoDuel.State;
 using MoDuel.Time;
 using MoDuel.Tools;
@@ -17,7 +19,7 @@ namespace MoDuel.Players;
 /// <para><see cref="UserId"/> should be made unique but is not confirmed to be as such. Use it's <see cref="Target.Index"/> to accurately determine the player.</para>
 /// </summary>
 [SerializeReference]
-public class Player : Target {
+public class Player : Target, IAbilityEntity {
 
     /// <summary>
     /// Player that can be used to bypass command queue to perform actions.
@@ -52,6 +54,11 @@ public class Player : Target {
     /// The turn that the player had last this excludes their current turn.
     /// </summary>
     public TurnData? LastTurn;
+
+    /// <summary>
+    /// The abilities provided to the player that are separate from their hero.
+    /// </summary>
+    public readonly List<AbilityReference> Abilities = [];
 
     /// <summary>
     /// Indexer that allows for access to <see cref="Target.Values"/> and <see cref="PrivateValues"/>. 
@@ -140,16 +147,13 @@ public class Player : Target {
     /// </summary>
     public bool IsAlive => Life > 0;
 
-#pragma warning disable CS8618 
-    // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    // System Player should be the only case when this constructor is used.
+#nullable disable
     private Player(string userId) : base(new TargetRegistry(new Indexer())) {
         if (userId != "System")
             throw new ArgumentException($"{nameof(userId)} must be System to ensure this constructor is not used.");
         UserId = userId;
     }
-    // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-#pragma warning restore CS8618 
+#nullable enable
 
     public Player(DuelState context, PlayerMeta meta) : base(context.TargetRegistry) {
         UserId = meta.UserId;
@@ -158,8 +162,8 @@ public class Player : Target {
         ResourcePool = new ResourcePool(meta.ResourcePoolTypes);
         Field = new SubField(this);
         Hero = new HeroInstance(meta.Hero, this);
-        Hand = new CardSet(this);
-        Grave = new CardSet(this);
+        Hand = new CardSet(this, "Hand");
+        Grave = new CardSet(this, "Grave");
     }
 
     /// <summary>
@@ -178,25 +182,25 @@ public class Player : Target {
     /// Adds a card to this player's hand.
     /// </summary>
     /// <param name="card"></param>
-    public void AddCardToHand(CardInstance card) => Hand.Add(card);
+    public void AddCardToHand(CardInstance card) => Hand.AddToLocation(card);
 
     /// <summary>
     /// Removes a card from this player's hand if it currently in there.
     /// </summary>
     /// <param name="card"></param>
-    public void RemoveCardFromHand(CardInstance card) => Hand.Remove(card);
+    public void RemoveCardFromHand(CardInstance card) => Hand.RemoveFromLocation(card);
 
     /// <summary>
     /// Adds a card to this player's grave.
     /// </summary>
     /// <param name="card"></param>
-    public void AddCardToGrave(CardInstance card) => Grave.Add(card);
+    public void AddCardToGrave(CardInstance card) => Grave.AddToLocation(card);
 
     /// <summary>
     /// Removes a card from this player's grave if it currently in there.
     /// </summary>
     /// <param name="card"></param>
-    public void RemoveCardFromGrave(CardInstance card) => Grave.Remove(card);
+    public void RemoveCardFromGrave(CardInstance card) => Grave.RemoveFromLocation(card);
 
     /// <summary>
     /// Check to see if player has a certain card in their hand.
@@ -260,5 +264,34 @@ public class Player : Target {
     /// </summary>
     public bool IsTurnOwner() => Context.CurrentTurn.Owner == this;
 
+    /// <summary>
+    /// Get the opposing player via the state.
+    /// </summary>
+    public Player GetOpposingPlayer() {
+        return Context.GetOpposingPlayer(this);
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<AbilityReference> GetAbilities() => Abilities;
+
+
+    /// <inheritdoc/>
+    public DuelState GetState() => Context;
+
+    /// <inheritdoc/>
+    public void AddAbility(AbilityReference ability) => Abilities.Add(ability);
+
+    /// <inheritdoc/>
+    public void RemoveAbility(AbilityReference ability) => Abilities.Remove(ability);
+
+    /// <summary>
+    /// Calls a trigger. This is currently implemented in the <see cref="IAbilityEntity"/>.
+    /// </summary>
+    public void AbilityTrigger(string triggerKey, DataTable data) => ((IAbilityEntity)this).Trigger(triggerKey, data);
+
+    /// <summary>
+    /// Calls a data trigger. This is currently implemented in the <see cref="IAbilityEntity"/>.
+    /// </summary>
+    public void AbilityDataTrigger<T>(string triggerKey, ref T data) where T : DataTable => ((IAbilityEntity)this).DataTrigger(triggerKey, ref data);
 
 }

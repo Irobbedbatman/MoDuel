@@ -1,6 +1,5 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Field;
-using MoDuel.OngoingEffects;
 using MoDuel.Players;
 using MoDuel.Time;
 
@@ -9,6 +8,11 @@ namespace MoDuel.State;
 
 // Look at DuelState.cs for documentation.
 public partial class DuelState {
+
+    /// <summary>
+    /// The entity that will be used to handle global effects.
+    /// </summary>
+    public readonly GlobalEntity GlobalEntity;
 
     /// <summary>
     /// One of the two players that are taking part in the game.
@@ -31,11 +35,6 @@ public partial class DuelState {
     public readonly CardInstanceManager CardManager = new();
 
     /// <summary>
-    /// The manager that stores all the <see cref="OngoingEffect"/>s and allows for compartmentalised functionality.
-    /// </summary>
-    public readonly OngoingEffectManager EffectManager = new();
-
-    /// <summary>
     /// Stops the timers for both <see cref="Player1"/> and <see cref="Player2"/>.
     /// </summary>
     public void StopAllTimers() {
@@ -46,7 +45,7 @@ public partial class DuelState {
     /// <summary>
     /// Assigns <see cref="PlayerTimers"/> for both <see cref="Player1"/> and <see cref="Player2"/>.
     /// </summary>
-    /// <param name="settings"The <see cref="TimerSettings"/> both timers will use.></param>
+    /// <param name="settings">The <see cref="TimerSettings"/> both timers will use.</param>
     /// <param name="threadLock">The lock object to handle timeouts in a thread safe way,</param>
     public void AssignTimers(TimerSettings settings, object threadLock) {
         Player1.AssignTimer(settings, threadLock);

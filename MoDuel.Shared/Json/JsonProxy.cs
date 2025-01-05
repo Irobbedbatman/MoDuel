@@ -1,7 +1,6 @@
-﻿
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 
-namespace MoDuel.Json;
+namespace MoDuel.Shared.Json;
 
 /// <summary>
 /// A proxy for a <see cref="JToken"/> that does not store that json token; instead storing the path.

@@ -52,7 +52,7 @@ public class AIPlayer(DuelFlow flow, Player player, ManagedRandom random) {
                 () => Flow.EnqueueCommand(Player, "CMDCharge")
             ];
 
-            // Check to see if leveling up is a valid action.
+            // Check to see if levelling up is a valid action.
             LevelUp(commands);
 
             // Check to see if cards in the hand could be played.

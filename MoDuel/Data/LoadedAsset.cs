@@ -1,5 +1,5 @@
-﻿using MoDuel.Json;
-using MoDuel.Serialization;
+﻿using MoDuel.Serialization;
+using MoDuel.Shared.Json;
 using System.Collections.Frozen;
 using System.Text.Json.Nodes;
 
@@ -33,9 +33,7 @@ public abstract class LoadedAsset(Package package, string id, JsonObject? data =
     /// <summary>
     /// The tags associated with this asset.
     /// </summary>
-#nullable disable
-    public readonly FrozenSet<string> Tags = data["tags"]?.AsArray().Select(t => t.ToRawValue<string>()).Where(t => t != null).ToFrozenSet();
-#nullable enable
+    public readonly FrozenSet<string> Tags = data?["tags"]?.AsArray().Select(t => t?.ToRawValue<string>()).OfType<string>().ToFrozenSet() ?? Array.Empty<string>().ToFrozenSet();
 
     /// <summary>
     /// Accessor for the any other value contained in the <see cref="Data"/>.

@@ -1,6 +1,11 @@
-﻿using MoDuel.Cards;
-using MoDuel.Data;
+﻿using MoDuel;
+using MoDuel.Abilities;
+using MoDuel.Cards;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
+using MoDuel.Shared.Structures;
+using MoDuel.Sources;
+using MoDuel.Triggers;
 
 namespace DefaultPackage;
 public static class PlayerActions {
@@ -20,7 +25,7 @@ public static class PlayerActions {
             return;
         }
 
-        card.MoveCardToGrave(card.OriginalOwner);
+        card.MoveCardToGrave(card.TrueOwner);
 
         // TODO CLIENT: discard effects
     }
@@ -31,25 +36,38 @@ public static class PlayerActions {
     /// <param name="inflictDamage">Should the player take damage equal to the amount of cards revived.</param>
     public static void ReturnDeadCardsToHand(this Player player, bool inflictDamage = true) {
 
-        var cards = player.Grave.ToHashSet();
+        var cards = player.Grave.ToDataSet();
 
-        // TODO DELAY: Get cards overwirite i guess.
+        var data = new DataTable() {
+            ["Player"] = player,
+            ["CardsToRevive"] = cards
+        };
 
-        foreach (var card in player.Grave) {
-            bool result = card.FallbackTrigger("CanBeRevived", new MoDuel.ActionFunction(CardActions.CanBeRevivedDefault));
-
-            if (!result) {
-                cards.Remove(card);
-            }
-        }
+        var state = player.Context;
+        var source = new Source(); // TODO: convert to revival source.
+        var trigger = new Trigger("Revive:GetCards", source, state, TriggerType.DataOverride);
+        state.DataTrigger(trigger, ref data);
 
         if (inflictDamage)
             DamageActions.InflictDamageToPlayer(player, cards.Count);
 
+        cards = data.Get<DataSet<CardInstance>>("CardsToRevive") ?? [];
 
         foreach (var card in cards) {
             if (card.InGrave) {
-                card.FallbackTrigger("Revive", new MoDuel.ActionFunction(CardActions.ReviveDefault));
+                var individualCardData = new DataTable() {
+                    ["Card"] = card,
+                    ["ReviveAction"] = new ActionFunction(CardActions.ReviveDefault)
+                };
+
+                ((IAbilityEntity)card).DataTrigger("Revive:GetAction", ref individualCardData);
+
+                var updatedCard = individualCardData.Get<CardInstance>("Card");
+                var action = individualCardData.Get<ActionFunction>("ReviveAction");
+
+                if (updatedCard != null) {
+                    action?.Call(updatedCard);
+                }
             }
         }
     }

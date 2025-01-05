@@ -1,73 +1,35 @@
-﻿using MoDuel.Players;
-using MoDuel.Serialization;
+﻿using MoDuel.Serialization;
 using MoDuel.State;
+using MoDuel.Triggers;
 
 namespace MoDuel.Cards;
 
 /// <summary>
-/// Comparer that can be used to get activation priority of <see cref="CardInstance"/>s and <see cref="CardInstance"/>s.
+/// Comparer that can be used to get activation priority of <see cref="CardInstance"/>s.
 /// <para>Lower values indicate higher priority.</para>
 /// </summary>
 [SerializeReference]
-public class CardInstanceComparer(Player priorityPlayer, string trigger = "", ActionFunction? customComparer = null) : IComparer<CardInstance> {
-
-    /// <summary>
-    /// The player whose cards have more priority than other players.
-    /// </summary>
-    public readonly Player PriorityPlayer = priorityPlayer;
-
-    /// <summary>
-    /// The <see cref="DuelState"/> that is requesting the comparison.
-    /// </summary>
-    public DuelState Context => PriorityPlayer.Context;
-
-    /// <summary>
-    /// A lua based comparer that is used first in <see cref="Compare(CardInstance, CardInstance)"/>.
-    /// </summary>
-    public readonly ActionFunction CustomComparer = customComparer ?? new ActionFunction();
+public class CardInstanceComparer : IComparer<CardInstance> {
 
     /// <summary>
     /// The trigger that the <see cref="CardInstance"/>s are reacting to.
     /// </summary>
-    public readonly string Trigger = trigger;
+    public readonly Trigger Trigger;
 
     /// <summary>
-    /// Compares two cards with the following priority.
-    /// <list type="number">
-    /// <item>Custom Explicit Comparison provided by <paramref name="x"/> and <paramref name="y"/>.</item>
-    /// <item>Custom Comparison provided through <see cref="CustomComparer"/></item>
-    /// <item>Creatures as per <see cref="CompareCreatures(CardInstance, CardInstance)"/>.</item>
-    /// <item>Cards owned by <see cref="PriorityPlayer"/></item>
-    /// <item>Cards in hand</item>
-    /// <item>Cards in grave</item>
-    /// <item>Cards with higher level.</item>
-    /// <item>Alphabetical compared <see cref="Card.Id"/>.</item>
-    /// </list>
+    /// Get the state the trigger was called within.
     /// </summary>
-    /// <param name="skipExplicit">Check to determine if Explicit conversion should be skipped. This can be a costly operation.</param>
-    /// <returns>-1 for cards higher in priority. +1 for cards lower in priority. 0 for cards that are equivalent.</returns>
-    public int Compare(CardInstance? x, CardInstance? y, bool skipExplicit = false) {
+    public DuelState State => Trigger.State;
 
-        if (!skipExplicit) {
-            // Value of both explicit reactions checked against each other
-            int compareImplicit = 0;
-            if (x?.Imprint.ExplicitTriggerReactions.TryGetValue("Compare", out var value) ?? false) {
-                int? result = value.Call(this, x, y);
-                compareImplicit += result ?? 0;
-            }
-            if (y?.Imprint.ExplicitTriggerReactions.TryGetValue("Compare", out value) ?? false) {
-                int? result = value.Call(this, y, x, Trigger);
-                compareImplicit += result ?? 0;
-            }
-            // If implicit comparison is decisive return result.
-            if (compareImplicit != 0)
-                return compareImplicit;
-        }
+    public CardInstanceComparer(Trigger trigger) {
+        Trigger = trigger;
+    }
 
-        // Use the provided custom convertor.
-        int compareCustom = CustomComparer?.Call(this, x, y) ?? 0;
-        if (compareCustom != 0)
-            return compareCustom;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public int Compare(CardInstance? x, CardInstance? y) {
 
         // Null check
         if (x == null || y == null)
@@ -93,12 +55,7 @@ public class CardInstanceComparer(Player priorityPlayer, string trigger = "", Ac
         if (graveCompare != 0)
             return graveCompare;
 
-        // Prioritize cards with higher levels. 
-        int levelCompare = y.GetDisplayedLevel()?.CompareTo(x.GetDisplayedLevel()) ?? 0;
-        if (levelCompare != 0)
-            return levelCompare;
-
-        // Finally prioritize by index which will guarantee a consistent ordering.
+        // Finally prioritize by id which will guarantee a consistent ordering.
         int indexCompare = x.Imprint.Id.CompareTo(y.Imprint.Id);
         return indexCompare;
     }
@@ -170,21 +127,15 @@ public class CardInstanceComparer(Player priorityPlayer, string trigger = "", Ac
     }
 
     /// <summary>
-    /// Compares two <see cref="CardInstance"/>s and their Owner against the <see cref="PriorityPlayer"/>.
-    /// <para>If both cards are owned by the same player 0 is returned.</para>
-    /// <para>If both cards don't have the <see cref="PriorityPlayer"/> 0 is returned.</para>
+    /// Compares two <see cref="CardInstance"/>s to see if their owner is the current turn owner.
     /// </summary>
-    /// <returns>-1 if x is owned by the <see cref="PriorityPlayer"/>. +1 if y is the priority player. 0 otherwise.</returns>
+    /// <returns>-1 if x is owned by the current turn owner. +1 if y is the priority player. 0 otherwise.</returns>
     private int CompareOwner(CardInstance x, CardInstance y) {
-        if (x.Owner == y.Owner)
-            return 0;
-        if (x.Owner == PriorityPlayer)
+        if (x.Owner == State.CurrentTurn.Owner)
             return -1;
-        if (y.Owner == PriorityPlayer)
+        if (y.Owner == State.CurrentTurn.Owner)
             return 1;
         return 0;
     }
 
-    /// <inheritdoc/>
-    public int Compare(CardInstance? x, CardInstance? y) => Compare(x, y, false);
 }

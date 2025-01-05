@@ -33,7 +33,7 @@ public class TimerSettings {
     /// </summary>
     public double MinRefresh = 0;
     /// <summary>
-    /// A hard cutoff that ignore other time rules.
+    /// A hard cut off that ignore other time rules.
     /// </summary>
     public double AbsoluteTimeOut = FromMinutes(15);
     /// <summary>

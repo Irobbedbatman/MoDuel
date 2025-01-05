@@ -1,9 +1,10 @@
-﻿using MoDuel.Cards;
+﻿using MoDuel.Abilities;
+using MoDuel.Cards;
+using MoDuel.Data.Assembled;
 using MoDuel.Heroes;
-using MoDuel.Json;
 using MoDuel.Resources;
 using MoDuel.Shared.Json;
-using System.Text.Json;
+using MoDuel.Sources;
 using System.Text.Json.Nodes;
 
 namespace MoDuel.Data;
@@ -12,16 +13,9 @@ namespace MoDuel.Data;
 public partial class Package {
 
     /// <summary>
-    /// Flag that when true causes log methods to print the loaded content.
-    /// </summary>
-    public static bool LogLoads { get; set; } = false;
-
-    /// <summary>
     /// Logs the <paramref name="message"/> if <see cref="LogLoads"/> is true.
     /// </summary>
-    private static void Log(string message) {
-        if (LogLoads) Console.WriteLine(message);
-    }
+    private static void LogLoad(string message) => LogSettings.LogEvent(message, LogSettings.LogEvents.DataLoading);
 
     /// <summary>
     /// A category name for consistent naming conventions.
@@ -31,6 +25,7 @@ public partial class Package {
         CARD_CATEGORY = "Cards",
         HERO_CATEGORY = "Heroes",
         ACTION_CATEGORY = "Actions",
+        ABILITY_CATEGORY = "Abilities",
         JSON_DATA_CATEGORY = "Data",
         RESOURCE_TYPE_CATEGORY = "Resources";
 
@@ -38,6 +33,11 @@ public partial class Package {
     /// A property on data that indicates a collection of items that also need to be loaded.
     /// </summary>
     public const string DEPENDENCIES_PROPERTY = "Dependencies";
+
+    /// <summary>
+    /// A property on data that indicates a collection of ability references..
+    /// </summary>
+    public const string ABILITIES_PROPERTY = ABILITY_CATEGORY;
 
     /// <summary>
     /// The properties on data that list each trigger for that category.
@@ -95,7 +95,7 @@ public partial class Package {
             return data;
         }
         catch (Exception e) {
-            Console.WriteLine(e.StackTrace);
+            LogSettings.LogEvent(e.StackTrace ?? "", LogSettings.LogEvents.DataLoadingError);
             return [];
         }
     }
@@ -112,10 +112,10 @@ public partial class Package {
         if (LoadedCards.TryGetValue(id, out var preloadedCard))
             return preloadedCard;
 
-        Log($"Loading Card: {id} from package {Name}.");
+        LogLoad($"Loading Card: {id} from package {Name}.");
 
         if (!GetSystemPaths(CARD_CATEGORY, id, out var relativePath, out var fullPath)) {
-            Console.WriteLine($"No card file could be found for id: {id}.");
+            LogSettings.LogEvent($"No card file could be found for id: {id}.", LogSettings.LogEvents.DataLoadingError);
             return null;
         }
 
@@ -127,8 +127,13 @@ public partial class Package {
         LoadedCards.Add(id, card);
         // Load any content that is marked for loading.
         LoadLinkedContent(data[DEPENDENCIES_PROPERTY]);
-        // Assign the trigger reactions after loading to ensure no recursive loading.
-        card.AssignTriggerReactions(GetTriggersFrom(data[TRIGGERS_PROPERTY]), GetTriggersFrom(data[EXPLICIT_TRIGGERS_PROPERTY]));
+
+        // Add all the abilities.
+        var abilities = LoadListedAbilities(data[ABILITIES_PROPERTY]);
+        foreach (var ability in abilities) {
+            card.InitialAbilities.Add(ability);
+        }
+
         return card;
     }
 
@@ -146,10 +151,10 @@ public partial class Package {
             return preloadedHero;
 
         // Display a message if logging is enabled.
-        Log($"Loading Hero: {id} from package {Name}.");
+        LogLoad($"Loading Hero: {id} from package {Name}.");
 
         if (!GetSystemPaths(HERO_CATEGORY, id, out var relativePath, out var fullPath)) {
-            Console.WriteLine($"No hero file could be found for id: {id}.");
+            LogSettings.LogEvent($"No hero file could be found for id: {id}.", LogSettings.LogEvents.DataLoadingError);
             return null;
         }
 
@@ -159,8 +164,14 @@ public partial class Package {
         Hero hero = new(this, id, data);
         //Add the loaded hero to the loaded content.
         LoadedHeroes.Add(id, hero);
+
+        // Add all the abilities.
+        var abilities = LoadListedAbilities(data[ABILITIES_PROPERTY]);
+        foreach (var ability in abilities) {
+            hero.InitialAbilities.Add(ability);
+        }
+
         // Assign the trigger reactions after loading to ensure no recursive loading.
-        hero.AssignTriggerReactions(GetTriggersFrom(data[TRIGGERS_PROPERTY]), GetTriggersFrom(data[EXPLICIT_TRIGGERS_PROPERTY]));
         LoadLinkedContent(data[DEPENDENCIES_PROPERTY]);
         return hero;
 
@@ -173,8 +184,19 @@ public partial class Package {
         if (PackagedCode.Actions.TryGetValue(id, out var action)) {
             return action;
         }
-        Log($"Action couldn't be found with id: {id}");
+        LogLoad($"Action couldn't be found with id: {id}");
         return new ActionFunction();
+    }
+
+    /// <summary>
+    /// Loads an ability from the <see cref="PackagedCode"/> with the provided <paramref name="id"/>.
+    /// </summary>
+    public Ability LoadAbility(string id) {
+        if (PackagedCode.Abilities.TryGetValue(id, out var ability)) {
+            return ability;
+        }
+        LogLoad($"Ability couldn't be found with id: {id}");
+        return Ability.Missing;
     }
 
 
@@ -189,11 +211,11 @@ public partial class Package {
             return preloadedFile;
 
         // Display a message if logging is enabled.
-        Log($"Loading Json File: {id} from package {Name}.");
+        LogLoad($"Loading Json File: {id} from package {Name}.");
 
         // Get the file path and validate it.
         if (!GetSystemPaths(JSON_DATA_CATEGORY, id, out var relativePath, out var fullPath)) {
-            Console.WriteLine($"No json file could be found for id: {id}.");
+            LogSettings.LogEvent($"No json file could be found for id: {id}.", LogSettings.LogEvents.DataLoadingError);
             return DeadToken.Instance;
         }
 
@@ -214,11 +236,11 @@ public partial class Package {
         if (LoadedResourceTypes.TryGetValue(id, out var preloaded))
             return preloaded;
 
-        Log($"Loading Resource Type: {id} from package {Name}.");
+        LogLoad($"Loading Resource Type: {id} from package {Name}.");
 
         // Get the full file path and validate it.
         if (!GetSystemPaths(RESOURCE_TYPE_CATEGORY, id, out var relativePath, out var fullPath)) {
-            Console.WriteLine($"ResourceType: {id} not found in package.");
+            LogSettings.LogEvent($"ResourceType: {id} not found in package.", LogSettings.LogEvents.DataLoadingError);
             return null;
         }
 
@@ -231,8 +253,9 @@ public partial class Package {
         // Add the resource type so that need not be reloaded.
         LoadedResourceTypes.Add(id, newType);
 
-        // Load any explicit triggers and load them.
-        newType.AssignExplicitTriggers(GetTriggersFrom(data[EXPLICIT_TRIGGERS_PROPERTY]));
+        // Load all the abilities for the resource type.
+        var abilities = LoadListedAbilities(data[ABILITIES_PROPERTY]);
+        newType.Abilities.AddRange(abilities.Select(a => new AbilityReference(newType, new SourceImprint(newType), a)));
 
         // Load any content marked to be loaded as well.
         LoadLinkedContent(data[DEPENDENCIES_PROPERTY]);
@@ -244,6 +267,26 @@ public partial class Package {
     #endregion
 
     #region Helper Methods
+
+    /// <summary>
+    /// Goes through the provided <paramref name="abilitiesToken"/> and loads every ability referenced.
+    /// </summary>
+    /// <returns>All the loaded abilities mentioned in the token.</returns>
+    private List<Ability> LoadListedAbilities(JsonNode? abilitiesToken) {
+
+        if (abilitiesToken == null)
+            return [];
+
+        var abilities = new List<Ability>();
+
+        // Get all the ability from the token and load them.
+        var abilityKeys = abilitiesToken.GetValues().Select(a => a.GetValue<string>()).OfType<string>();
+        foreach (var abilityKey in abilityKeys) {
+            abilities.Add(Catalogue.LoadAbility(abilityKey, this));
+        }
+
+        return abilities;
+    }
 
     /// <summary>
     /// Goes through each category listed in <paramref name="linkedContent"/> and loads them.
@@ -258,6 +301,7 @@ public partial class Package {
         JsonNode? cards = linkedContent[CARD_CATEGORY];
         JsonNode? heroes = linkedContent[HERO_CATEGORY];
         JsonNode? actions = linkedContent[ACTION_CATEGORY];
+        JsonNode? abilities = linkedContent[ABILITY_CATEGORY];
         JsonNode? jsonFiles = linkedContent[JSON_DATA_CATEGORY];
         JsonNode? resourceFiles = linkedContent[RESOURCE_TYPE_CATEGORY];
 
@@ -271,39 +315,16 @@ public partial class Package {
         if (actions != null)
             foreach (string a in actions.GetValues().Select((action) => action.GetValue<string>()).Where(action => action != null))
                 Catalogue.LoadAction(a, this);
+        if (abilities != null) {
+            foreach (string a in abilities.GetValues().Select((ability) => ability.GetValue<string>()).Where(ability => ability != null))
+                Catalogue.LoadAbility(a, this);
+        }
         if (jsonFiles != null)
             foreach (string j in jsonFiles.GetValues().Select((json) => json.GetValue<string>()).Where(json => json != null))
                 Catalogue.LoadJson(j, this);
         if (resourceFiles != null)
             foreach (string j in resourceFiles.GetValues().Select((resource) => resource.GetValue<string>()).Where(resource => resource != null))
                 Catalogue.LoadResourceType(j, this);
-    }
-
-    /// <summary>
-    /// Loads all the requested trigger from a json block; linking the trigger key to a <see cref="ActionFunction"/> that will be triggered.
-    /// </summary>
-    /// <param name="triggerToken">A block of json with all the trigger, reaction pairs.</param>
-    /// <returns>A dictionary with the keys being the triggers and the values being the reactions.</returns>
-    public Dictionary<string, ActionFunction> GetTriggersFrom(JsonNode? triggerToken) {
-
-        if (triggerToken == null) return [];
-
-        Dictionary<string, ActionFunction> triggers = [];
-        foreach (var trigger in triggerToken.GetProperties()) {
-
-            // Get the trigger and the reaction.
-            string triggerKey = trigger.Key;
-            string triggerActionName = trigger.Value?.ToRawValue<string>() ?? "";
-
-            ActionFunction triggerAction;
-
-            // Load the reaction as an action.
-            triggerAction = Catalogue.LoadAction(triggerActionName, this) ?? new ActionFunction();
-
-            triggers.Add(triggerKey, triggerAction);
-        }
-
-        return triggers;
     }
 
     #endregion
@@ -331,6 +352,10 @@ public partial class Package {
     /// Returns a set that contains all loaded <see cref="ResourceType"/>s.
     /// </summary>
     public IEnumerable<ResourceType> GetLoadedResourceTypes() => LoadedResourceTypes.Values;
+    /// <summary>
+    /// Returns a set that contains all loaded <see cref="Ability"/>s.
+    /// </summary>
+    public IEnumerable<Ability> GetLoadedAbilities() => PackagedCode.Abilities.Values;
 
     /// <summary>
     /// All the <see cref="Card"/>s that have been loaded from their files and don't need to be reopened.
@@ -375,6 +400,8 @@ public partial class Package {
             keys.Add("Card|" + k);
         foreach (var k in PackagedCode.Actions.Keys)
             keys.Add("Action|" + k);
+        foreach (var k in PackagedCode.Abilities.Keys)
+            keys.Add("Ability|" + k);
         foreach (var k in LoadedHeroes.Keys)
             keys.Add("Hero|" + k);
         foreach (var k in LoadedJsonReferences.Keys)

@@ -1,8 +1,12 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Client;
 using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
+using MoDuel.Shared.Structures;
+using MoDuel.Sources;
 using MoDuel.State;
+using MoDuel.Triggers;
 
 namespace DefaultPackage;
 
@@ -23,11 +27,10 @@ public static class SystemActions {
 
         // Check who the winner of the duel is.
         Player? winner = null;
-        if (player1.IsAlive && player2.IsAlive) return;
         if (player1.IsAlive) winner = player1;
         if (player2.IsAlive) winner = player2;
 
-        if (winner != null) {
+        if (winner == null) {
             state.SendRequest(new ClientRequest("GameOverDraw"));
         }
         else {
@@ -42,8 +45,23 @@ public static class SystemActions {
     [ActionName(nameof(SysGameStart))]
     public static void SysGameStart(DuelState state) {
         SysDuelInit(state);
-        state.NewTurn(state.FirstPlayer);
-        state.FirstPlayer.ActionPoints = state.FirstPlayer.Level;
+
+        var data = new DataTable() {
+            ["TurnPlayer"] = state.FirstPlayer,
+            ["ActionPoints"] = state.FirstPlayer.Level
+        };
+
+        // Allow the turn data to be overridden.
+        var source = new Source();
+        var trigger = new Trigger("GameStart:GetTurnPlayer", source, state, TriggerType.DataOverride);
+        state.DataTrigger(trigger, ref data);
+
+        // Get the 
+        var player = data.Get<Player>("TurnPlayer");
+        var actionPoints = data.Get<int>("ActionPoints");
+        state.NewTurn(player ?? state.FirstPlayer);
+        state.FirstPlayer.ActionPoints = actionPoints;
+
         TurnActions.StartTurn(state);
     }
 
@@ -120,14 +138,8 @@ public static class SystemActions {
                 card.FixedLevel = level;
             }
 
-            card.Level = card.FallbackTrigger("GetLevel", new MoDuel.ActionFunction(CardActions.GetLevelDefault));
-            card.Attack = card.FallbackTrigger("GetAttack", new MoDuel.ActionFunction(CardActions.GetAttackDefault), card.Level);
-            card.Armour = card.FallbackTrigger("GetArmour", new MoDuel.ActionFunction(CardActions.GetArmourDefault), card.Level);
-            card.MaxLife = card.FallbackTrigger("GetMaxLife", new MoDuel.ActionFunction(CardActions.GetMaxLifeDefault), card.Level);
-            // No need to get cost here.
-            card.Life = card.FallbackTrigger("GetBaseLife", new MoDuel.ActionFunction(CreatureActions.GetBaseLifeDefault));
-            // TODO CLIENT: send message creatuer already summoned.
-            field[slot].Occupant = card;
+            // TODO: Use meta values.
+            CardActions.SummonAsCreature(card, field[slot]);
         }
     }
 

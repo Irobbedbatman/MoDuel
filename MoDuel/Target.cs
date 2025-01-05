@@ -1,4 +1,5 @@
-﻿using MoDuel.Serialization;
+﻿using MoDuel.Effects;
+using MoDuel.Serialization;
 using MoDuel.State;
 
 namespace MoDuel;
@@ -24,6 +25,10 @@ public abstract class Target {
     /// <para>Serialized with state of the duel.</para>
     /// </summary>
     public readonly Dictionary<string, object?> Values = [];
+
+    public IReadOnlyList<Effect> Effects => effects.AsReadOnly();
+
+    private readonly List<Effect> effects = [];
 
     public Target(TargetRegistry registry, int? index = null) {
         Registry = registry;
@@ -85,6 +90,24 @@ public abstract class Target {
     /// <summary>
     /// Removes a value from <see cref="Values"/>.
     /// </summary>
-    public void ClearValue(string key) => Values.Remove(key);
+    public void RemoveValue(string key) => Values.Remove(key);
+
+
+    /// <summary>
+    /// Add an apply the effect to the target.
+    /// </summary>
+    public void AddEffect(Effect effect) {
+        effects.Add(effect);
+        effect.Apply();
+    }
+
+    /// <summary>
+    /// Remove an effect from the target.
+    /// </summary>
+    public void RemoveEffect(Effect effect) {
+        effect.Remove();
+        effects.Remove(effect);
+
+    }
 
 }

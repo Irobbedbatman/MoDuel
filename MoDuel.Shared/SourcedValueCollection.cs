@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace MoDuel;
+namespace MoDuel.Shared;
 
 /// <summary>
 /// A collection that records multiple <see cref="SourcedValue{T}"/>s and provides set utility alongside specialized utility to handle the values.
@@ -70,7 +70,7 @@ public class SourcedValueCollection<T> : IEnumerable<T?>, ICollection {
             }
         }
     }
-    
+
     /// <summary>
     /// Removes all values from the collection.
     /// </summary>

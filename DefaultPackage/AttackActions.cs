@@ -1,6 +1,6 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Client;
-using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 
 namespace DefaultPackage;
@@ -27,8 +27,6 @@ public static class AttackActions {
             AttackHero(attacker, opposingPosition.ParentField.Owner);
         else
             AttackCreature(attacker, opposingPosition.Occupant);
-
-
     }
 
     /// <summary>

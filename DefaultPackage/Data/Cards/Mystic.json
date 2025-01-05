@@ -1,11 +1,15 @@
 ﻿{
   "Name": "Mystic",
   "Type": "Creature",
-  "Triggers": {
-    "AfterCharge": "MysticX",
-    "Overwrite:GetDisplayedAttack": "Mysticfy"
-  }
-
-
-
+  "Abilities": [
+    "Mystify"
+  ],
+  "Cost": [
+    [
+      {
+        "Type": "Hybrid",
+        "Values": ["Gold", "Gold"]
+      }
+    ]
+  ]
 }

@@ -1,12 +1,17 @@
 ﻿using DefaultPackage.ContentLookups;
+using DefaultPackage.DataTables;
 using MoDuel;
 using MoDuel.Client;
 using MoDuel.Data;
-using MoDuel.Json;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 using MoDuel.Resources;
+using MoDuel.Shared.Json;
+using MoDuel.Shared.Structures;
+using MoDuel.Sources;
 using MoDuel.State;
 using MoDuel.Triggers;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
 
 namespace DefaultPackage;
@@ -26,43 +31,37 @@ public static class ResourceActions {
     /// </summary>
     [ActionName(nameof(Meditate))]
     public static void Meditate(Player player) {
-        DuelState state = player.Context;
-        state.Trigger("BeforeCharge", player);
-        var resource = state.Random.NextItem(player.ResourcePool)?.Resource;
+        var source = new SourceCommand(nameof(Meditate), player);
 
-        OverwriteTable overwrite = new() {
-            { "Player", player },
-            { "Resource", resource },
-            { "Amount", 1 },
-            { "Action", new ActionFunction(GainResource) }
+        DuelState state = player.Context;
+
+        DataTable data = new() {
+            { "Player", player }
         };
 
-        state.OverwriteTrigger("ChargeOverwrite", overwrite);
-        if (overwrite["Player"] is not Player newPlayer) return;
-        resource = overwrite["Resource"] as ResourceType;
+        state.Trigger(new Trigger("BeforeMeditate", source, state, TriggerType.Implicit), data);
+        var resource = state.Random.NextItem(player.ResourcePool)?.Resource;
+
+        data["Resource"] = resource;
+        data["Amount"] = 1;
+        data["Action"] = new ActionFunction(GainResource);
+
+        state.DataTrigger(new Trigger("Mediate", source, state, TriggerType.DataOverride), ref data);
+
+        if (data["Player"] is not Player newPlayer) return;
+        resource = data["Resource"] as ResourceType;
         if (resource == null) return;
-        int? amount = overwrite["Amount"] as int?;
+        int? amount = data["Amount"] as int?;
         if (amount == null) return;
-        GainResource(newPlayer, resource, amount.Value);
-        state.Trigger("AfterCharge", newPlayer, resource, amount.Value);
-
-    }
-
-    /// <summary>
-    /// Parses a json token to a <see cref="ResourceCost"/>.
-    /// </summary>
-    public static ResourceCost ParseTokenToCost(JsonNode token, Package package, int level) {
-
-        var cost = new ResourceCost();
-
-        if (token is not JsonObject)
-            return cost;
-
-        foreach (var property in token.GetProperties()) {
-            cost.Add(ParseTokenToCounter(property, package, level));
+        if (data["Action"] is not ActionFunction action) {
+            GlobalActions.Fizzle();
+            return;
         }
 
-        return cost;
+        action.Call(data);
+
+        state.Trigger(new Trigger("AfterMeditate", source, state, TriggerType.Implicit), data);
+
     }
 
     /// <summary>
@@ -100,7 +99,14 @@ public static class ResourceActions {
     [ActionName("GetEachResource")]
     public static void GainEachResource(Player player) {
         foreach (var counter in player.ResourcePool) {
-            GainResource(player, counter.Resource, 1);
+
+            var data = new DataTable() {
+                ["Player"] = player,
+                ["Resource"] = counter.Resource,
+                ["Amount"] = 1
+            };
+
+            GainResource(data);
         }
     }
 
@@ -108,7 +114,16 @@ public static class ResourceActions {
     /// Grants a player the provided <paramref name="amount"/> of the provided <paramref name="resource"/>.
     /// </summary>
     [ActionName("GainResource")]
-    public static void GainResource(Player player, ResourceType resource, int amount) {
+    public static void GainResource(DataTable data) {
+
+        var player = data.Get<Player>("Player");
+        var resource = data.Get<ResourceType>("Resource");
+        var amount = data.Get<int>("Amount");
+
+        if (player == null || resource == null || resource == ResourceType.Missing) {
+            return;
+        }
+
         if (amount <= 0) {
             GlobalActions.Fizzle();
             return;
@@ -121,7 +136,10 @@ public static class ResourceActions {
 
         counter.Amount = Math.Clamp(counter.Amount + amount, 0, resource.GetResourceCap());
         player.Context.SendRequest(new ClientRequest("GainResource", player.Index, resource.Id, amount));
-        player.Context.Trigger("GainedResource", player, resource, amount);
+
+        var trigger = new Trigger("GainedResource", new Source(), player.Context, TriggerType.Implicit);
+
+        player.Context.Trigger(trigger, data);
 
     }
 
@@ -143,7 +161,16 @@ public static class ResourceActions {
 
         counter.Amount = Math.Clamp(counter.Amount - amount, 0, resource.GetResourceCap());
         player.Context.SendRequest(new ClientRequest("DrainResource", player.Index, resource.Id, amount));
-        player.Context.Trigger("DrainedResource", player, resource, amount);
+
+        var data = new DataTable() {
+            ["Player"] = player,
+            ["Resource"] = resource,
+            ["Amount"] = amount
+        };
+
+        var trigger = new Trigger("DrainedResource", new Source(), player.Context, TriggerType.Implicit);
+
+        player.Context.Trigger(trigger, data);
 
     }
 
@@ -152,11 +179,14 @@ public static class ResourceActions {
     /// </summary>
     [ActionName(nameof(GetResourceCap))]
     public static int GetResourceCap(this ResourceType type) {
-        var action = type.GetExplicitReaction("GetCap");
-        if (!action.IsAssigned)
-            return DEFAULT_RESOURCE_CAP;
-        else
-            return action.Call();
+
+        var data = new DataTable() {
+            ["Type"] = type,
+            ["Cap"] = 20
+        };
+
+        type.AbilityDataTrigger("GetCap", ref data);
+        return data.Get<int>("Cap");
     }
 
     /// <summary>
@@ -172,12 +202,22 @@ public static class ResourceActions {
     /// Makes the player pay the <paramref name="amount"/> of the provided resource <paramref name="type"/>.
     /// </summary>
     [ActionName(nameof(DefaultPayAmount))]
-    public static void DefaultPayAmount(ResourceType type, Player player, int amount) {
+    public static void DefaultPayAmount(Player player, ResourceCounter cost) {
+        var type = cost.Resource;
         var counter = player.ResourcePool[type];
         if (counter != null) {
             // TODO CLIENT: client effects
-            counter.Amount -= amount;
+            counter.Amount -= cost.Amount;
         }
+    }
+
+    /// <summary>
+    /// Convert the resource cost to a set of counters that can be directly used.
+    /// </summary>
+    public static IEnumerable<ResourceCounter> ConvertToFixedCost(this ResourceCost cost) {
+        ResourceCost fixedCost = [];
+        // TODO: implement custom logic.
+        return cost.GetAsCounters();
     }
 
     /// <summary>
@@ -186,13 +226,21 @@ public static class ResourceActions {
     /// <returns>True if the cost can be payed.</returns>
     [ActionName(nameof(CanPayCost))]
     public static bool CanPayCost(this Player player, ResourceCost cost) {
-        ResourcePool pool = player.ResourcePool;
+        var fixedCost = cost.ConvertToFixedCost();
 
         // Check to see if each resource can be payed.
-        foreach (var counter in cost) {
+        foreach (var counter in fixedCost) {
             var resource = counter.Resource;
-            bool result = resource.FallbackTrigger("CanPay", new ActionFunction(DefaultCanPayAmount), player, counter.Amount);
-            if (result == false)
+
+            var data = new CostCounterDataTable(player, counter) {
+                ["Result"] = DefaultCanPayAmount(resource, player, counter.Amount),
+            };
+
+            resource.AbilityDataTrigger("CanPay", ref data);
+
+            var result = data.Get<bool>("Result");
+
+            if (!result)
                 return false;
         }
 
@@ -213,9 +261,22 @@ public static class ResourceActions {
             return false;
         }
 
-        foreach (var counter in cost) {
+        var fixedCost = cost.ConvertToFixedCost();
+
+        foreach (var counter in fixedCost) {
+
             var resource = counter.Resource;
-            resource.FallbackTrigger("Pay", new ActionFunction(DefaultPayAmount), player, counter.Amount);
+
+            var data = new CostCounterDataTable(player, counter) {
+                ["PayAction"] = new ActionFunction(DefaultPayAmount)
+            };
+
+            resource.AbilityDataTrigger("GetPayAction", ref data);
+
+            var action = data.Get<ActionFunction>("PayAction");
+
+            action?.Call(player, counter);
+
             // TODO CLIENT: effects but should it just be through the above trigger.
         }
 

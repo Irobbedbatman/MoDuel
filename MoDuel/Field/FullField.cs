@@ -73,9 +73,9 @@ public class FullField : Field {
     /// <inheritdoc/>
     public override FieldSlot this[int position] => (position > 5) ? SubField2[position - 5] : SubField1[position];
     /// <inheritdoc/>
-    public override HashSet<CardInstance> GetCreatures() => SubField1.GetCreatures().Concat(SubField2.GetCreatures()).ToHashSet();
+    public override HashSet<CardInstance> GetCreatures() => [.. SubField1.GetCreatures(), .. SubField2.GetCreatures()];
     /// <inheritdoc/>
-    public override HashSet<FieldSlot> GetEmptySlots() => SubField1.GetEmptySlots().Concat(SubField2.GetEmptySlots()).ToHashSet();
+    public override HashSet<FieldSlot> GetEmptySlots() => [.. SubField1.GetEmptySlots(), .. SubField2.GetEmptySlots()];
     /// <inheritdoc/>
     public override IEnumerator<FieldSlot> GetEnumerator() => SubField1.Concat(SubField2).GetEnumerator();
     /// <inheritdoc/>

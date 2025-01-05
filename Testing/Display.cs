@@ -22,7 +22,7 @@ public static class Display {
         foreach (var slot in field) {
 
             if (slot.IsOccupied) {
-                // If there is a crature in the slot we provide a contrast.
+                // If there is a creature in the slot we provide a contrast.
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.Write($"[{slot.Index,3}]");
@@ -43,9 +43,9 @@ public static class Display {
                 // If a slot is empty we just display the slot number.
                 Console.Write($" {slot.Index,3} ");
             }
-            // Display a sperator between field slots.
+            // Display a separator between field slots.
             Console.Write("|");
-            // If we have finsished drawing the first row we display a sperator between the fields.
+            // If we have finished drawing the first row we display a separator between the fields.
             if (field is FullField && field.SlotPosition(slot) == field.Count() / 2)
                 Console.Write("\n-------------------------------\n|");
         }
@@ -61,7 +61,7 @@ public static class Display {
             lines.Add("------------");
         }
 
-        // Display all the crature info we retreived early in the lines collection.
+        // Display all the creature info we retrieved early in the lines collection.
         if (lines.Count > 0) {
             foreach (var line in lines) {
                 Console.WriteLine(line);
@@ -81,8 +81,8 @@ public static class Display {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{card.Imprint.Name,-30} @[{card.Index}]");
             Console.ResetColor();
-            Console.WriteLine("Cost: " + card.GetDisplayedCost()?.ToString());
-            Console.WriteLine($"Lvl: {card.GetDisplayedLevel() ?? "?"} Atk: {card.GetDisplayedAttack() ?? "?"} Def: {card.GetDisplayedArmour() ?? "?"} Life: {card.GetDisplayedLife() ?? "?"}");
+            Console.WriteLine("Cost: TBC");
+            Console.WriteLine($"Lvl: {card.Level} Atk: {card.Attack} Def: {card.Armour} Life: {card.MaxLife}");
             if (card.Values.Count > 0) {
                 foreach (var val in card.Values)
                     Console.WriteLine(val.Key + ": " + val.Value);
@@ -100,7 +100,7 @@ public static class Display {
     public static readonly int LEVEL_2_XP = 6, LEVEL_3_XP = 30, INVALID_XP = -1;
 
     /// <summary>
-    /// Retreive the value of exp required at a certain level to reach the next.
+    /// Retrieve the value of exp required at a certain level to reach the next.
     /// </summary>
     public static int ExpNextLevel(int level) => level switch {
         1 => LEVEL_2_XP,
@@ -136,7 +136,7 @@ public static class Display {
         int nextExpLevel = ExpNextLevel(player.Level);
         // Display the player's exp.
         Console.WriteLine("Level: {0} ... Exp: {1}", player.Level, ((nextExpLevel == INVALID_XP) ? "---" : player.Exp + " | " + nextExpLevel.ToString()));
-        // Display the player's resouces.
+        // Display the player's resources.
         foreach (ResourceCounter counter in player.ResourcePool) {
             // Print each resource name and how much the player has of that said resource.
             Console.WriteLine(counter.Name + ": " + counter.Count);

@@ -1,5 +1,7 @@
 ﻿using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.State;
+using MoDuel.Tools;
 
 namespace DefaultPackage;
 
@@ -8,6 +10,15 @@ namespace DefaultPackage;
 /// </summary>
 [PackagedCodeBinding("DefaultPackage")]
 public class DefaultPackage : PackagedCode {
+
+#nullable disable
+    /// <summary>
+    /// Get the local instance of the package per thread.
+    /// <para>Only returns a value when the duel is started.</para>
+    /// </summary>
+    public static Package GetPackage() => ThreadContext.GetPackageInstance(Name);
+#nullable enable
+
 
     public const string Name = "Default";
 
@@ -22,7 +33,7 @@ public class DefaultPackage : PackagedCode {
             GlobalActions.Fizzle
         };
 
-        // The second is to a automatde system to get all actions with the ActioName attribute.
+        // The second is a an automated system to get all actions with the ActionName attribute.
         return GetAllActionsViaTag();
 
 

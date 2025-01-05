@@ -1,4 +1,5 @@
 ﻿using MoDuel.Serialization;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MoDuel;
@@ -62,8 +63,21 @@ public class ActionFunction : IReloadable {
     /// <param name="args">The arguments to pass into the <see cref="ActionFunction"/>.</param>
     /// <returns>The result of the <see cref="ActionFunction"/>.</returns>
     public dynamic? Call(params object?[]? args) {
-        // TODO VALIDATION: consider error handling.
-        return Delegate?.DynamicInvoke(args);
+
+        try {
+            return Delegate?.DynamicInvoke(args);
+        }
+        catch (Exception ex) {
+            LogSettings.LogEvent($"ActionFunction.Call() failed.\n" +
+                $"Exception: {ex.GetType()}"+
+                $"\nCalled Method: {Delegate?.Method}" +
+                $"\nMethod Type: {Delegate?.Method.DeclaringType}" +
+                $"\nArgs: { string.Join(", ", args?.Select(a => a?.GetType().ToString() ?? "-") ?? [])}" +
+                $"\nPath: {FullItemPath ?? "-"}" +
+                $"\nStack: {new StackTrace(true)}", LogSettings.LogEvents.ActionFailed);
+            Debugger.Break();
+            return default;
+        }
     }
 
     /// <inheritdoc/>

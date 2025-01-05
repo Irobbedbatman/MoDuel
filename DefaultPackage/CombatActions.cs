@@ -1,5 +1,6 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.State;
 
 namespace DefaultPackage;
@@ -29,18 +30,18 @@ public static class CombatActions {
         // Get the ready list of creatures on the duel state.s
         ReadyAttackers(state);
 
-        // The comparer that will inform the order of attackers.
-        var comparer = new CardInstanceComparer(state.CurrentTurn.Owner, "AttackCompare");
+        // TODO: REORDER ATTACKERS>
 
-        /// The hashset on the state that stores attack data.
+        /// The hash set on the state that stores attack data.
         var attackers = (HashSet<CardInstance>?)state.Values[READY_CREATURES];
 
         // Have each attacker attack.
         while (attackers?.Count > 0) {
-            var attacker = GetNextAttacker(state, comparer);
-            attacker?.FallbackTrigger("Attack", AttackActions.AttackDefault);
+            var attacker = GetNextAttacker(state);
             if (attacker == null)
                 break;
+            // TODO: add back override.
+            AttackActions.AttackDefault(attacker);
             attackers.Remove(attacker);
         }
 
@@ -63,32 +64,33 @@ public static class CombatActions {
     /// </summary>
     public static void ReadyAttackers(DuelState state) {
 
-        var eligableAttacks = state.Field.GetCreatures().Where(
+        var eligibleAttacks = state.Field.GetCreatures().Where(
             (creature) => {
-                return creature.FallbackTrigger("ReadyToAttack", DefaultCreatureReadyCheck,
-                    state);
+                return DefaultCreatureReadyCheck(creature, state);
+        // TODO: add back override.
             }).ToHashSet();
 
         // TODO CLIENT: Effects.
 
-        state.Values[READY_CREATURES] = eligableAttacks;
+        state.Values[READY_CREATURES] = eligibleAttacks;
     }
 
     /// <summary>
     /// Get the creature that will perform the next attack.
     /// </summary>
-    public static CardInstance? GetNextAttacker(DuelState state, CardInstanceComparer comparer) {
+    public static CardInstance? GetNextAttacker(DuelState state) {
 #nullable disable
         var creatures = (HashSet<CardInstance>)state.Values.GetValueOrDefault(READY_CREATURES, new HashSet<CardInstance>());
         foreach (var creature in creatures.ToArray()) {
-            if (!creature.FallbackTrigger(
-                "ReadyToAttack",
-                DefaultCreatureReadyCheck,
-                state)) {
-                creatures.Remove(creature);
-            }
+            //if (!creature.FallbackTrigger(
+            //    "ReadyToAttack",
+            //    DefaultCreatureReadyCheck,
+            //    state)) {
+            //    creatures.Remove(creature);
+            //}
+            // TODO: add back not able to attack.
         }
-        return (CardInstance)creatures.Order(comparer).FirstOrDefault();
+        return creatures.FirstOrDefault();
 #nullable enable
     }
 

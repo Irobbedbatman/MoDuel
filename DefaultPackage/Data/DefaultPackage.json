@@ -9,7 +9,7 @@
     "HoodedFigure": "./Heroes/HoodedFigure.json"
   },
   "Resources": {
-    "ActionPoints": "./Resources/ActionPoints.json",
+    "ActionPoint": "./Resources/ActionPoint.json",
     "Life": "./Resources/Life.json",
 
     "Fire": "./Resources/Fire.json",

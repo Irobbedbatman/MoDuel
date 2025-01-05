@@ -1,9 +1,11 @@
 ﻿using DefaultPackage.ContentLookups;
 using MoDuel;
 using MoDuel.Cards;
-using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 using MoDuel.Resources;
+using MoDuel.Shared.Structures;
+using MoDuel.Sources;
 using MoDuel.State;
 using MoDuel.Triggers;
 
@@ -17,9 +19,7 @@ public static class CommandActions {
     /// <summary>
     /// The cost a command normal would take. This is one action point.
     /// </summary>
-    public static ResourceCost NormalCommandCost => new() {
-        new ResourceCounter(ResourceTypes.ActionPoints, 1)
-    };
+    public static ResourceCost NormalCommandCost => new([new CostComponent(ResourceTypes.ActionPoint, 1)]);
 
     /// <summary>
     /// The action ran after each command to reset command information for the next command.
@@ -32,7 +32,7 @@ public static class CommandActions {
     /// The action that performs the meditate command.
     /// </summary>
     [ActionName(nameof(CmdMeditate))]
-    [Dependency(DependencyAttribute.DependencyTypes.ResourceType, "ActionPoints")]
+    [Dependency(DependencyAttribute.DependencyTypes.ResourceType, "ActionPoint")]
     public static bool CmdMeditate(Player player) {
         if (!player.IsTurnOwner()) return false;
         if (ResourceActions.PayCost(player, NormalCommandCost)) {
@@ -77,7 +77,7 @@ public static class CommandActions {
         if (!player.IsTurnOwner()) return false;
 
         if (player.CanLevelUp() && ResourceActions.PayCost(player, NormalCommandCost)) {
-            ExpAndLevelingActions.LevelUp(player);
+            ExpAndLevellingActions.LevelUp(player);
             EndCommand(player.Context);
             return true;
         }
@@ -129,25 +129,38 @@ public static class CommandActions {
 
         if (card == null || target == null) return false;
 
-        var overwrite = new OverwriteTable() {
+        var data = new DataTable() {
             { "Card", card },
             { "Target", target },
-            { "Player", player }
+            { "Player", player },
+            { "Result", true },
+            { "Action", new ActionFunction(DefaultPlayActions.PlayCard) }
         };
 
-        state.OverwriteTrigger("CardPlayedOverwrite", overwrite);
+        var source = new SourceCommand(nameof(CmdPlayCard), player);
+
+        var canPlayTrigger = new Trigger("CanPlay", source, state, TriggerType.ExplicitData);
+
+        state.ExplicitDataTrigger(canPlayTrigger, ref data);
+
+        var cardPlayedTrigger = new Trigger("CardPlayed", source, state, TriggerType.ExplicitData);
+
+        state.DataTrigger(cardPlayedTrigger, ref data);
 
         if (card == null || target == null || !card.InHand) return false;
 
-        card = overwrite.Get<CardInstance>("Card");
-        target = overwrite.Get<Target>("Target");
+        card = data.Get<CardInstance>("Card");
+        target = data.Get<Target>("Target");
+        var action = data.Get<ActionFunction>("Action");
 
-        card?.FallbackTrigger("PlayCard", DefaultPlayActions.PlayCard, target);
+        action?.Call(card, target);
         card?.RemoveFromHand();
 
         // TODO DELAY: Return false if the card could not be played.
 
-        state.Trigger("CardPlayed", card, target);
+        var trigger = new Trigger("CardPlayed", source, state, TriggerType.Implicit);
+
+        state.Trigger(trigger, data);
 
         EndCommand(state);
 

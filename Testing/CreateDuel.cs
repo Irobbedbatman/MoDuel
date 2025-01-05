@@ -10,7 +10,7 @@ namespace Testing;
 #nullable disable
 
 /// <summary>
-/// Methods to builda <see cref="DuelState"/> ready to run from test data.
+/// Methods to build a <see cref="DuelState"/> ready to run from test data.
 /// </summary>
 public class CreateDuel {
 
@@ -21,20 +21,16 @@ public class CreateDuel {
             "../../../../DefaultPackage\\bin\\Debug\\net8.0\\Data\\DefaultPackage.json"
         ];
 
-        Package.LogLoads = true;
 
-        // Load the package catalouge.
+        LogSettings.LoggedEvents = LogSettings.LogEvents.LogAll;
+
+        // Load the package catalogue.
         PackageCatalogue content = new(packages);
 
-        // Defien the gaeme settings.
+        // Define the game settings.
         DuelSettings settings = new() {
             GameStartAction = content.LoadAction("SysGameStart"),
-            GameEndAction = content.LoadAction("SysGameEnd"),
-            CardGetDisplayedArmourFallback = content.LoadAction("GetDisplayedArmourDefault"),
-            CardGetDisplayedAttackFallback = content.LoadAction("GetDisplayedAttackDefault"),
-            CardGetDisplayedCostFallback = content.LoadAction("GetDisplayedCostDefault"),
-            CardGetDisplayedLevelFallback = content.LoadAction("GetDisplayedLevelDefault"),
-            CardGetDisplayedLifeFallback = content.LoadAction("GetDisplayedLifeDefault")
+            GameEndAction = content.LoadAction("SysGameEnd")
         };
 
         // Load Card data.
@@ -44,7 +40,7 @@ public class CreateDuel {
         // Define the cards that will start in the players hand.
         var hand = new List<CardMeta>() { meta, meta, meta, meta2 };
 
-        // Create the player resouce ppol.
+        // Create the player resource pool.
         ResourceType resource = content.LoadResourceType("Gold");
         var pool = new ResourceType[] { resource };
         

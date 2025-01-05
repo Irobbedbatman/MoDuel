@@ -1,6 +1,4 @@
 {
   "Mysteriousness": 65,
-  "Triggers": {
-    "AfterCharge": "SoulCharge"
-  }
+  "Abilities":  ["SoulCharge"]
 }

@@ -17,7 +17,6 @@ public partial class CardInstance {
     /// </summary>
     public CardInstance OriginalState => PreviousState ?? this;
 
-
     /// <summary>
     /// The internal position value used sync or desync with a <see cref="ILocation"/> value.
     /// </summary>
@@ -58,28 +57,6 @@ public partial class CardInstance {
         }
         set => Position = value;
     }
-
-    /// <summary>
-    /// Shared active state of <see cref="ExplicitTriggerActive"/> and <see cref="ImplicitTriggerActive"/>.
-    /// <para>Used to simplify disabling both.</para>
-    /// </summary>
-    public bool Active {
-        get => ExplicitTriggerActive && ImplicitTriggerActive;
-        set {
-            ExplicitTriggerActive = value;
-            ImplicitTriggerActive = false;
-        }
-    }
-
-    /// <summary>
-    /// If the explicit triggering should be used externally.
-    /// </summary>
-    public bool ExplicitTriggerActive = true;
-
-    /// <summary>
-    /// If the implicit triggering should be used externally
-    /// </summary>
-    public bool ImplicitTriggerActive = true;
 
     /// <summary>
     /// Check to see if this card instance is alive. This is true if it is on the field.

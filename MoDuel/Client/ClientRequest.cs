@@ -1,14 +1,28 @@
-﻿namespace MoDuel.Client;
+﻿using System.Reflection;
+
+namespace MoDuel.Client;
 
 /// <summary>
 /// Information to send to a client.
 /// </summary>
-/// <param name="RequestId">The request id that the client can understand.</param>
-/// <param name="SendReadyConfirmation">A flag that when true requires the client to return a ready confirmation message.</param>
-/// <param name="Arguments">The data payload to send to the client for the request.</param>
-public record ClientRequest(string RequestId, bool SendReadyConfirmation, params object?[] Arguments) {
+public record ClientRequest {
 
-    public ClientRequest(string RequestId, params object?[] Arguments) : this(RequestId, false, Arguments) { }
+    public readonly string RequestId;
+
+    public readonly bool SendReadyConfirmation;
+
+    public readonly object?[] Arguments;
+
+    public ClientRequest(string requestId, bool sendReadyConfirmation, params object?[] arguments) {
+
+        // TODO: get package of calling assembly to use as default package.
+
+        RequestId = requestId;
+        SendReadyConfirmation = sendReadyConfirmation;
+        Arguments = arguments;
+    }
+
+    public ClientRequest(string requestId, params object?[] arguments) : this(requestId, false, arguments) { }
 
     /// <summary>
     /// Requires the players to send a ready confirmation when they receive this request.

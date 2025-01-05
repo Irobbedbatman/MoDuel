@@ -1,40 +1,35 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Players;
-using System.Collections;
 
 namespace MoDuel;
 
 /// <summary>
 /// A set that contains <see cref="CardInstance"/>s and counts as location for their position.
 /// </summary>
-/// <param name="owner">An owner designated to the set.</param>
-public class CardSet(Player? owner) : ICollection<CardInstance>, ILocation {
-
-    /// <summary>
-    /// The internal dta set.
-    /// </summary>
-    private readonly HashSet<CardInstance> CardInstances = [];
+public class CardSet : HashSet<CardInstance>, ILocation {
 
     /// <summary>
     /// The owner of the set.
     /// </summary>
-    public readonly Player? Owner = owner;
+    public readonly Player? Owner;
 
     /// <summary>
-    /// THe amount of cards contained within the set.
+    /// The identifier used to define this set as a location and indicate which type of location.
     /// </summary>
-    public int Count => CardInstances.Count;
+    public readonly string? LocationCode;
 
-    /// <summary>
-    /// Card sets are never readonly.
-    /// </summary>
-    public bool IsReadOnly => false;
+    /// <param name="owner">An owner designated to the set.</param>
+    /// <param name="locationCode"></param>
+    public CardSet(Player? owner, string? locationCode = null) {
+        Owner = owner;
+        LocationCode = locationCode;
+    }
 
     /// <summary>
     /// Add a card to the set if it was not already in the set.
     /// </summary>
-    public void Add(CardInstance card) {
-        if (!CardInstances.Contains(card)) {
+    public void AddToLocation(CardInstance card) {
+        if (!Contains(card)) {
             card.Position = this;
         }
     }
@@ -42,7 +37,7 @@ public class CardSet(Player? owner) : ICollection<CardInstance>, ILocation {
     /// <summary>
     /// Remove a card from the set if it is in the set.
     /// </summary>
-    public bool Remove(CardInstance card) {
+    public bool RemoveFromLocation(CardInstance card) {
         if (Contains(card)) {
             card.Position = null;
         }
@@ -51,12 +46,12 @@ public class CardSet(Player? owner) : ICollection<CardInstance>, ILocation {
 
     /// <inheritdoc/>
     public void JustRemove(CardInstance card) {
-        CardInstances.Remove(card);
+        Remove(card);
     }
 
     /// <inheritdoc/>
     public void JustAdd(CardInstance card) {
-        CardInstances.Add(card);
+        Add(card);
     }
 
     /// <summary>
@@ -68,26 +63,10 @@ public class CardSet(Player? owner) : ICollection<CardInstance>, ILocation {
     /// <summary>
     /// Remove all cards from the cards set.
     /// </summary>
-    public void Clear() {
-        foreach (var card in CardInstances.ToArray()) {
+    public new void Clear() {
+        foreach (var card in this.ToArray()) {
             card.Position = null;
         }
     }
-
-    /// <summary>
-    /// Check to see if the provided card is in the set.
-    /// </summary>
-    public bool Contains(CardInstance item) => CardInstances.Contains(item);
-
-    /// <inheritdoc/>
-    public void CopyTo(CardInstance[] array, int arrayIndex) {
-        array[arrayIndex] = CardInstances.ElementAt(arrayIndex);
-    }
-
-    /// <inheritdoc/>
-    public IEnumerator<CardInstance> GetEnumerator() => CardInstances.GetEnumerator();
-
-    /// <inheritdoc/>
-    IEnumerator IEnumerable.GetEnumerator() => CardInstances.GetEnumerator();
 
 }

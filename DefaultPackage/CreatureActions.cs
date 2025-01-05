@@ -1,5 +1,6 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Field;
 
 namespace DefaultPackage;
@@ -10,21 +11,13 @@ namespace DefaultPackage;
 public static class CreatureActions {
 
     /// <summary>
-    /// The default life a creature will be summoned with. The default is the creatures max life.
-    /// </summary>
-    [ActionName(nameof(GetBaseLifeDefault))]
-    public static int GetBaseLifeDefault(CardInstance creature) {
-        return creature.MaxLife;
-    }
-
-    /// <summary>
     /// Sets the position of the creature on the field to summon it.
     /// </summary>
     [ActionName(nameof(Summon))]
     public static void Summon(this CardInstance creature, FieldSlot location) {
         creature.Position = location;
         creature.Values[CombatActions.SUMMONING_SICKNESS] = true;
-        // TODO CLIENT: SUmmon
+        // TODO CLIENT: Summon
     }
 
 
@@ -40,13 +33,13 @@ public static class CreatureActions {
     }
 
     /// <summary>
-    /// Kills the creauture. The creatures original state will be sent to the grave.
+    /// Kills the creature. The creatures original state will be sent to the grave.
     /// </summary>
     [ActionName("KillCreature")]
     public static void Kill(this CardInstance creature) {
         creature.Position = null;
         var card = creature.OriginalState;
-        card.MoveCardToGrave(card.OriginalOwner);
+        card.MoveCardToGrave(card.TrueOwner);
         // TODO DELAY: Kill creature exp.
         // TODO CLIENT: Kill creature
     }

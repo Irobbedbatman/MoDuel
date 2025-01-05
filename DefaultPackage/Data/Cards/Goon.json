@@ -8,10 +8,17 @@
     "4": 22
   },
   "Life": 22,
-  "Cost": {
-    "ActionPoints": 1,
-    "Gold": [1,2]
-  },
+  "Cost": [
+    [ "ActionPoint", "Gold" ],
+    [ "ActionPoint", "Gold", "Gold" ],
+    [
+      "ActionPoint",
+      {
+        "Type": "Gold",
+        "Amount":  3
+      }
+    ]
+  ],
   "Discard": {
     "Gold": 1
   }

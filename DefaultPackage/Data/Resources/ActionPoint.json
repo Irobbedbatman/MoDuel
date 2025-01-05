@@ -1,0 +1,7 @@
+﻿{
+  "Name": "ActionPoint",
+  "Plural": "Action Points",
+  "Abilities": [
+    "ActionPointBehaviour"
+  ]
+}

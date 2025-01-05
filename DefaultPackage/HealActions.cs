@@ -2,6 +2,7 @@
 using MoDuel.Cards;
 using MoDuel.Client;
 using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 
 namespace DefaultPackage;

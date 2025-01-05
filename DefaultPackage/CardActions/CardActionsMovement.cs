@@ -1,5 +1,6 @@
 ﻿using MoDuel.Cards;
 using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 
 namespace DefaultPackage;
@@ -22,13 +23,12 @@ public static partial class CardActions {
 
     /// <summary>
     /// Moves a <paramref name="card"/> to a <paramref name="player"/>s hand.
-    /// <para>If <paramref name="player"/> is null the card is attempted to move to it's original owners hand.</para>
+    /// <para>If <paramref name="player"/> is null the card is attempted to move to it's true owners hand.</para>
     /// <para>If the original owner does not exist the card will only be removed from its current location.</para>
     /// </summary>
     public static void MoveCardToHand(this CardInstance card, Player? player = null) {
         RemoveFromCurrentLocation(card);
-        if (player == null)
-            player = card.OriginalOwner;
+        player ??= card.TrueOwner;
         if (player == null) return;
         player.AddCardToHand(card);
         // TOOD CLIENT: add card to hand client.
@@ -36,14 +36,13 @@ public static partial class CardActions {
 
     /// <summary>
     /// Moves a <paramref name="card"/> to a <paramref name="player"/>s grave.
-    /// <para>If <paramref name="player"/> is null the card is attempted to move to it's oiginal owners greave.</para>
+    /// <para>If <paramref name="player"/> is null the card is attempted to move to it's true owners greave.</para>
     /// <para>If the original owner does not exist the card will only be removed from its current location.</para>
     /// </summary>
-
     public static void MoveCardToGrave(this CardInstance card, Player? player = null) {
         RemoveFromCurrentLocation(card);
         if (player == null)
-            player = card.OriginalOwner;
+            player = card.TrueOwner;
         if (player == null) return;
         player.AddCardToGrave(card);
         // TODO CLIENT: add card to grave client.

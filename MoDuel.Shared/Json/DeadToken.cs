@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace MoDuel.Json;
+namespace MoDuel.Shared.Json;
 
 /// <summary>
-/// Solely used to house the <see cref="DeadToken.Instance"/> which is a <see cref="JToken"/> that is missing.
+/// Solely used to house the <see cref="Instance"/> which is a <see cref="JToken"/> that is missing.
 /// </summary>
 public static class DeadToken {
 

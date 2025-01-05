@@ -2,6 +2,7 @@
 using MoDuel.Cards;
 using MoDuel.Client;
 using MoDuel.Data;
+using MoDuel.Data.Assembled;
 using MoDuel.Players;
 using MoDuel.State;
 
@@ -37,7 +38,7 @@ public static class DamageActions {
     /// Inflicts the provided amount of <paramref name="damage"/> to the provided <paramref name="target"/>.
     /// <para>This will call the similarly named actions if the target is a creature or a player.</para>
     /// </summary>
-    /// <param name="damage">The damge to deal.</param>
+    /// <param name="damage">The damage to deal.</param>
     /// <param name="lethal">Can the damage reduce the targets life below 1.</param>
     [ActionName(nameof(InflictDamage))]
     public static void InflictDamage(Target target, int damage, bool lethal = true) {
@@ -73,7 +74,7 @@ public static class DamageActions {
         }
 
         var opposer = player.Context.GetOpposingPlayer(player);
-        ExpAndLevelingActions.GainExp(opposer, INFLICT_DAMAGE_TO_PLAYER_EXP);
+        ExpAndLevellingActions.GainExp(opposer, INFLICT_DAMAGE_TO_PLAYER_EXP);
 
     }
 
@@ -98,7 +99,7 @@ public static class DamageActions {
     /// <summary>
     /// Inflicts the provided amount of <paramref name="damage"/> to the provided <paramref name="creature"/>.
     /// </summary>
-    /// <param name="damage">The damge to deal.</param>
+    /// <param name="damage">The damage to deal.</param>
     /// <param name="lethal">Can the damage reduce the targets life below 1.</param>
 
     public static void InflictDamageToCreature(CardInstance creature, int damage, bool lethal = true, bool ignoreArmor = false) {

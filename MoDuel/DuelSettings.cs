@@ -1,3 +1,4 @@
+using MoDuel.Abilities;
 using MoDuel.Serialization;
 using MoDuel.Time;
 
@@ -46,14 +47,13 @@ public class DuelSettings {
     public ActionFunction GameEndAction = new();
 
     /// <summary>
-    /// A fallback action that will be called when a <see cref="Cards.CardInstance"/> doesn't have unique behaviour for the same named trigger.
+    /// The highest a trigger can be recursively called.
     /// </summary>
-    public ActionFunction
-        CardGetDisplayedLevelFallback = new(),
-        CardGetDisplayedAttackFallback = new(),
-        CardGetDisplayedArmourFallback = new(),
-        CardGetDisplayedLifeFallback = new(),
-        CardGetDisplayedCostFallback = new(),
-        CardGetDisplayedDescriptionFallback = new();
+    public int MaxTriggerDepth = 22;
+
+    /// <summary>
+    /// The set of abilities that will be provided to <see cref="State.GlobalEntity"/> on creation of the duel state.
+    /// </summary>
+    public readonly List<Ability> GlobalAbilities = [];
 
 }

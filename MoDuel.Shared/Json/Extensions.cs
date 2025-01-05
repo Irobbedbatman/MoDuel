@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace MoDuel.Json;
+namespace MoDuel.Shared.Json;
 
 /// <summary>
 /// Extensions for json linq objects.
@@ -157,7 +157,7 @@ public static class Extensions {
     /// <para>If the element could not be found returns false and the result will be a <see cref="DeadToken.Instance"/>.</para>
     /// </summary>
     public static bool TryGet(this JsonNode token, string key, out JsonNode result) {
-        result = Get(token, key);
+        result = token.Get(key);
         return result != DeadToken.Instance;
     }
 
@@ -167,7 +167,7 @@ public static class Extensions {
     /// <para>If the element could not be found returns false and the result will be a <see cref="DeadToken.Instance"/>.</para>
     /// </summary>
     public static bool TryGet(this JsonNode token, int key, out JsonNode result) {
-        result = Get(token, key);
+        result = token.Get(key);
         return result != DeadToken.Instance;
     }
 
@@ -201,9 +201,9 @@ public static class Extensions {
         }
         // Try to get the next highest index.
         if (token is JsonObject obj) {
-            var indices = GetIndices(obj);
+            var indices = obj.GetIndices();
             index = indices.FirstOrDefault((i) => i > index, -1);
-            if (index != -1) return Get(obj, index);
+            if (index != -1) return obj.Get(index);
             if (fallbackToHighest) {
                 int? highest = token.GetHighestIndex();
                 if (highest.HasValue) {
@@ -224,7 +224,7 @@ public static class Extensions {
     /// Attempts to use <see cref="GetOrHighest(JsonNode, int)"/> but if no value is returned returns the <paramref name="token"/>.
     /// </summary>
     public static JsonNode BaseFallbackGetOrHighest(this JsonNode token, int index) {
-        var result = GetOrHighest(token, index);
+        var result = token.GetOrHighest(index);
         return result.IsDead() ? token : result;
     }
 
@@ -234,7 +234,7 @@ public static class Extensions {
     /// </summary>
     /// <param name="fallbackToHighest">If there are no values greater than <paramref name="index"/> fallback to the highest index in the <paramref name="token"/>.</param>
     public static JsonNode BaseFallbackGetOrNextHighest(this JsonNode token, int index, bool fallbackToHighest = true) {
-        var result = GetOrNextHighest(token, index, fallbackToHighest);
+        var result = token.GetOrNextHighest(index, fallbackToHighest);
         return result.IsDead() ? token : result;
     }
 
@@ -268,9 +268,9 @@ public static class Extensions {
         }
         // Try to get the next lowest index.
         if (token is JsonObject obj) {
-            var indices = GetIndices(obj);
+            var indices = obj.GetIndices();
             index = indices.Reverse().FirstOrDefault((i) => i < index, -1);
-            if (index != -1) return Get(obj, index);
+            if (index != -1) return obj.Get(index);
             if (fallbackToLowest) {
                 int? lowest = token.GetLowestIndex();
                 if (lowest.HasValue) {
@@ -286,7 +286,7 @@ public static class Extensions {
     /// Attempts to use <see cref="GetOrLowest(JsonNode, int)"/> but if no value is returned returns the <paramref name="token"/>.
     /// </summary>
     public static JsonNode BaseFallbackGetOrLowest(this JsonNode token, int index) {
-        var result = GetOrLowest(token, index);
+        var result = token.GetOrLowest(index);
         return result.IsDead() ? token : result;
     }
 
@@ -295,7 +295,7 @@ public static class Extensions {
     /// </summary>
     /// <param name="fallbackToLowest">If there are no values smaller than <paramref name="index"/> fallback to the lowest index in the <paramref name="token"/>.</param>
     public static JsonNode BaseFallbackGetOrNextLowest(this JsonNode token, int index, bool fallbackToLowest = true) {
-        var result = GetOrNextLowest(token, index, fallbackToLowest);
+        var result = token.GetOrNextLowest(index, fallbackToLowest);
         return result.IsDead() ? token : result;
     }
 
@@ -422,7 +422,7 @@ public static class Extensions {
     /// <para>The only values that work are double, string and bool.</para>
     /// </summary>
     public static T? ToRawValue<T>(this JsonNode token) {
-        var value = ToRawValue(token);
+        var value = token.ToRawValue();
         if (value is T t) return t;
         // TOOD: Convert using IConvertible interface
         try {
@@ -460,7 +460,7 @@ public static class Extensions {
     /// </summary>
     [return: NotNullIfNotNull(nameof(fallback))]
     public static object? ToRawValueOrFallback(this JsonNode token, object fallback) {
-        var result = ToRawValue(token);
+        var result = token.ToRawValue();
         if (result == null) {
             return fallback;
         }

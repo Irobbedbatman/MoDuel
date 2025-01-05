@@ -9,17 +9,12 @@ namespace MoDuel.Flow;
 /// The flow object that wraps a <see cref="DuelState"/> to provide interaction.
 /// <para>After creation call <see cref="StartLoop"/> to start the duel.</para>
 /// </summary>
-public class DuelFlow(DuelState state) : IDisposable {
-
-    /// <summary>
-    /// A flag that when enabled will cause the <see cref="DuelFlow"/> to print messages during operation.
-    /// </summary>
-    public static bool LoggingEnabled { get; set; } = false;
+public class DuelFlow : IDisposable {
 
     /// <summary>
     /// The state the <see cref="DuelFlow"/> is providing flow to.
     /// </summary>
-    public readonly DuelState State = state;
+    public readonly DuelState State;
 
     /// <summary>
     /// The sole thread that the flow utilises for executing commands.
@@ -33,9 +28,14 @@ public class DuelFlow(DuelState state) : IDisposable {
     private bool isDisposed;
 
     /// <summary>
-    /// Whether the thread should be stopped.
+    /// Whether the thread should is currently stopped.
     /// </summary>
     private bool Stopped = false;
+
+    /// <summary>
+    /// A signal used between <see cref="StartLoop"/> and the the thread start to ensure the first does not return until the duel has started,
+    /// </summary>
+    private ManualResetEvent? ThreadStartedEvent;
 
     /// <summary>
     /// The packages that have been opened and tools used to access package content.
@@ -51,24 +51,31 @@ public class DuelFlow(DuelState state) : IDisposable {
     /// The <see cref="FlowCommandHandler"/> that will manage the command queue.
     /// </summary>
     private readonly FlowCommandHandler CommandHandler = new();
+    public DuelFlow(DuelState state) {
+        State = state;
+    }
 
     /// <summary>
     /// Starts the duel loop if it had not already been started.
     /// </summary>
-    /// <param name="startDuel">Whether to also start the duel. Note if the duel state is not started the loop will not start.</param>
-    public void StartLoop(bool startDuel = true) {
+    public void StartLoop() {
 
         if (Thread != null) {
-            Console.WriteLine("DuelFlow thread already started. Cannot start another.");
+            LogSettings.LogEvent("DuelFlow thread already started. Cannot start another.", LogSettings.LogEvents.FlowThreadState);
             return;
         }
 
-        if (startDuel)
-            State.Start();
+        // Create a signal to ensure this method only returns after the thread and duel have started,
+        ThreadStartedEvent = new ManualResetEvent(false);
 
         Thread = new(new ThreadStart(Loop));
         Stopped = false;
         Thread.Start();
+            
+        ThreadStartedEvent.WaitOne();
+        ThreadStartedEvent.Dispose();
+        ThreadStartedEvent = null;
+
     }
 
     /// <summary>
@@ -87,6 +94,10 @@ public class DuelFlow(DuelState state) : IDisposable {
 
         ThreadContext.DuelState = State;
 
+        State.Start();
+
+        ThreadStartedEvent?.Set();
+
         // Only loop while the duel is ongoing.
         while (!Stopped && State.Ongoing) {
 
@@ -101,10 +112,9 @@ public class DuelFlow(DuelState state) : IDisposable {
             CommandHandler.DequeueCommandAndRun();
         }
 
-        State.CleanupOnGameFinished();
+        State.CleanUpOnGameFinished();
 
-        if (LoggingEnabled)
-            Console.WriteLine("Thread finished running cleanup.");
+        LogSettings.LogEvent("Thread finished running cleanup.", LogSettings.LogEvents.FlowThreadState);
 
         // Perform clean up once the loop is over.
         OnThreadFinished?.Invoke();
@@ -139,13 +149,13 @@ public class DuelFlow(DuelState state) : IDisposable {
     /// Finalizer to clean up unmanaged resources.
     /// </summary>
     ~DuelFlow() {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        // Do not change this code. Put clean up code in 'Dispose(bool disposing)' method
         Dispose(disposing: false);
     }
 
     /// <inheritdoc/>
     public void Dispose() {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        // Do not change this code. Put clean up code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
