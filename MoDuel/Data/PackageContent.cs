@@ -51,6 +51,20 @@ public partial class Package {
     /// </summary>
     public readonly PackagedCode PackagedCode;
 
+    /// <inheritdoc/>
+    public override bool HasItem(string category, string itemName) {
+
+        // Need to account for actions and abilities, these are preloaded.
+        if (category == ACTION_CATEGORY) {
+            return PackagedCode.Actions.ContainsKey(itemName);
+        }
+        if (category == ABILITY_CATEGORY) {
+            return PackagedCode.Abilities.ContainsKey(itemName);
+        }
+
+        return base.HasItem(category, itemName);
+    }
+
     #region Load Methods
 
     /// <summary>

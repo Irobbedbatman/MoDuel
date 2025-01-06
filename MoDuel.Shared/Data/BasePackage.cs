@@ -12,6 +12,11 @@ namespace MoDuel.Shared.Data;
 public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> where P : BasePackage<P, C> {
 
     /// <summary>
+    /// The key in the json data to get the <see cref="ResolveOrder"/>.
+    /// </summary>
+    public const string RESOLVE_ORDER_KEY = "ResolveOrder";
+
+    /// <summary>
     /// The name of the package and the key used to represent it in short form.
     /// </summary>
     public readonly string Name;
@@ -36,11 +41,18 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
     /// </summary>
     public readonly C Catalogue;
 
+    /// <summary>
+    /// The order other packages are resolved when an item is requested and the item is not in this package.
+    /// <para>Should be a set of <see cref="BasePackage{P, C}.Name"/></para>
+    /// </summary>
+    public readonly string[] ResolveOrder;
+
     protected BasePackage(string name, string directory, JsonObject data, C catalogue) {
         Name = name;
         Directory = directory;
         Data = data;
         Catalogue = catalogue;
+        ResolveOrder = Data[RESOLVE_ORDER_KEY]?.GetValues().Select(v => v.ToRawValue<string>()).OfType<string>().ToArray() ?? [];
     }
 
     /// <summary>
@@ -136,7 +148,7 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
     }
 
     /// <summary>
-    /// Returns the value of the property provided; properties are always strings.
+    /// Returns the value of the property provided.
     /// </summary>
     public T? GetProperty<T>(string propertyName) {
         var value = Data[propertyName];
@@ -159,5 +171,12 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
     public string? GetItemPath() {
         return Name;
     }
+
+    /// <summary>
+    /// A check to see if this package has the item key provided.
+    /// </summary>
+    /// <param name="category">The category the item is in.</param>
+    /// <param name="itemName">The name of the item to check.</param>
+    public virtual bool HasItem(string category, string itemName) => GetAllItemNamesInCategory(category).Contains(itemName);
 
 }

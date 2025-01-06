@@ -42,28 +42,11 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     #region Package Content Loaders
 
     /// <summary>
-    /// Uses the loader for the implemented generic type. Can also load <see cref="Package"/>s.
-    /// <para>This is far slower that directly using the loader.</para>
-    /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
-    /// </summary>
-    public T? Load<T>(string itemPath, Package? sourcePackage = null) {
-        // Packages also can be retrieved but need to be checked first.
-        if (typeof(T).IsAssignableFrom(typeof(Package))) {
-            return (T?)(object?)GetPackage(itemPath);
-        }
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
-        if (package == null) {
-            return default;
-        }
-        return package.Load<T>(itemName);
-    }
-
-    /// <summary>
     /// Loads a <see cref="Card"/> file from a package using a full or partial item path.
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public Card? LoadCard(string itemPath, Package? sourcePackage = null) {
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        Package? package = GetPackageFromItemPath(itemPath, Package.CARD_CATEGORY, out string itemName, sourcePackage);
         return package?.LoadCard(itemName);
     }
 
@@ -72,7 +55,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public Hero? LoadHero(string itemPath, Package? sourcePackage = null) {
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        Package? package = GetPackageFromItemPath(itemPath, Package.HERO_CATEGORY, out string itemName, sourcePackage);
         return package?.LoadHero(itemName);
     }
 
@@ -81,7 +64,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public ActionFunction LoadAction(string itemPath, Package? sourcePackage = null) {
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        Package? package = GetPackageFromItemPath(itemPath, Package.ACTION_CATEGORY, out string itemName, sourcePackage);
         return package?.LoadAction(itemName) ?? new ActionFunction();
     }
 
@@ -90,7 +73,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public Ability LoadAbility(string itemPath, Package? sourcePackage = null) {
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        Package? package = GetPackageFromItemPath(itemPath, Package.ABILITY_CATEGORY, out string itemName, sourcePackage);
         return package?.LoadAbility(itemName) ?? Ability.Missing;
     }
 
@@ -99,7 +82,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public JsonNode LoadJson(string itemPath, Package? sourcePackage = null) {
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        Package? package = GetPackageFromItemPath(itemPath, Package.JSON_DATA_CATEGORY, out string itemName, sourcePackage);
         return package?.LoadJson(itemName) ?? DeadToken.Instance;
     }
 
@@ -108,7 +91,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
     /// <para>Look at <see cref="GetPackageFromItemPath(string, out string, Package?)"/> to see how <paramref name="itemPath"/> is separated and how the <paramref name="sourcePackage"/> affects package access.</para>
     /// </summary>
     public ResourceType? LoadResourceType(string itemPath, Package? sourcePackage = null) {
-        Package? package = GetPackageFromItemPath(itemPath, out string itemName, sourcePackage);
+        Package? package = GetPackageFromItemPath(itemPath, Package.RESOURCE_TYPE_CATEGORY, out string itemName, sourcePackage);
         return package?.LoadResourceType(itemName);
     }
 

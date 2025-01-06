@@ -72,22 +72,45 @@ public class BasePackageCatalogue<P, C> : IEnumerable<P> where P : BasePackage<P
     /// <para>Only an <paramref name="itemName"/> could also be provided; this will use the <paramref name="currentPackage"/> if it exists or <see cref="DefaultPackage"/>.</para>
     /// </param>
     /// <param name="itemName">The remaining portion of <paramref name="itemPath"/> that is the item requested inside the package.</param>
+    /// <param name="itemCategory">The category the item is in,</param>
     /// <param name="currentPackage">The package that is requesting the package; used if the requested item is in the same package.</param>
-    /// <returns>The <see cref="Package"/> that contains the item requested.</returns>
-    public P? GetPackageFromItemPath(string itemPath, out string itemName, P? currentPackage = null) {
+    /// <returns>The <typeparamref name="P"/> that contains the item requested.</returns>
+    public P? GetPackageFromItemPath(string itemPath, string itemCategory, out string itemName, P? currentPackage ) {
 
         // Separate the package name and the item name.
         var pathSplit = itemPath.Split(PackageItemSeparator);
 
+        // Item name is all that was provided.
         if (pathSplit.Length == 1) {
-            // Item name is all that was provided.
+
             itemName = itemPath;
+
             // If this was not requested from a package assume the item is in the default package.
             if (currentPackage == null) {
                 return DefaultPackage;
             }
-            // If this was requested from a package assume the item is from that same package.
-            return currentPackage;
+
+            // Can be found in the same package that requested it.
+            if (currentPackage.HasItem(itemCategory, itemName)) {
+                return currentPackage;
+            }
+            else {
+                // Get the resolved package.
+                foreach (var resolvedPackageName in currentPackage.ResolveOrder) {
+                    var resolvedPackage = GetPackage(resolvedPackageName);
+                    if (resolvedPackage?.HasItem(itemCategory, itemName) ?? false) {
+                        return resolvedPackage;
+                    }
+                }
+
+                if (DefaultPackage?.HasItem(itemCategory, itemName) ?? false) {
+                    return DefaultPackage;
+                }
+
+                // Failed to find item.
+                return null;
+            }
+
         }
 
         // Should only be a package id or a package id and item.
