@@ -56,4 +56,9 @@ public class DuelSettings {
     /// </summary>
     public readonly List<Ability> GlobalAbilities = [];
 
+    /// <summary>
+    /// Clone the settings. THis will point to all the same actions.
+    /// </summary>
+    public void Clone() => MemberwiseClone();
+
 }
