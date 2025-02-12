@@ -1,4 +1,6 @@
-﻿namespace MoDuel.Networking;
+﻿using LiteNetLib.Utils;
+
+namespace MoDuel.Networking;
 
 /// <summary>
 /// The abstract logic to communicate with a <see cref="MoDuel.DuelFlow"/> via commands.
@@ -15,22 +17,13 @@ public abstract class GameProvider {
     }
 
     /// <summary>
-    /// The method used to send commands to a <see cref="MoDuel.DuelFlow"/>
+    /// The method used to send commands to a <see cref="MoDuel"/> duel flow.
     /// </summary>
     public abstract void SendCommand(string commandId, params object[] args);
 
     /// <summary>
-    /// The action that is invoked when a message is received from a <see cref="MoDuel.DuelFlow"/>.
+    /// The action that is invoked when a message is received from a <see cref="MoDuel"/> duel flow.
     /// </summary>
     public Action<string, object[]>? ReceiveCommand;
-
-    /// <summary>
-    /// Cleans <see cref="DynValue"/>s of their ownership so the values can be sent from backend to frontend and vise-versa.
-    /// </summary>
-    protected static object[] CleanArray(object[] values) {
-        var writer = new NetDataWriter();
-        MoDuel.Networking.DynValueSerialization.SerializeArray(values, writer);
-        return MoDuel.Networking.DynValueSerialization.DeserializeArray(new NetDataReader(writer)) ?? Array.Empty<DynValue>(); ;
-    }
 
 }

@@ -64,6 +64,7 @@ public static class CommandActions {
         if (ResourceActions.PayCost(player, NormalCommandCost)) {
             player.Discard(card);
             EndCommand(state);
+
             return true;
         }
         return false;

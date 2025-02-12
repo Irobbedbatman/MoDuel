@@ -52,6 +52,15 @@ public abstract class PackagedCode {
     /// </summary>
     public bool IsLoaded { get; private set; } = false;
 
+    /// <summary>
+    /// Gets the <see cref="PackagedCode"/> via the assembly that is loaded from
+    /// </summary>
+    public static T GetInstanceViaAssembly<T>() where T : PackagedCode {
+#nullable disable
+        return PackageAssemblyAttribute.GetPackage(typeof(T).Assembly) as T;
+#nullable enable
+    }
+
     public PackagedCode(Package package) {
         Package = package;
         RegisterActions();
@@ -150,7 +159,12 @@ public abstract class PackagedCode {
     /// </summary>
     private void RegisterAbilities() {
 
-        var abilityTypes = GetType().Assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(Ability)));
+        var type = GetType();
+
+        // Will cause an issue when trying to load abilities from the MoDuel library.
+        if (type == typeof(NoPackagedCode)) return;
+
+        var abilityTypes = type.Assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(Ability)));
         foreach (var abilityType in abilityTypes) {
 
             // TODO PERFORMANCE: Consider other ways to call the constructor that may be more performant.

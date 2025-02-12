@@ -1,26 +1,19 @@
-﻿using MoDuel.Data;
-using MoDuel.Data.Assembled;
+﻿using MoDuel.Data.Assembled;
+using MoDuel.Data;
 using MoDuel.State;
-using MoDuel.Tools;
+
+[assembly: PackageAssembly(typeof(DefaultPackage.DefaultPackage))]
 
 namespace DefaultPackage;
 
 /// <summary>
 /// The package that contains the default game logic.
 /// </summary>
-[PackagedCodeBinding("DefaultPackage")]
 public class DefaultPackage : PackagedCode {
 
-#nullable disable
-    /// <summary>
-    /// Get the local instance of the package per thread.
-    /// <para>Only returns a value when the duel is started.</para>
-    /// </summary>
-    public static Package GetPackage() => ThreadContext.GetPackageInstance(Name);
-#nullable enable
+    public static DefaultPackage Instance => GetInstanceViaAssembly<DefaultPackage>();
 
-
-    public const string Name = "Default";
+    public static string Name => Instance.Package.Name;
 
     public DefaultPackage(Package sourcePackage) : base(sourcePackage) { }
 
@@ -39,11 +32,8 @@ public class DefaultPackage : PackagedCode {
 
     }
 
-    public override void OnDuelLoaded(DuelState state) {
+    public override void OnDuelLoaded(DuelState state) { }
 
-    }
+    public override void OnPackageLoaded(Package package) { }
 
-    public override void OnPackageLoaded(Package package) {
-
-    }
 }

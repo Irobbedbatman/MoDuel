@@ -11,9 +11,9 @@ namespace DefaultPackage.ContentLookups;
 /// </summary>
 public static class ResourceTypes {
 
-    public static ResourceType ActionPoint => DefaultPackage.GetPackage().LoadResourceType(nameof(ActionPoint));
+    public static ResourceType ActionPoint => DefaultPackage.Instance.Package.LoadResourceType(nameof(ActionPoint));
 
-    public static ResourceType Void => DefaultPackage.GetPackage().LoadResourceType(nameof(Void));
+    public static ResourceType Void => DefaultPackage.Instance.Package.LoadResourceType(nameof(Void));
 
 }
 

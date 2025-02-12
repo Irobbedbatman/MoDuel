@@ -9,7 +9,7 @@ using MoDuel.State;
 namespace DefaultPackage;
 
 /// <summary>
-/// Actions used to inflic or calculate damage dealt.
+/// Actions used to inflict or calculate damage dealt.
 /// </summary>
 public static class DamageActions {
 

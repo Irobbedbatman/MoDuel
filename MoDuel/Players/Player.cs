@@ -4,6 +4,7 @@ using MoDuel.Client;
 using MoDuel.Field;
 using MoDuel.Flow;
 using MoDuel.Heroes;
+using MoDuel.Networking.Messages;
 using MoDuel.Resources;
 using MoDuel.Serialization;
 using MoDuel.Shared.Structures;
@@ -96,7 +97,7 @@ public class Player : Target, IAbilityEntity {
     /// <summary>
     /// The event handler for when the player says they are ready after a <see cref="ClientRequest"/> marked as <see cref="ClientRequest.SendReadyConfirmation"/>.
     /// </summary>
-    public EventHandler InBoundReadDelegate = delegate { };
+    public EventHandler<ClientResponse> InBoundReadDelegate = delegate { };
 
     /// <summary>
     /// The <see cref="HeroInstance"/> this player is currently playing as.

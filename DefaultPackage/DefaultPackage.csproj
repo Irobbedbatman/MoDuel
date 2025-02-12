@@ -12,14 +12,6 @@
     <ProjectReference Include="..\MoDuel\MoDuel.csproj" />
   </ItemGroup>
 
-  <!--ItemGroup>
-    <ContentWithTargetPath Include="Resources\**">
-      <TargetPath>%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </ContentWithTargetPath>
-    <None Include="Resources\**" />
-  </ItemGroup-->
-
   <ItemGroup>
     <None Include="Data\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -31,6 +23,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  
   
 </Project>

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MoDuel.Networking\MoDuel.Networking.csproj" />
     <ProjectReference Include="..\MoDuel.Shared\MoDuel.Shared.csproj" />
   </ItemGroup>
 
