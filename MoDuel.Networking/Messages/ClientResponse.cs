@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MoDuel.Networking.Messages;
 
 /// <summary>
-/// The response returned from a client afer a server request.
+/// The response returned from a client after a server request.
 /// </summary>
 public class ClientResponse {
 }

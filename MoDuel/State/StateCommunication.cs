@@ -35,7 +35,7 @@ public partial class DuelState {
     /// <summary>
     /// Blocks the execution of the current <see cref="Thread"/>.
     /// </summary>
-    /// <param name="blockDuration">How long to block the thread by, affected by <see cref="DuelSettings.BlockPlaybackDurationMultiplier"/></param>
+    /// <param name="blockDuration">How long to block the thread by, affected by <see cref="DuelSettingsLoaded.BlockPlaybackDurationMultiplier"/></param>
     public void BlockPlayback(double blockDuration) {
         var settings = Settings;
         if (!settings.IsPlaybackBlocked) {

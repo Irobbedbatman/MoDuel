@@ -42,14 +42,14 @@ public partial class CardInstance : Target {
     /// <summary>
     /// The values used to define this <see cref="CardInstance"/>.
     /// </summary>
-    public readonly CardMeta Meta;
+    public readonly CardMetaLoaded Meta;
 
     /// <summary>
     /// The context which this <see cref="CardInstance"/> was created within.
     /// </summary>
     public readonly DuelState Context;
 
-    public CardInstance(DuelState context, CardMeta meta) : base(context.TargetRegistry) {
+    public CardInstance(DuelState context, CardMetaLoaded meta) : base(context.TargetRegistry) {
         Imprint = meta.Card;
         Meta = meta;
         Context = context;
@@ -59,7 +59,7 @@ public partial class CardInstance : Target {
         Register();
     }
 
-    public CardInstance(Player player, CardMeta meta) : this(player.Context, meta) {
+    public CardInstance(Player player, CardMetaLoaded meta) : this(player.Context, meta) {
         OriginalOwner = player;
         TrueOwner = player;
     }
@@ -68,7 +68,7 @@ public partial class CardInstance : Target {
     /// Constructor that creates a new card over an old one, useful for transformation.
     /// </summary>
     /// <param name="previousState">The card instance to pull original state and previous state from.</param>
-    public CardInstance(CardMeta meta, CardInstance previousState) : this(previousState.Context, meta) {
+    public CardInstance(CardMetaLoaded meta, CardInstance previousState) : this(previousState.Context, meta) {
         PreviousState = previousState;
     }
 

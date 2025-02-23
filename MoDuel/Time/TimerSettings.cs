@@ -7,7 +7,6 @@ namespace MoDuel.Time;
 /// <summary>
 /// Settings to be provided to <see cref="PlayerTimer"/> to define it's operation.
 /// </summary>
-[SerializeReference]
 public class TimerSettings {
 
     /// <summary>

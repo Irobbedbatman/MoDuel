@@ -21,7 +21,7 @@ public class ClientRequest : Request {
     /// </summary>
     public readonly Package? RequestingPackage;
 
-    public ClientRequest(string requestId, Package requestingPackage, params object?[] arguments) : base(requestId, arguments) {
+    public ClientRequest(string requestId, Package? requestingPackage, params object?[] arguments) : base(requestId, arguments) {
         RequestingPackage = requestingPackage;
     }
 

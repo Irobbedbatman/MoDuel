@@ -28,9 +28,15 @@ public class HeroInstance : IAbilityEntity {
     /// </summary>
     public List<AbilityReference> Abilities = [];
 
-    public HeroInstance(Hero hero, Player owner) {
-        Imprint = hero;
+    /// <summary>
+    /// The values used to define this <see cref="HeroInstance"/>.
+    /// </summary>
+    public HeroMetaLoaded Meta;
+
+    public HeroInstance(HeroMetaLoaded meta, Player owner) {
+        Imprint = meta.Hero;
         Owner = owner;
+        Meta = meta;
         AddImprintedAbilities();
     }
 

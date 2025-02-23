@@ -31,12 +31,6 @@ public class Player : Target, IAbilityEntity {
     internal static readonly Player SysPlayer = new("System");
 
     /// <summary>
-    /// The string prefix to access <see cref="PrivateValues"/> when in lua.
-    /// <para>Example Player.~Value</para>
-    /// </summary>
-    public const string PRIVATE_INDEX_PREFIX = "p_";
-
-    /// <summary>
     /// The unique id, name, username of this player.
     /// </summary>
     public readonly string UserId;
@@ -47,7 +41,7 @@ public class Player : Target, IAbilityEntity {
     public readonly ResourcePool ResourcePool;
 
     /// <summary>
-    /// A version of <see cref="Target.Values"/> that will not be serialized unless requested by this <see cref="Player"/>.
+    /// A version of <see cref="Target.Values"/> that stores values that should not be broadcast to all players.
     /// </summary>
     public readonly Dictionary<string, object?> PrivateValues = [];
 
@@ -60,34 +54,6 @@ public class Player : Target, IAbilityEntity {
     /// The abilities provided to the player that are separate from their hero.
     /// </summary>
     public readonly List<AbilityReference> Abilities = [];
-
-    /// <summary>
-    /// Indexer that allows for access to <see cref="Target.Values"/> and <see cref="PrivateValues"/>. 
-    /// <para>Prefix with <see cref="PRIVATE_INDEX_PREFIX"/> to access <see cref="PrivateValues"/>.</para>
-    /// </summary>
-    /// <param name="key">The key from either collection.</param>
-    /// <returns>The requested object or null if it couldn't be found.</returns>
-    public new object? this[string key] {
-
-        get {
-            // Get from private values.
-            if (key.StartsWith(PRIVATE_INDEX_PREFIX, StringComparison.CurrentCultureIgnoreCase)) {
-                // Ensure the value exists. If it doesn't attempt to use the Target.Values.
-                if (PrivateValues.TryGetValue(key, out var value))
-                    return value;
-                return base[key];
-            }
-            else
-                return base[key];
-        }
-        set {
-            // Set to private values.
-            if (key.StartsWith(PRIVATE_INDEX_PREFIX, StringComparison.CurrentCultureIgnoreCase)) {
-                PrivateValues[key] = value;
-            }
-            base[key] = value;
-        }
-    }
 
     /// <summary>
     /// The animations that are sent out for this specific player.
@@ -131,7 +97,7 @@ public class Player : Target, IAbilityEntity {
     /// <summary>
     /// The meta that was used to create this player.
     /// </summary>
-    public readonly PlayerMeta Meta;
+    public readonly PlayerMetaLoaded Meta;
 
     /// <summary>
     /// The timeout object for this player.
@@ -156,7 +122,7 @@ public class Player : Target, IAbilityEntity {
     }
 #nullable enable
 
-    public Player(DuelState context, PlayerMeta meta) : base(context.TargetRegistry) {
+    public Player(DuelState context, PlayerMetaLoaded meta) : base(context.TargetRegistry) {
         UserId = meta.UserId;
         Meta = meta;
         Context = context;
@@ -216,7 +182,7 @@ public class Player : Target, IAbilityEntity {
     /// <summary>
     /// Sets the hero value by creating a new <see cref="HeroInstance"/> from the provided <see cref="Hero"/>.
     /// </summary>
-    public void SetHero(Hero newHero) => Hero = new HeroInstance(newHero, this);
+    public void SetHero(HeroMetaLoaded newHero) => Hero = new HeroInstance(newHero, this);
 
     /// <summary>
     /// Invokes <see cref="OutBoundDelegate"/> with a request for the client to do.

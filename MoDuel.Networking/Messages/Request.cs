@@ -12,7 +12,7 @@ namespace MoDuel.Networking.Messages;
 /// <summary>
 /// A request message sent in either direction.
 /// </summary>
-public abstract class Request : INetSerializable{
+public abstract class Request : INetSerializable {
 
     /// <summary>
     /// The id of the request to execute.

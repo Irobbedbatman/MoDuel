@@ -37,9 +37,9 @@ public partial class DuelState {
     }
 
     /// <summary>
-    /// The <see cref="DuelSettings"/> that will remain constant throughout the duel.
+    /// The <see cref="DuelSettingsLoaded"/> that will remain constant throughout the duel.
     /// </summary>
-    public readonly DuelSettings Settings;
+    public readonly DuelSettingsLoaded Settings;
 
     /// <summary>
     /// The <see cref="ManagedRandom"/> that any random actions should use.
@@ -62,7 +62,7 @@ public partial class DuelState {
     /// </summary>
     public readonly Player FirstPlayer;
 
-    public DuelState(PlayerMeta player1, PlayerMeta player2, PackageCatalogue packageCatalogue, DuelSettings settings) {
+    public DuelState(PlayerMetaLoaded player1, PlayerMetaLoaded player2, PackageCatalogue packageCatalogue, DuelSettingsLoaded settings) {
         _packageCatalogue = packageCatalogue;
         Settings = settings;
         Random = settings.RandomSeed.HasValue ? new(settings.RandomSeed.Value) : new();
@@ -90,7 +90,7 @@ public partial class DuelState {
     }
 
     /// <summary>
-    /// Puts the <see cref="DuelState"/> in a started status and calls the <see cref="DuelSettings.GameStartAction"/>.
+    /// Puts the <see cref="DuelState"/> in a started status and calls the <see cref="DuelSettingsLoaded.GameStartAction"/>.
     /// </summary>
     internal void Start() {
         if (Started) {

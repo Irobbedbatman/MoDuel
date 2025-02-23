@@ -96,7 +96,7 @@ public static class SystemActions {
     /// <summary>
     /// Initializes a player's hand from their meta data.
     /// </summary>
-    private static void SysInitHand(Player player, ICollection<CardMeta> handMeta) {
+    private static void SysInitHand(Player player, ICollection<CardMetaLoaded> handMeta) {
         foreach (var cardMeta in handMeta) {
             CardInstance card = new(player, cardMeta);
             if (cardMeta.Values.TryGetValue("FixedLevel", out object? levelUnknown) && levelUnknown is int level) {
@@ -111,7 +111,7 @@ public static class SystemActions {
     /// <summary>
     /// Initializes a player's grave from their meta data.
     /// </summary>
-    private static void SysInitGrave(Player player, ICollection<CardMeta> graveMeta) {
+    private static void SysInitGrave(Player player, ICollection<CardMetaLoaded> graveMeta) {
         foreach (var cardMeta in graveMeta) {
             CardInstance card = new(player, cardMeta);
             if (cardMeta.Values.TryGetValue("FixedLevel", out object? levelUnknown) && levelUnknown is int level) {
@@ -125,7 +125,7 @@ public static class SystemActions {
     /// <summary>
     /// Initializes a player's field from their meta data.
     /// </summary>
-    private static void SysInitField(Player player, IReadOnlyDictionary<int, CardMeta> fieldMeta) {
+    private static void SysInitField(Player player, IReadOnlyDictionary<int, CardMetaLoaded> fieldMeta) {
         var field = player.Field;
         foreach (var pair in fieldMeta) {
             int slot = pair.Key;

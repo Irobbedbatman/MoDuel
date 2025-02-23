@@ -11,6 +11,11 @@ namespace MoDuel;
 public class ActionFunction : IReloadable {
 
     /// <summary>
+    /// Whether the action function has been loaded. A blank action function is not considered loaded.
+    /// </summary>
+    public bool Loaded { get; private set; } = false;
+
+    /// <summary>
     /// Constructor for an unassigned <see cref="ActionFunction"/>.
     /// </summary>
     public ActionFunction() { }
@@ -23,10 +28,12 @@ public class ActionFunction : IReloadable {
     public ActionFunction(string fullItemPath, Delegate _delegate) {
         FullItemPath = fullItemPath;
         Delegate = _delegate;
+        Loaded = true;
     }
 
     public ActionFunction(Delegate _delegate) {
         Delegate = _delegate;
+        Loaded = true;
     }
 
     /// <summary>
@@ -39,6 +46,7 @@ public class ActionFunction : IReloadable {
         }
         FullItemPath = fullItemPath;
         Delegate = _delegate;
+        Loaded = true;
     }
 
     /// <summary>

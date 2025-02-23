@@ -1,14 +1,8 @@
-using MoDuel.Abilities;
-using MoDuel.Serialization;
-using MoDuel.Time;
-
-namespace MoDuel;
+namespace MoDuel.Shared;
 
 /// <summary>
 /// Settings that define how a duel will operate.
-/// <para>Including animation settings and optional <see cref="ActionFunction"/>s for lua based operations at key points.</para>
 /// </summary>
-[SerializeReference]
 public class DuelSettings {
 
     /// <summary>
@@ -30,21 +24,18 @@ public class DuelSettings {
     /// Shorthand check to see if animations should play.
     /// </summary>
     public bool IsPlaybackBlocked => BlockPlaybackDurationMultiplier == 0;
-    /// <summary>
-    /// The settings used to handle player timeouts.
-    /// <para>If no settings are provided not timeouts will occur.</para>
-    /// </summary>
-    public TimerSettings TimerSettings = TimerSettings.NoTimeout;
+
+    // TODO: Timer settings.
 
     /// <summary>
-    /// Action that is called when the game starts.
+    /// THe key of the action that is called when the game starts.
     /// </summary>
-    public ActionFunction GameStartAction = new();
+    public string? GameStartActionItemPath = null;
 
     /// <summary>
-    /// Action that is called when the game ends.
+    /// THe key of the action that is called when the game ends.
     /// </summary>
-    public ActionFunction GameEndAction = new();
+    public string? GameEndActionItemPath = null;
 
     /// <summary>
     /// The highest a trigger can be recursively called.
@@ -52,9 +43,9 @@ public class DuelSettings {
     public int MaxTriggerDepth = 22;
 
     /// <summary>
-    /// The set of abilities that will be provided to <see cref="State.GlobalEntity"/> on creation of the duel state.
+    /// The set of keys of abilities that will be provided to <see cref="MoDUel.State.GlobalEntity"/> on creation of the duel state.
     /// </summary>
-    public readonly List<Ability> GlobalAbilities = [];
+    public readonly List<string> GlobalAbilityItemPaths = [];
 
     /// <summary>
     /// Clone the settings. THis will point to all the same actions.
