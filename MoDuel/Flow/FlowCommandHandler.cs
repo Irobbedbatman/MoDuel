@@ -1,4 +1,5 @@
 ﻿using MoDuel.Players;
+using MoDuel.Shared;
 
 namespace MoDuel.Flow;
 
@@ -49,7 +50,7 @@ internal class FlowCommandHandler : IDisposable {
             var span = DateTime.UtcNow - commandTime;
             // If the command was created more than a second before execution it is ignored. System commands don't have this limitation.
             if (span.TotalSeconds > CommandTimeOut) {
-                LogSettings.LogEvent($"Command timed out. It was buffered for {span.TotalSeconds} seconds", LogSettings.LogEvents.FlowCommands);
+                Logger.Log(LogTypes.FLowCommands, $"Command timed out. It was buffered for {span.TotalSeconds} seconds");
                 return;
             }
 
@@ -66,7 +67,7 @@ internal class FlowCommandHandler : IDisposable {
             // As command references are equal for the same player this will overwrite any old commands.
             CommandBuffer[cmdRef] = command;
 
-            LogSettings.LogEvent("Command Received", LogSettings.LogEvents.FlowCommands);
+            Logger.Log(LogTypes.FLowCommands, "Command Received");
 
             // Tell the flow to resume.
             CommandReadySignal?.Set();
@@ -99,12 +100,12 @@ internal class FlowCommandHandler : IDisposable {
         try {
             // Invoke the command and allow commands to be added while its is running.
             if (command != null)
-                LogSettings.LogEvent("Running provided command.", LogSettings.LogEvents.FlowCommands);
+                Logger.Log(LogTypes.FLowCommands, "Running provided command.");
             command?.Value.Invoke();
         }
         catch (Exception e) {
             // Because invoke may cause unhandled exceptions display them for debugging.
-            LogSettings.LogEvent(e.StackTrace ?? "", LogSettings.LogEvents.FlowCommands);
+            Logger.Log(LogTypes.FLowCommands, e.StackTrace ?? "");
         }
     }
 
@@ -123,7 +124,7 @@ internal class FlowCommandHandler : IDisposable {
                 return;
 
 
-            LogSettings.LogEvent("No Commands are ready. Waiting for one.", LogSettings.LogEvents.FlowCommands);
+            Logger.Log(LogTypes.FLowCommands, "No Commands are ready. Waiting for one.");
 
             // Reset the signal so that WaitOne will block.
             CommandReadySignal?.Reset();
@@ -140,7 +141,7 @@ internal class FlowCommandHandler : IDisposable {
     /// <para>This will stop the thread that is using it from being blocked.</para>
     /// </summary>
     public void ForceReadyState() {
-        LogSettings.LogEvent("Forcing the ready state on the command handler.", LogSettings.LogEvents.FlowCommands);
+        Logger.Log(LogTypes.FLowCommands, "Forcing the ready state on the command handler.");
         CommandReadySignal?.Set();
     }
 
@@ -153,7 +154,7 @@ internal class FlowCommandHandler : IDisposable {
             CommandReadySignal.Dispose();
             CommandReadySignal = null;
         }
-        LogSettings.LogEvent("Attempt to dispose of command queue signal when it was already disposed.", LogSettings.LogEvents.FlowCommands);
+        Logger.Log(LogTypes.FLowCommands, "Attempt to dispose of command queue signal when it was already disposed.");
     }
 
     /// <inheritdoc/>

@@ -3,6 +3,7 @@ using MoDuel.Cards;
 using MoDuel.Heroes;
 using MoDuel.Resources;
 using MoDuel.Serialization;
+using MoDuel.Shared;
 using MoDuel.Shared.Data;
 using MoDuel.Shared.Json;
 using System.Diagnostics.CodeAnalysis;
@@ -30,7 +31,7 @@ public class PackageCatalogue : BasePackageCatalogue<Package, PackageCatalogue>,
                     Packages.Add(package.Name, package);
                 }
                 else {
-                    LogSettings.LogEvent($"No package could be found at location: {location}", LogSettings.LogEvents.DataLoadingError);
+                    Logger.Log(Logger.DataLoadingError, $"No package could be found at location: {location}");
                 }
             }
         }

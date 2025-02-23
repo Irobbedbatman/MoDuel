@@ -1,5 +1,6 @@
 ﻿using MoDuel.Data;
 using MoDuel.Players;
+using MoDuel.Shared;
 using MoDuel.State;
 using MoDuel.Tools;
 
@@ -61,7 +62,7 @@ public class DuelFlow : IDisposable {
     public void StartLoop() {
 
         if (Thread != null) {
-            LogSettings.LogEvent("DuelFlow thread already started. Cannot start another.", LogSettings.LogEvents.FlowThreadState);
+            Logger.Log(LogTypes.FlowThreadState, "DuelFlow thread already started. Cannot start another.");
             return;
         }
 
@@ -114,7 +115,7 @@ public class DuelFlow : IDisposable {
 
         State.CleanUpOnGameFinished();
 
-        LogSettings.LogEvent("Thread finished running cleanup.", LogSettings.LogEvents.FlowThreadState);
+        Logger.Log(LogTypes.FlowThreadState, "Thread finished running cleanup.");
 
         // Perform clean up once the loop is over.
         OnThreadFinished?.Invoke();

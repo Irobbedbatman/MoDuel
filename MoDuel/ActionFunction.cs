@@ -1,4 +1,5 @@
 ﻿using MoDuel.Serialization;
+using MoDuel.Shared;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -76,13 +77,13 @@ public class ActionFunction : IReloadable {
             return Delegate?.DynamicInvoke(args);
         }
         catch (Exception ex) {
-            LogSettings.LogEvent($"ActionFunction.Call() failed.\n" +
+            Logger.Log(LogTypes.ActionFailed, $"ActionFunction.Call() failed.\n" +
                 $"Exception: {ex.GetType()}"+
                 $"\nCalled Method: {Delegate?.Method}" +
                 $"\nMethod Type: {Delegate?.Method.DeclaringType}" +
                 $"\nArgs: { string.Join(", ", args?.Select(a => a?.GetType().ToString() ?? "-") ?? [])}" +
                 $"\nPath: {FullItemPath ?? "-"}" +
-                $"\nStack: {new StackTrace(true)}", LogSettings.LogEvents.ActionFailed);
+                $"\nStack: {new StackTrace(true)}");
             Debugger.Break();
             return default;
         }

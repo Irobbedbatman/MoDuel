@@ -13,7 +13,7 @@ public class Tag {
     public Source Source;
 
     /// <summary>
-    /// The test that represents the tag,
+    /// The text that represents the tag,
     /// </summary>
     public string Text;
 

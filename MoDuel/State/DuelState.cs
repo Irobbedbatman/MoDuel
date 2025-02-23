@@ -1,6 +1,7 @@
 using MoDuel.Data;
 using MoDuel.Players;
 using MoDuel.Serialization;
+using MoDuel.Shared;
 using MoDuel.Tools;
 
 namespace MoDuel.State;
@@ -94,7 +95,7 @@ public partial class DuelState {
     /// </summary>
     internal void Start() {
         if (Started) {
-            LogSettings.LogEvent("Failed to Start duel as it has already started.", LogSettings.LogEvents.State);
+            Logger.Log(LogTypes.StateError, "Failed to Start duel as it has already started.");
             return;
         }
         Started = true;

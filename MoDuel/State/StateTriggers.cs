@@ -1,4 +1,5 @@
 ﻿using MoDuel.Abilities;
+using MoDuel.Shared;
 using MoDuel.Shared.Structures;
 using MoDuel.Sources;
 using MoDuel.Triggers;
@@ -56,12 +57,12 @@ public partial class DuelState {
 
         // Block execution at the set depth.
         if (currentTriggerDepth >= Settings.MaxTriggerDepth) {
-            LogSettings.LogEvent("Max trigger depth reached.", LogSettings.LogEvents.TriggerFailed);
+            Logger.Log(LogTypes.TriggerFailed, "Max trigger depth reached.");
             return;
         }
         currentTriggerDepth++;
 
-        LogSettings.LogEvent("Trigger called: " + trigger.Key, LogSettings.LogEvents.TriggerCalled);
+        Logger.Log(LogTypes.TriggerCalled, "Trigger called: " + trigger.Key);
 
         TriggerPipeline.Execute(trigger, GetReactions(trigger), data);
 
@@ -78,12 +79,12 @@ public partial class DuelState {
 
         // Block execution at the set depth.
         if (currentTriggerDepth >= Settings.MaxTriggerDepth) {
-            LogSettings.LogEvent("Max trigger depth reached.", LogSettings.LogEvents.TriggerFailed);
+            Logger.Log(LogTypes.TriggerFailed, "Max trigger depth reached.");
             return;
         }
         currentTriggerDepth++;
 
-        LogSettings.LogEvent("DataTrigger called: " + trigger.Key, LogSettings.LogEvents.TriggerCalled);
+        Logger.Log(LogTypes.TriggerCalled, "DataTrigger called: " + trigger.Key);
 
         TriggerPipeline.ExecuteOverride(trigger, GetReactions(trigger).Reverse<TriggerReaction>(), ref data);
 
@@ -100,7 +101,7 @@ public partial class DuelState {
 
         // Block execution at the set depth.
         if (currentTriggerDepth >= Settings.MaxTriggerDepth) {
-            LogSettings.LogEvent("Max trigger depth reached.", LogSettings.LogEvents.TriggerFailed);
+            Logger.Log(LogTypes.TriggerFailed, "Max trigger depth reached.");
             return;
         }
 
@@ -116,7 +117,7 @@ public partial class DuelState {
 
         currentTriggerDepth++;
 
-        LogSettings.LogEvent("ExplicitTrigger called: " + trigger.Key, LogSettings.LogEvents.TriggerCalled);
+        Logger.Log(LogTypes.TriggerCalled, "ExplicitTrigger called: " + trigger.Key);
 
         TriggerPipeline.Execute(trigger, references, data);
 
@@ -133,7 +134,7 @@ public partial class DuelState {
 
         // Block execution at the set depth.
         if (currentTriggerDepth >= Settings.MaxTriggerDepth) {
-            LogSettings.LogEvent("Max trigger depth reached.", LogSettings.LogEvents.TriggerFailed);
+            Logger.Log(LogTypes.TriggerFailed, "Max trigger depth reached.");
             return;
         }
 
@@ -143,7 +144,7 @@ public partial class DuelState {
 
         currentTriggerDepth++;
 
-        LogSettings.LogEvent("ExplicitDataTrigger called: " + trigger.Key, LogSettings.LogEvents.TriggerCalled);
+        Logger.Log(LogTypes.TriggerCalled, "ExplicitDataTrigger called: " + trigger.Key);
 
         // Get all the abilities from the explicit trigger entity.
         var abilities = sender.Entity.GetAbilities();

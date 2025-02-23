@@ -108,6 +108,7 @@ public class BasePackageCatalogue<P, C> : IEnumerable<P> where P : BasePackage<P
                 }
 
                 // Failed to find item.
+                Logger.Log(Logger.DataLoadingError, $"Failed to resolve package from path: {itemPath}. Category: {itemCategory}.");
                 return null;
             }
 
@@ -132,6 +133,7 @@ public class BasePackageCatalogue<P, C> : IEnumerable<P> where P : BasePackage<P
             // If it was a same package request require there be a same package to use.
             if (currentPackage != null)
                 return currentPackage;
+            Logger.Log(Logger.DataLoadingError, $"Failed to resolve package requested from same package. No package provided.");
             return null;
         }
 

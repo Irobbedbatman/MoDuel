@@ -1,4 +1,5 @@
 ﻿using MoDuel.Shared;
+using MoDuel.Shared.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,11 @@ public class DuelHostingInfo {
     public bool IsPlayer2Ai = true;
 
     public string? Password = null;
+
+
+    public PlayerMeta? AiPlayer1Data;
+
+    public PlayerMeta? AiPlayer2Data;
 
     public DuelSettings Settings { init; get; } = new DuelSettings();
 

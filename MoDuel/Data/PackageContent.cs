@@ -3,6 +3,7 @@ using MoDuel.Cards;
 using MoDuel.Data.Assembled;
 using MoDuel.Heroes;
 using MoDuel.Resources;
+using MoDuel.Shared;
 using MoDuel.Shared.Json;
 using MoDuel.Sources;
 using System.Text.Json.Nodes;
@@ -15,7 +16,7 @@ public partial class Package {
     /// <summary>
     /// Logs the <paramref name="message"/> if <see cref="LogLoads"/> is true.
     /// </summary>
-    private static void LogLoad(string message) => LogSettings.LogEvent(message, LogSettings.LogEvents.DataLoading);
+    private static void LogLoad(string message) => Logger.Log(Logger.DataLoading, message);
 
     /// <summary>
     /// A category name for consistent naming conventions.
@@ -109,7 +110,7 @@ public partial class Package {
             return data;
         }
         catch (Exception e) {
-            LogSettings.LogEvent(e.StackTrace ?? "", LogSettings.LogEvents.DataLoadingError);
+            Logger.Log(Logger.DataLoadingError, e.StackTrace ?? "");
             return [];
         }
     }
@@ -129,7 +130,7 @@ public partial class Package {
         LogLoad($"Loading Card: {id} from package {Name}.");
 
         if (!GetSystemPaths(CARD_CATEGORY, id, out var relativePath, out var fullPath)) {
-            LogSettings.LogEvent($"No card file could be found for id: {id}.", LogSettings.LogEvents.DataLoadingError);
+            Logger.Log(Logger.DataLoadingError, $"No card file could be found for id: {id}.");
             return null;
         }
 
@@ -168,7 +169,7 @@ public partial class Package {
         LogLoad($"Loading Hero: {id} from package {Name}.");
 
         if (!GetSystemPaths(HERO_CATEGORY, id, out var relativePath, out var fullPath)) {
-            LogSettings.LogEvent($"No hero file could be found for id: {id}.", LogSettings.LogEvents.DataLoadingError);
+            Logger.Log(Logger.DataLoadingError, $"No hero file could be found for id: {id}.");
             return null;
         }
 
@@ -229,7 +230,7 @@ public partial class Package {
 
         // Get the file path and validate it.
         if (!GetSystemPaths(JSON_DATA_CATEGORY, id, out var relativePath, out var fullPath)) {
-            LogSettings.LogEvent($"No json file could be found for id: {id}.", LogSettings.LogEvents.DataLoadingError);
+            Logger.Log(Logger.DataLoadingError, $"No json file could be found for id: {id}.");
             return DeadToken.Instance;
         }
 
@@ -254,7 +255,7 @@ public partial class Package {
 
         // Get the full file path and validate it.
         if (!GetSystemPaths(RESOURCE_TYPE_CATEGORY, id, out var relativePath, out var fullPath)) {
-            LogSettings.LogEvent($"ResourceType: {id} not found in package.", LogSettings.LogEvents.DataLoadingError);
+            Logger.Log(Logger.DataLoadingError, $"ResourceType: {id} not found in package.");
             return null;
         }
 

@@ -1,5 +1,6 @@
 ﻿using MoDuel.Data.Assembled;
 using MoDuel.Serialization;
+using MoDuel.Shared;
 using MoDuel.Shared.Data;
 using System.Text.Json.Nodes;
 
@@ -32,7 +33,7 @@ public partial class Package : BasePackage<Package, PackageCatalogue>, IReloadab
             data = (JsonObject?)JsonNode.Parse(File.ReadAllText(path)) ?? throw new NullReferenceException();
         }
         catch {
-            LogSettings.LogEvent($"Package at {path} could not be found or loaded.", LogSettings.LogEvents.DataLoadingError);
+            Logger.Log(Logger.DataLoadingError, $"Package at {path} could not be found or loaded.");
             return null;
         }
 

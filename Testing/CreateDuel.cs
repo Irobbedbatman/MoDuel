@@ -19,9 +19,6 @@ public class CreateDuel {
             "../../../../DefaultPackage\\bin\\Debug\\net8.0\\Data\\DefaultPackage.json"
         ];
 
-
-        LogSettings.LoggedEvents = LogSettings.LogEvents.LogAll;
-
         // Load the package catalogue.
         PackageCatalogue content = new(packages);
 

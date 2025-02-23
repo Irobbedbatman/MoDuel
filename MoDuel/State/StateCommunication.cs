@@ -1,6 +1,7 @@
 ﻿using MoDuel.Client;
 using MoDuel.Flow;
 using MoDuel.Players;
+using MoDuel.Shared;
 using MoDuel.Tools;
 
 namespace MoDuel.State;
@@ -18,7 +19,7 @@ public partial class DuelState {
     /// <para>Call <see cref="BlockPlayback(double)"/> afterward if the request should stop other things from happening.</para>/// </summary>
     /// <param name="request">THe request to be sent to the player.</param> 
     public void SendRequest(ClientRequest request) {
-        LogSettings.LogEvent("SendRequest [" + request.RequestId + "]", LogSettings.LogEvents.OutboundRequests);
+        Logger.Log(LogTypes.OutboundRequests, "SendRequest [" + request.RequestId + "]");
         OutBoundDelegate?.Invoke(this, request);
     }
 
@@ -28,7 +29,7 @@ public partial class DuelState {
     /// </summary>
     /// <param name="request">THe request to be sent to the player.</param> 
     public static void SendRequestTo(Player target, ClientRequest request) {
-        LogSettings.LogEvent("SendRequest [" + request.RequestId + "] to [" + target.UserId + "]", LogSettings.LogEvents.OutboundRequests);
+        Logger.Log(LogTypes.OutboundRequests, "SendRequest [" + request.RequestId + "] to [" + target.UserId + "]");
         target.SendRequest(request);
     }
 
@@ -58,7 +59,7 @@ public partial class DuelState {
     /// </returns>
     public (bool, bool, bool) SendBlockingRequest(ClientRequest request, double timeout) {
 
-        LogSettings.LogEvent("SendBlockingRequest [" + request.RequestId + "]", LogSettings.LogEvents.OutboundRequests);
+        Logger.Log(LogTypes.OutboundRequests, "SendBlockingRequest [" + request.RequestId + "]");
 
         // If there is no playback blocking skip the expensive operations.
         if (Settings.IsPlaybackBlocked) {
