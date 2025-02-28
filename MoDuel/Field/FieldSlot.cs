@@ -84,7 +84,7 @@ public class FieldSlot(SubField parent, int relativePosition) : Target(parent.Co
     /// <summary>
     /// The <see cref="FieldColumn"/> this slot is in.
     /// </summary>
-    public FieldColumn Column => FullField.Columns[RelativePosition - 1];
+    public FieldColumn Column => FullField.Columns[RelativePosition];
 
     /// <summary>
     /// Get's the slot opposing this slot.

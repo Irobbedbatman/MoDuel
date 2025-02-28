@@ -26,7 +26,7 @@ public class SubField : Field {
     public FullField FullField => Context.Field;
 
     public SubField(Player owner) : base(owner.Context) {
-        Slots = [new(this, 1), new(this, 2), new(this, 3), new(this, 4), new(this, 5)];
+        Slots = [new(this, 0), new(this, 1), new(this, 2), new(this, 3), new(this, 4)];
         Owner = owner;
     }
 
@@ -69,9 +69,9 @@ public class SubField : Field {
     /// <inheritdoc/>
     public override int WrapHorizontal(int origin, int move) {
         int newPos = origin + move;
-        while (newPos < 1)
-            newPos += SlotCount;
-        while (newPos > SlotCount)
+        while (newPos < 0)
+            newPos += SlotCount - 1;
+        while (newPos >= SlotCount)
             newPos -= SlotCount;
         return newPos;
     }
@@ -79,9 +79,9 @@ public class SubField : Field {
     /// <inheritdoc/>
     public override int MoveHorizontal(int origin, int move) {
         int newPos = origin + move;
-        if (newPos < 1)
-            newPos = 1;
-        if (newPos > SlotCount)
+        if (newPos < 0)
+            newPos = 0;
+        if (newPos >= SlotCount)
             newPos = SlotCount;
         return newPos;
     }
@@ -89,9 +89,9 @@ public class SubField : Field {
     /// <inheritdoc/>
     public override int? Move(int origin, int move) {
         int newPos = origin + move;
-        if (newPos < 1)
+        if (newPos < 0)
             return null;
-        if (newPos > SlotCount)
+        if (newPos >= SlotCount)
             return null;
         return newPos;
     }
@@ -102,8 +102,8 @@ public class SubField : Field {
     /// </summary>
     public int Position {
         get {
-            if (FullField.SubField1 == this) return 1;
-            if ((FullField.SubField2 == this)) return 2;
+            if (FullField.SubField1 == this) return 0;
+            if ((FullField.SubField2 == this)) return 1;
             return ERR_SLOT;
         }
     }

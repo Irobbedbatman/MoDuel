@@ -30,17 +30,17 @@ public class FullField : Field {
         SubField1 = subfield1;
         SubField2 = subfield2;
         Columns = [
+            new FieldColumn(this, 0),
             new FieldColumn(this, 1),
             new FieldColumn(this, 2),
             new FieldColumn(this, 3),
-            new FieldColumn(this, 4),
-            new FieldColumn(this, 5)
+            new FieldColumn(this, 4)
         ];
     }
 
     /// <inheritdoc/>
     public override int WrapHorizontal(int origin, int move) {
-        if (origin <= 5)
+        if (origin <= 4)
             return SubField1.WrapHorizontal(origin, move);
         else
             return SubField2.WrapHorizontal(origin - 5, move) + 5;
@@ -48,7 +48,7 @@ public class FullField : Field {
 
     /// <inheritdoc/>
     public override int MoveHorizontal(int origin, int move) {
-        if (origin <= 5)
+        if (origin <= 4)
             return SubField1.MoveHorizontal(origin, move);
         else
             return SubField2.MoveHorizontal(origin - 5, move) + 5;
@@ -57,7 +57,7 @@ public class FullField : Field {
 
     /// <inheritdoc/>
     public override int? Move(int origin, int move) {
-        if (origin <= 5)
+        if (origin <= 4)
             return SubField1.Move(origin, move);
         else
             return SubField2.Move(origin - 5, move) + 5;
@@ -68,10 +68,10 @@ public class FullField : Field {
     /// </summary>
     /// <param name="position">The position to check from.</param>
     /// <returns>The field slot across from <paramref name="position"/>.</returns>
-    public static int GetOpposingPosition(int position) => (position <= 5) ? position + 5 : position - 5;
+    public static int GetOpposingPosition(int position) => (position <= 4) ? position + 5 : position - 5;
 
     /// <inheritdoc/>
-    public override FieldSlot this[int position] => (position > 5) ? SubField2[position - 5] : SubField1[position];
+    public override FieldSlot this[int position] => (position > 4) ? SubField2[position - 5] : SubField1[position];
     /// <inheritdoc/>
     public override HashSet<CardInstance> GetCreatures() => [.. SubField1.GetCreatures(), .. SubField2.GetCreatures()];
     /// <inheritdoc/>
