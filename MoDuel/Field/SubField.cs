@@ -31,7 +31,7 @@ public class SubField : Field {
     }
 
     /// <inheritdoc/>
-    public override FieldSlot this[int position] => Slots[position - 1];
+    public override FieldSlot this[int position] => Slots[position];
 
     public override int SlotCount => Slots.Length;
 
