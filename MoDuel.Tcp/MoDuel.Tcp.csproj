@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MoDuel.Serialiaztion\MoDuel.Serialization.csproj" />
+    <ProjectReference Include="..\MoDuel.Shared\MoDuel.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
