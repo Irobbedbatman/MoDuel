@@ -71,6 +71,9 @@ public class ManagedTcpHost : IDisposable {
         Host.Server.NoDelay = true;
     }
 
+    /// <summary>
+    /// Start the host.
+    /// </summary>
     public void Start() {
 
         if (Port != -1) {
@@ -86,6 +89,10 @@ public class ManagedTcpHost : IDisposable {
         connectionTask.ContinueWith(OnNewClientConnected);
     }
 
+    /// <summary>
+    /// Action called when a new client is connected.
+    /// </summary>
+    /// <param name="task">The task to get the new client.</param>
     private void OnNewClientConnected(Task<TcpClient> task) {
         if (task.IsCanceled || cancellationTokenSource.IsCancellationRequested) return;
 
@@ -121,6 +128,9 @@ public class ManagedTcpHost : IDisposable {
         Logger.Log(Logger.General, $"Connected Clients: {ActiveConnections.Count}");
     }
 
+    /// <summary>
+    /// Stop the host.
+    /// </summary>
     public void Stop() {
         cancellationTokenSource.Cancel();
         foreach (var connection in ActiveConnections.Keys) {
@@ -130,6 +140,9 @@ public class ManagedTcpHost : IDisposable {
         Console.WriteLine("Host stopped.");
     }
 
+    /// <summary>
+    /// Send a message to all active clients.
+    /// </summary>
     public void SendToAll(byte[] data) {
 
         var clients = ActiveConnections.Keys;

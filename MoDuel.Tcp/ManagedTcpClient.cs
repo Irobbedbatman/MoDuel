@@ -64,12 +64,14 @@ public class ManagedTcpClient : IDisposable {
         catch { }
     }
 
+
     /// <summary>
-    /// Send data to across the connection.
+    /// Send an object value to the host.
     /// </summary>
-    /// <param name="data"></param>
-    public void Send(byte[] data) {
-        Connection?.Send(data);
+    public void Send(object value) {
+        ByteSetWriter writer = new ByteSetWriter();
+        ObjectSerialization.Serialize(writer, value);
+        Connection?.Send(writer.Data);
     }
 
     /// <summary>
