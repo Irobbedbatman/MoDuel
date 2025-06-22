@@ -11,9 +11,9 @@ public class DuelSettings {
     public int? RandomSeed;
     /// <summary>
     /// Makes the <see cref="Player"/> with the same ID to go first.
-    /// <para>If the id could not be found a random one will be used instead.</para>
+    /// <para>If the id is null or the player with the same id could not be found instead picks a player a random.</para>
     /// </summary>
-    public string ForceIdToGoFirst = "";
+    public PlayerId? ForceIdToGoFirst = null;
     /// <summary>
     /// A multiplier applied to any delay on playback.
     /// <para>Interruptions can still occur. Doesn't affect sections not blocked.</para>
@@ -50,6 +50,6 @@ public class DuelSettings {
     /// <summary>
     /// Clone the settings. THis will point to all the same actions.
     /// </summary>
-    public void Clone() => MemberwiseClone();
+    public object Clone() => MemberwiseClone();
 
 }
