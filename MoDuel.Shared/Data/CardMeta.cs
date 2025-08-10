@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using MoDuel.Shared.Json;
+using System.Text.Json.Nodes;
 
 namespace MoDuel.Shared.Data;
 
@@ -10,21 +11,19 @@ public class CardMeta {
     /// <summary>
     /// The id of the card to load.
     /// </summary>
-    public readonly string CardId;
+    public string CardId => Values.Get("CardId").ToRawValue<string>() ?? "";
 
     /// <summary>
     /// The style that determines how the card is displayed.
     /// </summary>
-    public readonly string Style;
+    public string Style => Values.Get("Style").ToRawValue<string>() ?? "Default";
 
     /// <summary>
     /// Unique information to provide to the instance of the card.
     /// </summary>
     public readonly JsonObject Values = [];
 
-    public CardMeta(string cardId, string style, JsonObject values) {
-        CardId = cardId;
-        Style = style;
+    public CardMeta(JsonObject values) {
         Values = values;
     }
 
