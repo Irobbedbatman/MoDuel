@@ -59,11 +59,11 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
     /// Retrieves a full path to a file.
     /// </summary>
     /// <param name="category">The category the file is listed under.</param>
-    /// <param name="index">The key that is used in the category to get the result.</param>
-    /// <returns><c>null</c> if there was no valid <paramref name="category"/> or the <paramref name="index"/> wasn't found.</returns>
-    public string? GetFullSystemPath(string category, string index) {
+    /// <param name="key">The key that is used in the category to get the result.</param>
+    /// <returns><c>null</c> if there was no valid <paramref name="category"/> or the <paramref name="key"/> wasn't found.</returns>
+    public string? GetFullSystemPath(string category, string key) {
         // Get the path to the item from the package directory.
-        var relativePath = GetRelativeSystemPath(category, index);
+        var relativePath = GetRelativeSystemPath(category, key);
         if (relativePath == null) return null;
         return Path.Combine(Directory, relativePath);
     }
@@ -72,15 +72,15 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
     /// Retrieves a relative path to a file.
     /// </summary>
     /// <param name="category">The category the file is listed under.</param>
-    /// <param name="index">The key that is used in the category to get the result.</param>
-    /// <returns><c>null</c> if there was no valid <paramref name="category"/> or the <paramref name="index"/> wasn't found.</returns>
-    public string? GetRelativeSystemPath(string category, string index) {
+    /// <param name="key">The key that is used in the category to get the result.</param>
+    /// <returns><c>null</c> if there was no valid <paramref name="category"/> or the <paramref name="key"/> wasn't found.</returns>
+    public string? GetRelativeSystemPath(string category, string key) {
         // Ensure the category exists.
         if (Data.TryGet(category, out var categoryToken)) {
             // Ensure the category is actually a category.
             if (categoryToken is JsonObject categoryValue) {
                 // Check to see if the index is supplied within the category.
-                if (categoryValue.TryGet(index, out var locationToken)) {
+                if (categoryValue.TryGet(key, out var locationToken)) {
                     // Ensure the token is a string value.
                     if (locationToken.GetValueKind() == JsonValueKind.String)
                         return locationToken.ToString();
@@ -101,12 +101,12 @@ public abstract class BasePackage<P, C> where C : BasePackageCatalogue<P, C> whe
     /// <para>Ensures the file exists.</para>
     /// </summary>
     /// <param name="category">The category within the <see cref="Package"/> to load from.</param>
-    /// <param name="id">The unique id within the category.</param>
+    /// <param name="key">The unique id within the category.</param>
     /// <param name="relativePath">The relative path that was found or null if no path was found.</param>
     /// <param name="fullPath">The full path that was found or null if no path was found.</param>
     /// <returns>True if the paths a re valid and the file exists; false otherwise.</returns>
-    public bool GetSystemPaths(string category, string id, out string? relativePath, out string? fullPath) {
-        relativePath = GetRelativeSystemPath(category, id);
+    public bool GetSystemPaths(string category, string key, out string? relativePath, out string? fullPath) {
+        relativePath = GetRelativeSystemPath(category, key);
         if (relativePath == null) {
             fullPath = null;
             return false;

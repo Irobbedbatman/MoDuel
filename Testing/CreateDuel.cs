@@ -34,8 +34,8 @@ public class CreateDuel {
         }
 
         // Card meta the cards will use.
-        CardMeta meta1 = new("Goon", []);
-        CardMeta meta2 = new("Goon", []);
+        CardMeta meta1 = new("Goon", "", []);
+        CardMeta meta2 = new("Goon", "", []);
 
         // Define the cards that will start in the players hand.
         var hand = new List<CardMeta>() { meta1, meta1, meta1, meta2 };

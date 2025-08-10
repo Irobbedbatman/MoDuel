@@ -13,12 +13,18 @@ public class CardMeta {
     public readonly string CardId;
 
     /// <summary>
+    /// The style that determines how the card is displayed.
+    /// </summary>
+    public readonly string Style;
+
+    /// <summary>
     /// Unique information to provide to the instance of the card.
     /// </summary>
     public readonly JsonObject Values = [];
 
-    public CardMeta(string cardId, JsonObject values) {
+    public CardMeta(string cardId, string style, JsonObject values) {
         CardId = cardId;
+        Style = style;
         Values = values;
     }
 
