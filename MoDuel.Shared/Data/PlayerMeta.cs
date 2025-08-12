@@ -10,7 +10,7 @@ public class PlayerMeta {
     /// <summary>
     /// The unique id of this player.
     /// </summary>
-    public PlayerId Id;
+    public Guid Id;
 
     /// <summary>
     /// The id of the player.
@@ -47,7 +47,7 @@ public class PlayerMeta {
     /// </summary>
     public JsonObject Values { init; get; }
 
-    public PlayerMeta(PlayerId id, string name, HeroMeta hero, string[] resourceTypes, JsonObject values) {
+    public PlayerMeta(Guid id, string name, HeroMeta hero, string[] resourceTypes, JsonObject values) {
         Id = id;
         Name = name;
         Hero = hero;
